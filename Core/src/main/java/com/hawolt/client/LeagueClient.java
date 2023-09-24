@@ -1,9 +1,6 @@
 package com.hawolt.client;
 
-import com.hawolt.client.cache.CacheType;
-import com.hawolt.client.cache.Cacheable;
-import com.hawolt.client.cache.CachedValueLoader;
-import com.hawolt.client.cache.ExceptionalSupplier;
+import com.hawolt.client.cache.*;
 import com.hawolt.client.handler.RMSHandler;
 import com.hawolt.client.handler.RTMPHandler;
 import com.hawolt.client.handler.XMPPHandler;
@@ -22,9 +19,7 @@ import com.hawolt.virtual.riotclient.client.IVirtualRiotClient;
 import com.hawolt.virtual.riotclient.instance.IVirtualRiotClientInstance;
 import com.hawolt.xmpp.core.VirtualRiotXMPPClient;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.function.Consumer;
@@ -35,13 +30,15 @@ import java.util.function.Consumer;
  **/
 
 public class LeagueClient implements Cacheable, Consumer<CachedValueLoader<?>> {
+
+    private final Map<CacheType, List<CacheListener<?>>> map = new HashMap<>();
+    private final Map<CacheType, Object> cache = new HashMap<>();
+
     private final IVirtualLeagueClientInstance virtualLeagueClientInstance;
     private final VirtualLeagueClient virtualLeagueClient;
 
     private final IVirtualRiotClientInstance virtualRiotClientInstance;
     private final IVirtualRiotClient virtualRiotClient;
-
-    private final Map<CacheType, Object> cache = new HashMap<>();
 
     private PurchaseWidget purchaseWidget;
     private PlatformEndpoint platform;
@@ -76,6 +73,8 @@ public class LeagueClient implements Cacheable, Consumer<CachedValueLoader<?>> {
         // TODO DONT STORE TOKEN LIKE THIS FIX
         service.execute(new CachedValueLoader<>(CacheType.CHAMPION_DATA, () -> ledge.getInventoryService().getInventoryToken(), this));
         service.execute(new CachedValueLoader<>(CacheType.PUUID, () -> getVirtualRiotClient().getRiotClientUser().getPUUID(), this));
+        service.execute(new CachedValueLoader<>(CacheType.PROFILE, () -> ledge.getSummoner().resolveSummonerById(getVirtualLeagueClientInstance().getUserInformation().getUserInformationLeagueAccount().getSummonerId()), this));
+        service.execute(new CachedValueLoader<>(CacheType.RANKED_STATISTIC, () -> ledge.getLeague().getRankedStats(getVirtualRiotClient().getRiotClientUser().getPUUID()), this));
         service.execute(new CachedValueLoader<>(CacheType.PARTY_REGISTRATION, () -> ledge.getParties().register(), this));
         service.shutdown();
     }
@@ -93,6 +92,20 @@ public class LeagueClient implements Cacheable, Consumer<CachedValueLoader<?>> {
     @Override
     public void cache(CacheType type, Object o) {
         this.cache.put(type, o);
+        this.dispatch(type);
+    }
+
+    public void dispatch(CacheType type) {
+        if (!map.containsKey(type)) return;
+        Object reference = cache.get(type);
+        this.map.get(type).forEach(listener -> listener.onCacheUpdate(Unsafe.cast(reference)));
+    }
+
+    @Override
+    public void register(CacheType type, CacheListener<?> listener) {
+        if (!map.containsKey(type)) map.put(type, new LinkedList<>());
+        this.map.get(type).add(listener);
+        this.dispatch(type);
     }
 
     public <T> T getCachedValue(CacheType type) {

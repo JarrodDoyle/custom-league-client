@@ -47,7 +47,7 @@ public class QueueWindow extends ChildUIComponent implements Runnable, PacketCal
     private final ChildUIComponent parent;
     private final DraftQueueLobby lobby;
     private final TFTQueueLobby tftLobby;
-    private final List<String> supportedModes = Arrays.asList("ARAM", "BOTS", "BLIND", "DRAFT", "RANKED-FLEX", "RANKED-SOLO", "TFT");
+    private final List<String> supportedModes = Arrays.asList("TUTORIAL", "ARAM", "BOTS", "BLIND", "DRAFT", "RANKED-FLEX", "RANKED-SOLO", "TFT");
     Boolean init = false;
     ChildUIComponent main = new ChildUIComponent(new BorderLayout());
     private LFlatButton button = new LFlatButton("Show Lobby", LTextAlign.CENTER);
@@ -115,6 +115,7 @@ public class QueueWindow extends ChildUIComponent implements Runnable, PacketCal
             }
             if (!supported) continue;
             String gameMode = object.getString("gameMode");
+            if (gameMode.contains("TUTORIAL")) gameMode = "TUTORIAL";
             if (!map.containsKey(gameMode)) map.put(gameMode, new ArrayList<>());
             map.get(gameMode).add(object);
         }
@@ -123,7 +124,6 @@ public class QueueWindow extends ChildUIComponent implements Runnable, PacketCal
         main.setBackground(ColorPalette.backgroundColor);
         modes.setBackground(ColorPalette.backgroundColor);
         for (String key : map.keySet()) {
-            if (key.contains("TUTORIAL")) continue;
             ChildUIComponent parent = new ChildUIComponent(new BorderLayout());
             ChildUIComponent grid = new ChildUIComponent(new GridLayout(0, 1, 0, 5)) {
                 @Override
@@ -147,7 +147,7 @@ public class QueueWindow extends ChildUIComponent implements Runnable, PacketCal
 
             for (JSONObject object : map.get(key)) {
                 String name = object.getString("shortName");
-                if (name.contains("TUTORIAL") || name.contains("CLASH")) {
+                if (name.contains("CLASH") || name.contains("TFT-TUTORIAL")) {
                     continue;
                 }
 
@@ -180,6 +180,7 @@ public class QueueWindow extends ChildUIComponent implements Runnable, PacketCal
                 } else if (name.contains("ARAM")) {
                     modeName = "ARAM";
                 }
+                modeName = modeName.toUpperCase();
 
                 LFlatButton button = new LFlatButton(modeName.isEmpty() ? name : modeName, LTextAlign.CENTER, HighlightType.COMPONENT);
 
@@ -192,6 +193,8 @@ public class QueueWindow extends ChildUIComponent implements Runnable, PacketCal
                     button.addActionListener(e -> goToLobby(e, "TFT"));
                 } else if (key.contains("ARAM")) {
                     button.addActionListener(e -> goToLobby(e, "ARAM"));
+                } else if (key.contains("TUTORIAL")) {
+                    button.addActionListener(e -> goToLobby(e, "TUTORIAL"));
                 }
                 grid.add(button);
             }
@@ -279,7 +282,7 @@ public class QueueWindow extends ChildUIComponent implements Runnable, PacketCal
 
     public void goToLobby(ActionEvent e, String mode) {
         Logger.error("goTo Lobby mode: " + mode);
-        if (mode.equals("CLASSIC") || mode.equals("ARAM")) {
+        if (mode.equals("CLASSIC") || mode.equals("ARAM") || mode.equals("TUTORIAL")) {
             this.parent.add("lobby", lobby);
             layout.show(parent, "lobby");
             lobby.actionPerformed(null);

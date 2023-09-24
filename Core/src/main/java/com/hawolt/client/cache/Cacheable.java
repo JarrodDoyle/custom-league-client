@@ -6,5 +6,9 @@ package com.hawolt.client.cache;
  **/
 
 public interface Cacheable {
+    void dispatch(CacheType type);
+
     void cache(CacheType type, Object o);
+
+    void register(CacheType type, CacheListener<?> listener);
 }

@@ -16,6 +16,8 @@ import org.json.JSONObject;
 import java.io.IOException;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
+import java.util.LinkedList;
+import java.util.List;
 
 /**
  * Created: 19/01/2023 16:38
@@ -50,6 +52,32 @@ public class SummonerLedge extends AbstractLedgeEndpoint {
                 )
         );
     }
+
+    public Summoner resolveSummonerById(long id) throws IOException {
+        return resolveSummonerByIds(id).get(0);
+    }
+
+    public List<Summoner> resolveSummonerByIds(long... ids) throws IOException {
+        String uri = String.format("%s/%s/v%s/regions/%s/summoners/summoner-ids",
+                base,
+                name(),
+                version(),
+                platform.name().toLowerCase()
+        );
+        JSONArray object = new JSONArray();
+        for (long id : ids) object.put(id);
+        Request request = jsonRequest(uri)
+                .post(RequestBody.create(object.toString(), Constant.APPLICATION_JSON))
+                .build();
+        IResponse response = OkHttp3Client.execute(request, gateway);
+        JSONArray array = new JSONArray(response.asString());
+        List<Summoner> list = new LinkedList<>();
+        for (int i = 0; i < array.length(); i++) {
+            list.add(new Summoner(array.getJSONObject(i)));
+        }
+        return list;
+    }
+
 
     public Summoner resolveSummoner(String uri) throws IOException {
         Request request = jsonRequest(uri)
