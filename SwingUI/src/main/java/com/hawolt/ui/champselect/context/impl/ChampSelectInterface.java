@@ -2,7 +2,6 @@ package com.hawolt.ui.champselect.context.impl;
 
 import com.hawolt.LeagueClientUI;
 import com.hawolt.client.LeagueClient;
-import com.hawolt.ui.champselect.AbstractRenderInstance;
 import com.hawolt.ui.champselect.ChampSelectUI;
 import com.hawolt.ui.champselect.context.ChampSelectContext;
 import com.hawolt.ui.champselect.context.ChampSelectContextProvider;
@@ -36,9 +35,7 @@ public class ChampSelectInterface extends ChampSelectContextProvider implements 
 
     @Override
     public void filterChampion(String champion) {
-        for (AbstractRenderInstance instance : champSelectUI.getInstances()) {
-            instance.invokeChampionFilter(champion);
-        }
+        this.champSelectUI.getInstance(context.getChampSelectSettingsContext().getQueueId()).invokeChampionFilter(champion);
     }
 
     @Override

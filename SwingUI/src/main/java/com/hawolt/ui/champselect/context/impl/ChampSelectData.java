@@ -6,7 +6,6 @@ import com.hawolt.rtmp.amf.TypedObject;
 import com.hawolt.rtmp.io.RtmpPacket;
 import com.hawolt.rtmp.utility.Base64GZIP;
 import com.hawolt.rtmp.utility.PacketCallback;
-import com.hawolt.ui.champselect.AbstractRenderInstance;
 import com.hawolt.ui.champselect.ChampSelectUI;
 import com.hawolt.ui.champselect.context.ChampSelectContext;
 import com.hawolt.ui.champselect.context.ChampSelectContextProvider;
@@ -64,7 +63,7 @@ public class ChampSelectData extends ChampSelectContextProvider implements Champ
 
     @Override
     public void onPacket(RtmpPacket rtmpPacket, TypedObject typedObject) throws Exception {
-        
+
         if (typedObject == null || !typedObject.containsKey("data")) return;
         TypedObject data = typedObject.getTypedObject("data");
         if (data == null || !data.containsKey("flex.messaging.messages.AsyncMessage")) return;
@@ -90,16 +89,12 @@ public class ChampSelectData extends ChampSelectContextProvider implements Champ
     @Override
     public void onMessageReceived(IncomingMessage incomingMessage) {
         if (!incomingMessage.getType().equals("groupchat")) return;
-        for (AbstractRenderInstance instance : champSelectUI.getInstances()) {
-            instance.push(incomingMessage);
-        }
+        this.champSelectUI.getInstance(context.getChampSelectSettingsContext().getQueueId()).push(incomingMessage);
     }
 
     @Override
     public void push(JoinMucPresence message) {
-        for (AbstractRenderInstance instance : champSelectUI.getInstances()) {
-            instance.push(message);
-        }
+        this.champSelectUI.getInstance(context.getChampSelectSettingsContext().getQueueId()).push(message);
     }
 
     @Override

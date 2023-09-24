@@ -26,7 +26,6 @@ import org.json.JSONObject;
 
 import javax.swing.*;
 import java.awt.*;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -37,8 +36,8 @@ import java.util.Map;
  **/
 
 public class ChampSelectUI extends ChildUIComponent implements IServiceMessageListener<RiotMessageServiceMessage> {
+    private final Map<Integer, AbstractRenderInstance> instances = new HashMap<>();
     private final Map<Integer, String> QUEUE_RENDERER_MAPPING = new HashMap<>();
-    private final List<AbstractRenderInstance> instances = new ArrayList<>();
     private final CardLayout layout = new CardLayout();
     private final JComponent main = new ChildUIComponent(layout);
     private final ChampSelect champSelect;
@@ -89,8 +88,8 @@ public class ChampSelectUI extends ChildUIComponent implements IServiceMessageLi
         for (int id : queueIds) {
             Logger.info("[champ-select] register queueId:{} as '{}'", id, instance.getCardName());
             QUEUE_RENDERER_MAPPING.put(id, instance.getCardName());
+            instances.put(id, instance);
         }
-        this.instances.add(instance);
         this.main.add(instance.getCardName(), instance);
     }
 
@@ -111,9 +110,7 @@ public class ChampSelectUI extends ChildUIComponent implements IServiceMessageLi
                 leagueClientUI.getHeader().selectAndShowComponent(LayoutComponent.CHAMPSELECT);
             }
         }
-        for (AbstractRenderInstance instance : instances) {
-            instance.delegate(context, initialCounter);
-        }
+        this.instances.get(settingsContext.getQueueId()).delegate(context, initialCounter);
         this.repaint();
     }
 
@@ -129,8 +126,8 @@ public class ChampSelectUI extends ChildUIComponent implements IServiceMessageLi
         return leagueClientUI;
     }
 
-    public List<AbstractRenderInstance> getInstances() {
-        return instances;
+    public AbstractRenderInstance getInstance(int queueId) {
+        return instances.get(queueId);
     }
 
     @Override

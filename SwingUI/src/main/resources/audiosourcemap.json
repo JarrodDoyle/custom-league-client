@@ -28,5 +28,9 @@
   {
     "file": "success.mp3",
     "source": "https://pixabay.com/sound-effects/short-success-sound-glockenspiel-treasure-video-game-6346/"
+  },
+  {
+    "file": "pick.mp3",
+    "source": "https://pixabay.com/sound-effects/interface-124464/"
   }
 ]

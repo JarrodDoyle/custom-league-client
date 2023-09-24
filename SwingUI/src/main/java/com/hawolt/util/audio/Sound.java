@@ -12,7 +12,8 @@ public enum Sound {
     ACTIVE_CHAT_MESSAGE("msg-1.mp3"),
     INACTIVE_CHAT_MESSAGE("msg-2.mp3"),
     FRIEND_REQUEST("friend-request.mp3"),
-    OPEN_STORE("open-store.mp3");
+    OPEN_STORE("open-store.mp3"),
+    PICK("pick.mp3");
     final String filename;
 
     Sound(String filename) {
