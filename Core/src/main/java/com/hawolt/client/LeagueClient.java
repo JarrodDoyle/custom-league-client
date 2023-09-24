@@ -12,6 +12,7 @@ import com.hawolt.client.resources.ledge.preferences.objects.PreferenceType;
 import com.hawolt.client.resources.platform.PlatformEndpoint;
 import com.hawolt.client.resources.purchasewidget.PurchaseWidget;
 import com.hawolt.generic.data.Platform;
+import com.hawolt.io.RunLevel;
 import com.hawolt.rms.VirtualRiotMessageClient;
 import com.hawolt.rtmp.LeagueRtmpClient;
 import com.hawolt.virtual.leagueclient.client.VirtualLeagueClient;
@@ -20,6 +21,7 @@ import com.hawolt.virtual.riotclient.client.IVirtualRiotClient;
 import com.hawolt.virtual.riotclient.instance.IVirtualRiotClientInstance;
 import com.hawolt.xmpp.core.VirtualRiotXMPPClient;
 
+import javax.imageio.ImageIO;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -62,10 +64,11 @@ public class LeagueClient extends ClientCache {
         cache(CacheElement.PUUID, getVirtualRiotClient().getRiotClientUser().getPUUID());
         cache(CacheElement.ACCOUNT_ID, getVirtualLeagueClientInstance().getUserInformation().getUserInformationLeague().getCUID());
         cache(CacheElement.SUMMONER_ID, getVirtualLeagueClientInstance().getUserInformation().getUserInformationLeagueAccount().getSummonerId());
-        cache(CacheElement.SUMMONER_ID, () -> ledge.getParties().register());
         ExecutorService service = Executors.newCachedThreadPool();
+        service.execute(new CachedValueLoader<>(CacheElement.PROFILE_MASK, () -> ImageIO.read(RunLevel.get("assets/profile-mask.png")), this));
         service.execute(new CachedValueLoader<>(CacheElement.CHAT_STATUS, () -> getLedge().getPlayerPreferences().getPreferences(PreferenceType.LCU_SOCIAL_PREFERENCES).getString("chat-status-message"), this));
-        service.execute(new CachedValueLoader<>(CacheElement.PROFILE, () -> ledge.getSummoner().resolveSummonerById(getVirtualLeagueClientInstance().getUserInformation().getUserInformationLeagueAccount().getSummonerId()), this));
+        service.execute(new CachedValueLoader<>(CacheElement.SUMMONER, () -> ledge.getSummoner().resolveSummonerById(getVirtualLeagueClientInstance().getUserInformation().getUserInformationLeagueAccount().getSummonerId()), this));
+        service.execute(new CachedValueLoader<>(CacheElement.PROFILE, () -> ledge.getSummoner().resolveSummonerProfile(getVirtualRiotClient().getRiotClientUser().getPUUID()), this));
         service.execute(new CachedValueLoader<>(CacheElement.RANKED_STATISTIC, () -> ledge.getLeague().getRankedStats(getVirtualRiotClient().getRiotClientUser().getPUUID()), this));
         service.shutdown();
         setElementSource(CacheElement.INVENTORY_TOKEN, (ExceptionalFunction<LeagueClient, String>) client -> ledge.getInventoryService().getInventoryToken());

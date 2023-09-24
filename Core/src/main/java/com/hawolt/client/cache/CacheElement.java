@@ -9,14 +9,16 @@ public enum CacheElement {
     PUUID(CachedDataType.VALUE),
     ACCOUNT_ID(CachedDataType.VALUE),
     SUMMONER_ID(CachedDataType.VALUE),
-    PROFILE(CachedDataType.VALUE),
+    SUMMONER(CachedDataType.VALUE),
     RANKED_STATISTIC(CachedDataType.VALUE),
     INVENTORY_TOKEN(CachedDataType.JWT),
     CHAT_STATUS(CachedDataType.VALUE),
     MATCH_CONTEXT(CachedDataType.VALUE),
     LEAGUE_LEDGE_NOTIFICATION(CachedDataType.VALUE),
     PLAYER_PREFERENCE(CachedDataType.VALUE),
-    PRESENCE(CachedDataType.VALUE);
+    PRESENCE(CachedDataType.VALUE),
+    PROFILE(CachedDataType.VALUE),
+    PROFILE_MASK(CachedDataType.VALUE);
     private final CachedDataType cachedDataType;
 
     CacheElement(CachedDataType cachedDataType) {

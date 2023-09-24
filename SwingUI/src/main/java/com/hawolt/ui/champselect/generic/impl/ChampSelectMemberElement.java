@@ -79,7 +79,7 @@ public class ChampSelectMemberElement extends ChampSelectUIComponent implements 
     private void configure(ChampSelectTeamMember teamMember) {
         LeagueClient client = dataContext.getLeagueClient();
         if (client == null) {
-            Logger.warn("unable to fetch name for {}, client is null", puuid);
+            Logger.warn("unable to fetch name for {}, client is null", puuid == null ? "N/A" : puuid);
             return;
         }
         if (puuid != null && puuid.equals(teamMember.getPUUID())) return;
@@ -90,7 +90,8 @@ public class ChampSelectMemberElement extends ChampSelectUIComponent implements 
             try {
                 this.name = summonerLedge.resolveSummonerByPUUD(teamMember.getPUUID()).getName();
                 switch (teamMember.getNameVisibilityType()) {
-                    case "UNHIDDEN" -> dataContext.cache(teamMember.getPUUID(), String.format("%s (%s)", name, getHiddenName()));
+                    case "UNHIDDEN" ->
+                            dataContext.cache(teamMember.getPUUID(), String.format("%s (%s)", name, getHiddenName()));
                     case "HIDDEN" -> dataContext.cache(teamMember.getPUUID(), getHiddenName());
                     case "VISIBLE" -> dataContext.cache(teamMember.getPUUID(), name);
                 }

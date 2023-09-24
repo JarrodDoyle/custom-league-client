@@ -27,7 +27,7 @@ public abstract class ClientCache implements ISimpleValueCache<CacheElement, Obj
     }
 
     @Override
-    public void register(CacheElement element, CacheListener<CacheElement> listener) {
+    public void register(CacheElement element, CacheListener<?> listener) {
         if (!listeners.containsKey(element)) listeners.put(element, new LinkedList<>());
         listeners.get(element).add(listener);
     }
@@ -45,12 +45,12 @@ public abstract class ClientCache implements ISimpleValueCache<CacheElement, Obj
     public void dispatch(CacheElement element) {
         if (!listeners.containsKey(element)) return;
         Object reference = cache.get(element);
-        this.listeners.get(element).forEach(listener -> listener.onCacheUpdate(Unsafe.cast(reference)));
+        this.listeners.get(element).forEach(listener -> listener.onCacheUpdate(element, Unsafe.cast(reference)));
     }
 
     @Override
     public void cache(CacheElement element, Object value) {
-        Logger.info("Storing value for {} in cache", element.getCachedDataType());
+        Logger.info("Storing value for {} in cache as {}", element, value);
         if (element.getCachedDataType() != CachedDataType.JWT) {
             this.cache.put(element, value);
         } else {
@@ -63,8 +63,12 @@ public abstract class ClientCache implements ISimpleValueCache<CacheElement, Obj
                         1,
                         jwt.getExpirationTime() - System.currentTimeMillis() - TimeUnit.MINUTES.toMillis(1)
                 );
+                Logger.error(jwt.getExpirationTime());
                 this.service.schedule(
-                        () -> cache.remove(element),
+                        () -> {
+                            Logger.info("Removing {} from cache, JWT expired", element);
+                            cache.remove(element);
+                        },
                         timestamp,
                         TimeUnit.MILLISECONDS
                 );
@@ -102,6 +106,15 @@ public abstract class ClientCache implements ISimpleValueCache<CacheElement, Obj
             return Optional.of(getCachedValueOrElse(type, supplier));
         } catch (Exception e) {
             consumer.accept(e);
+        }
+        return Optional.empty();
+    }
+
+    public <T> Optional<T> getCachedValueOrElseRun(CacheElement type, Runnable runnable) {
+        try {
+            return Optional.of(getCachedValue(type));
+        } catch (Exception e) {
+            runnable.run();
         }
         return Optional.empty();
     }

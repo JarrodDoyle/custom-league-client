@@ -32,7 +32,7 @@ public class LayoutHeader extends ChildUIComponent {
     private final ChatSidebarProfile profile;
     private final ILayoutManager manager;
     private final HeaderWallet wallet;
-    LazyLoadedImageComponent logo;
+    private LazyLoadedImageComponent logo;
 
     private Point initialClick;
 
@@ -77,7 +77,6 @@ public class LayoutHeader extends ChildUIComponent {
         main.add(verticalButtonAlignment, BorderLayout.WEST);
 
         for (LayoutComponent layoutComponent : LayoutComponent.values()) {
-            if (layoutComponent == LayoutComponent.PROFILE) continue;
             verticalButtonAlignment.add(Box.createRigidArea(new Dimension(10, 0)));
             verticalButtonAlignment.add(createHeaderComponent(layoutComponent));
         }

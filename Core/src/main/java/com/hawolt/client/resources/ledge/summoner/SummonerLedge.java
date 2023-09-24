@@ -3,6 +3,7 @@ package com.hawolt.client.resources.ledge.summoner;
 import com.hawolt.client.LeagueClient;
 import com.hawolt.client.resources.ledge.AbstractLedgeEndpoint;
 import com.hawolt.client.resources.ledge.summoner.objects.Summoner;
+import com.hawolt.client.resources.ledge.summoner.objects.SummonerProfile;
 import com.hawolt.client.resources.ledge.summoner.objects.SummonerValidation;
 import com.hawolt.generic.Constant;
 import com.hawolt.http.OkHttp3Client;
@@ -85,6 +86,25 @@ public class SummonerLedge extends AbstractLedgeEndpoint {
                 .build();
         IResponse response = OkHttp3Client.execute(request, gateway);
         return new Summoner(new JSONObject(response.asString()));
+    }
+
+    public SummonerProfile resolveSummonerProfile(Summoner summoner) throws IOException {
+        return resolveSummonerProfile(summoner.getPUUID());
+    }
+
+    public SummonerProfile resolveSummonerProfile(String puuid) throws IOException {
+        String uri = String.format("%s/%s/v%s/regions/%s/summonerprofile/%s",
+                base,
+                name(),
+                version(),
+                platform.name().toLowerCase(),
+                puuid
+        );
+        Request request = jsonRequest(uri)
+                .get()
+                .build();
+        IResponse response = OkHttp3Client.execute(request, gateway);
+        return new SummonerProfile(new JSONObject(response.asString()));
     }
 
     public String getSummonerToken() throws IOException {

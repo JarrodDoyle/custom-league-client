@@ -2,6 +2,7 @@ package com.hawolt.util.paint;
 
 import com.hawolt.ui.generic.component.LTextAlign;
 import com.hawolt.ui.generic.themes.ColorPalette;
+import org.imgscalr.Scalr;
 
 import java.awt.*;
 import java.awt.geom.Area;
@@ -49,12 +50,13 @@ public class PaintHelper {
     }
 
     public static void drawText(Graphics g, Font font, String text, Rectangle rectangle, LTextAlign alignment, Color textColor) {
+        g.setFont(font);
         FontMetrics metrics = g.getFontMetrics();
-        int y = rectangle.y + (rectangle.height >> 1) + (metrics.getAscent() >> 1);
+        int y = rectangle.y + (rectangle.height >> 1) + (metrics.getMaxAscent() >> 1) - (font.getSize() / 8);
         int x = switch (alignment) {
-            case LEFT -> rectangle.x + (rectangle.width / 20);
-            case CENTER -> rectangle.x - (rectangle.width >> 1) - (metrics.stringWidth(text) >> 1);
-            case RIGHT -> rectangle.x + (rectangle.width - metrics.stringWidth(text) - (rectangle.width / 20));
+            case LEFT -> (rectangle.width / 20);
+            case CENTER -> (rectangle.width >> 1) - (metrics.stringWidth(text) >> 1);
+            case RIGHT -> (rectangle.width - metrics.stringWidth(text) - (rectangle.width / 20));
         };
         drawText(g, font, text, x, y, textColor);
     }
@@ -95,6 +97,24 @@ public class PaintHelper {
         // using the white shape from above as alpha source
         g2.setComposite(AlphaComposite.SrcIn);
         g2.drawImage(image, 0, 0, null);
+
+        g2.dispose();
+
+        return output;
+    }
+
+    public static BufferedImage mask(BufferedImage source, BufferedImage reference) {
+        BufferedImage mask = Scalr.resize(reference, Scalr.Method.ULTRA_QUALITY, Scalr.Mode.FIT_EXACT, source.getWidth(), source.getHeight());
+        BufferedImage output = new BufferedImage(source.getWidth(), source.getHeight(), BufferedImage.TYPE_INT_ARGB);
+        Graphics2D g2 = output.createGraphics();
+
+        g2.setComposite(AlphaComposite.Src);
+        g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+        g2.setColor(Color.WHITE);
+        g2.drawImage(mask, 0, 0, null);
+
+        g2.setComposite(AlphaComposite.SrcIn);
+        g2.drawImage(source, 0, 0, null);
 
         g2.dispose();
 

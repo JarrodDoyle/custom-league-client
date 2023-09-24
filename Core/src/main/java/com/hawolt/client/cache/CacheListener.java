@@ -6,5 +6,5 @@ package com.hawolt.client.cache;
  **/
 
 public interface CacheListener<T> {
-    void onCacheUpdate(T o);
+    void onCacheUpdate(CacheElement element, T o);
 }

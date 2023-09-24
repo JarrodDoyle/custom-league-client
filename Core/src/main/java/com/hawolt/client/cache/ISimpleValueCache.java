@@ -7,7 +7,7 @@ package com.hawolt.client.cache;
 
 public interface ISimpleValueCache<T, S> {
 
-    void register(CacheElement element, CacheListener<T> listener);
+    void register(CacheElement element, CacheListener<?> listener);
 
     void cache(T type, ExceptionalSupplier<S> o);
 
