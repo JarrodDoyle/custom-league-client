@@ -2,10 +2,10 @@ package com.hawolt.ui.champselect;
 
 import com.hawolt.LeagueClientUI;
 import com.hawolt.client.LeagueClient;
-import com.hawolt.client.cache.CacheType;
 import com.hawolt.client.resources.ledge.leagues.objects.LeagueLedgeNotifications;
 import com.hawolt.client.resources.ledge.leagues.objects.LeagueNotification;
 import com.hawolt.client.resources.ledge.teambuilder.objects.MatchContext;
+import com.hawolt.client.cache.CacheElement;
 import com.hawolt.http.layer.IResponse;
 import com.hawolt.logger.Logger;
 import com.hawolt.rms.data.impl.payload.RiotMessageMessagePayload;
@@ -96,7 +96,7 @@ public class ChampSelectUI extends ChildUIComponent implements IServiceMessageLi
     public void update(ChampSelectContext context) {
         int initialCounter;
         if (leagueClient != null) {
-            MatchContext matchContext = leagueClient.getCachedValue(CacheType.MATCH_CONTEXT);
+            MatchContext matchContext = leagueClient.getCachedValue(CacheElement.MATCH_CONTEXT);
             initialCounter = matchContext.getPayload().getCounter() + 1;
         } else {
             initialCounter = 5;

@@ -12,8 +12,8 @@ import com.hawolt.authentication.LocalCookieSupplier;
 import com.hawolt.client.IClientCallback;
 import com.hawolt.client.LeagueClient;
 import com.hawolt.client.RiotClient;
-import com.hawolt.client.cache.CacheType;
 import com.hawolt.client.misc.ClientConfiguration;
+import com.hawolt.client.cache.CacheElement;
 import com.hawolt.generic.token.impl.StringTokenSupplier;
 import com.hawolt.io.RunLevel;
 import com.hawolt.logger.Logger;
@@ -127,7 +127,7 @@ public class LeagueClientUI extends JFrame implements IClientCallback, ILoginCal
             partiesPositionPreferences.put("data", data);
             object.put("partiesPositionPreferences", partiesPositionPreferences);
         }
-        leagueClient.cache(CacheType.PLAYER_PREFERENCE, object);
+        this.leagueClient.cache(CacheElement.PLAYER_PREFERENCE, object);
         this.settingService.write(SettingType.PLAYER, "preferences", object);
         this.dispose();
         this.loginUI.getAnimationVisualizer().stop();

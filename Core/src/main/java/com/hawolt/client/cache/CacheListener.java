@@ -1,10 +1,10 @@
 package com.hawolt.client.cache;
 
 /**
- * Created: 24/09/2023 02:52
+ * Created: 24/09/2023 10:39
  * Author: Twitter @hawolt
  **/
 
 public interface CacheListener<T> {
-    void onCacheUpdate(T value);
+    void onCacheUpdate(T o);
 }

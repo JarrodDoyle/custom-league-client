@@ -1,8 +1,8 @@
 package com.hawolt.client.resources.ledge.championmastery;
 
 import com.hawolt.client.LeagueClient;
-import com.hawolt.client.cache.CacheType;
 import com.hawolt.client.resources.ledge.AbstractLedgeEndpoint;
+import com.hawolt.client.cache.CacheElement;
 import com.hawolt.generic.Constant;
 import com.hawolt.http.OkHttp3Client;
 import com.hawolt.http.layer.IResponse;
@@ -21,9 +21,8 @@ public class ChampionMasteryLedge extends AbstractLedgeEndpoint {
         String uri = String.format("%s/%s/player/%s/champions",
                 base,
                 name(),
-                client.getCachedValue(CacheType.SUMMONER_ID)
+                client.getCachedValue(CacheElement.SUMMONER_ID)
         );
-
         Request request = jsonRequest(uri)
                 .post(RequestBody.create("\"" + client.getLedge().getSummoner().getSummonerToken() + "\"", Constant.APPLICATION_JSON))
                 .build();

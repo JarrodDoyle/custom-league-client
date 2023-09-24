@@ -2,9 +2,9 @@ package com.hawolt.ui.champselect.impl;
 
 import com.hawolt.LeagueClientUI;
 import com.hawolt.client.LeagueClient;
-import com.hawolt.client.cache.CacheType;
 import com.hawolt.client.resources.communitydragon.spell.Spell;
 import com.hawolt.client.resources.ledge.teambuilder.objects.MatchContext;
+import com.hawolt.client.cache.CacheElement;
 import com.hawolt.logger.Logger;
 import com.hawolt.rtmp.LeagueRtmpClient;
 import com.hawolt.rtmp.amf.TypedObject;
@@ -86,7 +86,7 @@ public abstract class MatchmadeRenderInstance extends AbstractRenderInstance imp
                 LeagueClientUI.service.execute(() -> {
                     LeagueClient client = context.getChampSelectDataContext().getLeagueClient();
                     if (client == null) return;
-                    MatchContext context = client.getCachedValue(CacheType.MATCH_CONTEXT);
+                    MatchContext context = client.getCachedValue(CacheElement.MATCH_CONTEXT);
                     if (context == null) return;
                     chatUI.setMatchContext(context);
                     VirtualRiotXMPPClient xmppClient = client.getXMPPClient();

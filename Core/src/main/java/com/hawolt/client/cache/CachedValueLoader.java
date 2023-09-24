@@ -9,20 +9,20 @@ import java.util.function.Consumer;
  * Author: Twitter @hawolt
  **/
 
-public class CachedValueLoader<T> implements Runnable {
-    private final Consumer<CachedValueLoader<?>> consumer;
+public class CachedValueLoader<S, T> implements Runnable {
+    private final Consumer<CachedValueLoader<S, ?>> consumer;
     private final ExceptionalSupplier<T> supplier;
-    private final CacheType type;
+    private final S type;
     private Exception e;
     private T value;
 
-    public CachedValueLoader(CacheType type, ExceptionalSupplier<T> supplier, Consumer<CachedValueLoader<?>> consumer) {
+    public CachedValueLoader(S type, ExceptionalSupplier<T> supplier, Consumer<CachedValueLoader<S, ?>> consumer) {
         this.consumer = consumer;
         this.supplier = supplier;
         this.type = type;
     }
 
-    public CacheType getType() {
+    public S getType() {
         return type;
     }
 

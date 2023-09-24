@@ -1,7 +1,7 @@
 package com.hawolt.ui.champselect.context.impl;
 
 import com.hawolt.client.LeagueClient;
-import com.hawolt.client.cache.CacheType;
+import com.hawolt.client.cache.CacheElement;
 import com.hawolt.ui.champselect.ChampSelectUI;
 import com.hawolt.ui.champselect.context.ChampSelectContext;
 import com.hawolt.ui.champselect.context.ChampSelectContextProvider;
@@ -237,7 +237,7 @@ public class ChampSelectSettings extends ChampSelectContextProvider implements C
     public int[] getChampionsAvailableForPick() {
         LeagueClient client = context.getChampSelectDataContext().getLeagueClient();
         if (client == null) return championsAvailableForBan;
-        String jwt = client.getCachedValue(CacheType.INVENTORY_TOKEN);
+        String jwt = client.getCachedValue(CacheElement.INVENTORY_TOKEN);
         JSONObject b = new JSONObject(new String(Base64.getDecoder().decode(jwt.split("\\.")[1])));
         JSONObject items = b.getJSONObject("items");
         JSONArray champions = items.getJSONArray("CHAMPION");

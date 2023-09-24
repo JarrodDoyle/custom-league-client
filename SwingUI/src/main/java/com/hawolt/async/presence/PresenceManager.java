@@ -2,7 +2,6 @@ package com.hawolt.async.presence;
 
 import com.hawolt.LeagueClientUI;
 import com.hawolt.client.LeagueClient;
-import com.hawolt.client.cache.CacheType;
 import com.hawolt.client.misc.MapQueueId;
 import com.hawolt.client.resources.ledge.gsm.GameServiceMessageLedge;
 import com.hawolt.client.resources.ledge.parties.PartiesLedge;
@@ -10,6 +9,7 @@ import com.hawolt.client.resources.ledge.parties.objects.CurrentParty;
 import com.hawolt.client.resources.ledge.parties.objects.PartiesRegistration;
 import com.hawolt.client.resources.ledge.parties.objects.PartyGameMode;
 import com.hawolt.client.resources.ledge.summoner.objects.Summoner;
+import com.hawolt.client.cache.CacheElement;
 import com.hawolt.logger.Logger;
 import com.hawolt.rms.data.impl.payload.RiotMessageMessagePayload;
 import com.hawolt.rms.data.subject.service.IServiceMessageListener;
@@ -95,7 +95,7 @@ public class PresenceManager implements PacketCallback, IServiceMessageListener<
         for (int i = 0; i < masteryValues.length(); i++) {
             masteryLevel = masteryLevel + masteryValues.getJSONObject(i).getInt("championLevel");
         }
-        String puuid = leagueClient.getCachedValue(CacheType.PUUID);
+        String puuid = leagueClient.getCachedValue(CacheElement.PUUID);
         Summoner summoner = leagueClient.getLedge().getSummoner().resolveSummonerByPUUD(puuid);
         JSONObject presenceRank = queues.getJSONObject(target);
         Presence.Builder builder = new Presence.Builder();
@@ -133,7 +133,8 @@ public class PresenceManager implements PacketCallback, IServiceMessageListener<
         if (object == null) return;
         JSONObject payload = new JSONObject(Base64GZIP.unzipBase64(object.toString()));
         int queueId = payload.getInt("queueId");
-        leagueClient.getCachedValueOrElse(CacheType.PRESENCE, this::configure, Logger::error).ifPresent(base -> {
+
+        leagueClient.getCachedValueOrElse(CacheElement.PRESENCE, this::configure, Logger::error).ifPresent(base -> {
             String status = leagueClientUI.getHeader().getSelectedStatus();
             Presence.Builder builder = new Presence.Builder()
                     .setGameQueueType(MapQueueId.getGameQueueType(queueId))
@@ -187,12 +188,12 @@ public class PresenceManager implements PacketCallback, IServiceMessageListener<
 
     private void set(String status, Presence presence) {
         leagueClientUI.getLeagueClient().getXMPPClient().setCustomPresence(
-                status, leagueClientUI.getLeagueClient().getCachedValue(CacheType.CHAT_STATUS), presence
+                status, leagueClientUI.getLeagueClient().getCachedValue(CacheElement.CHAT_STATUS), presence
         );
     }
 
     public void setIdlePresence() {
-        leagueClient.getCachedValueOrElse(CacheType.PRESENCE, this::configure, Logger::error).ifPresent(base -> {
+        leagueClient.getCachedValueOrElse(CacheElement.PRESENCE, this::configure, Logger::error).ifPresent(base -> {
             Presence.Builder builder = new Presence.Builder().setGameStatus("outOfGame");
             String status = leagueClientUI.getHeader().getSelectedStatus();
             currentDefaultStatus = "chat";
@@ -205,7 +206,7 @@ public class PresenceManager implements PacketCallback, IServiceMessageListener<
         PartiesLedge partiesLedge = leagueClientUI.getLeagueClient().getLedge().getParties();
         PartiesRegistration registration = partiesLedge.getCurrentRegistration();
         int queueId = registration.getCurrentParty().getPartyGameMode().getQueueId();
-        leagueClient.getCachedValueOrElse(CacheType.PRESENCE, this::configure, Logger::error).ifPresent(base -> {
+        leagueClient.getCachedValueOrElse(CacheElement.PRESENCE, this::configure, Logger::error).ifPresent(base -> {
             Presence.Builder builder = new Presence.Builder()
                     .setTimestamp(String.valueOf(System.currentTimeMillis()))
                     .setGameMode(MapQueueId.getGameMode(queueId))
@@ -218,7 +219,7 @@ public class PresenceManager implements PacketCallback, IServiceMessageListener<
     }
 
     private void setLobbyPresence(JSONObject payload) {
-        leagueClient.getCachedValueOrElse(CacheType.PRESENCE, this::configure, Logger::error).ifPresent(base -> {
+        leagueClient.getCachedValueOrElse(CacheElement.PRESENCE, this::configure, Logger::error).ifPresent(base -> {
             Presence.Builder builder = new Presence.Builder();
             PartiesRegistration registration = new PartiesRegistration(payload.getJSONObject("player"));
             CurrentParty party = registration.getCurrentParty();
@@ -226,7 +227,7 @@ public class PresenceManager implements PacketCallback, IServiceMessageListener<
             if (mode == null) return;
             builder.setGameMode(MapQueueId.getGameMode(mode.getQueueId()));
             builder.setGameQueueType(MapQueueId.getGameQueueType(mode.getQueueId()));
-            String puuid = leagueClient.getCachedValue(CacheType.PUUID);
+            String puuid = leagueClient.getCachedValue(CacheElement.PUUID);
             party.getPlayers().stream()
                     .filter(player -> player.getPUUID().equals(puuid))
                     .findFirst()
@@ -264,7 +265,7 @@ public class PresenceManager implements PacketCallback, IServiceMessageListener<
         long summonerId = payload.getLong("summonerId");
         GameServiceMessageLedge gmsLedge = leagueClientUI.getLeagueClient().getLedge().getGameServiceMessage();
         JSONObject data = gmsLedge.getGameInfoByGameId(gameId);
-        leagueClient.getCachedValueOrElse(CacheType.PRESENCE, this::configure, Logger::error).ifPresent(base -> {
+        leagueClient.getCachedValueOrElse(CacheElement.PRESENCE, this::configure, Logger::error).ifPresent(base -> {
             Presence.Builder builder = new Presence.Builder();
             builder.setGameId(gameId);
             builder.setGameMode(gameMode);
@@ -320,7 +321,7 @@ public class PresenceManager implements PacketCallback, IServiceMessageListener<
     public void changeStatus() {
         if (currentDefaultStatus == null) currentDefaultStatus = "chat";
         String status = leagueClientUI.getHeader().getSelectedStatus();
-        leagueClient.getCachedValueOrElse(CacheType.PRESENCE, this::configure, Logger::error).ifPresent(base -> {
+        leagueClient.getCachedValueOrElse(CacheElement.PRESENCE, this::configure, Logger::error).ifPresent(base -> {
             set("default".equals(status) ? "dnd" : status, base);
         });
     }

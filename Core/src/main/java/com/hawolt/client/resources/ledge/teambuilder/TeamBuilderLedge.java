@@ -1,9 +1,9 @@
 package com.hawolt.client.resources.ledge.teambuilder;
 
 import com.hawolt.client.LeagueClient;
-import com.hawolt.client.cache.CacheType;
 import com.hawolt.client.resources.ledge.AbstractLedgeEndpoint;
 import com.hawolt.client.resources.ledge.teambuilder.objects.MatchContext;
+import com.hawolt.client.cache.CacheElement;
 import com.hawolt.generic.Constant;
 import com.hawolt.http.OkHttp3Client;
 import com.hawolt.http.layer.IResponse;
@@ -44,7 +44,7 @@ public class TeamBuilderLedge extends AbstractLedgeEndpoint {
                 .build();
         IResponse response = OkHttp3Client.execute(request, gateway);
         MatchContext context = new MatchContext(new JSONObject(response.asString()));
-        client.cache(CacheType.MATCH_CONTEXT, context);
+        client.cache(CacheElement.MATCH_CONTEXT, context);
         return context;
     }
 
