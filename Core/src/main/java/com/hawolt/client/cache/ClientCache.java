@@ -1,6 +1,8 @@
 package com.hawolt.client.cache;
 
 import com.hawolt.client.LeagueClient;
+import com.hawolt.client.exceptional.ExceptionalFunction;
+import com.hawolt.client.exceptional.ExceptionalSupplier;
 import com.hawolt.generic.data.Unsafe;
 import com.hawolt.logger.Logger;
 
@@ -121,10 +123,14 @@ public abstract class ClientCache implements ISimpleValueCache<CacheElement, Obj
 
     @Override
     public void accept(CachedValueLoader<CacheElement, ?> loader) {
-        if (loader.getException() != null) {
+        if (loader.getException() != null && loader.getValue() == null) {
             Logger.error("Failed to cache value for {}", loader.getType());
         } else {
-            Logger.info("Cache value for {}", loader.getType());
+            if (loader.getException() != null) {
+                Logger.warn("Cache value for {} using fallback - root: {}", loader.getType(), loader.getException().getMessage());
+            } else {
+                Logger.info("Cache value for {}", loader.getType());
+            }
             cache(loader.getType(), loader.getValue());
         }
     }

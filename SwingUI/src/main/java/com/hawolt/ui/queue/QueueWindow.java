@@ -2,6 +2,7 @@ package com.hawolt.ui.queue;
 
 import com.hawolt.LeagueClientUI;
 import com.hawolt.client.LeagueClient;
+import com.hawolt.client.cache.CacheElement;
 import com.hawolt.client.resources.ledge.parties.PartiesLedge;
 import com.hawolt.client.resources.ledge.parties.objects.PartiesRegistration;
 import com.hawolt.client.resources.ledge.parties.objects.data.PartyRole;
@@ -147,7 +148,7 @@ public class QueueWindow extends ChildUIComponent implements Runnable, PacketCal
 
             for (JSONObject object : map.get(key)) {
                 String name = object.getString("shortName");
-                if (name.contains("CLASH") || name.contains("TFT-TUTORIAL")) {
+                if (name.contains("CLASH") /*|| name.contains("TFT-TUTORIAL")*/) {
                     continue;
                 }
 
@@ -249,6 +250,7 @@ public class QueueWindow extends ChildUIComponent implements Runnable, PacketCal
                 AudioEngine.play(Sound.QUEUE_POP);
                 JSONObject afkCheckState = payload.getJSONObject("afkCheckState");
                 long maxAfkMillis = afkCheckState.getLong("maxAfkMillis");
+                this.leagueClientUI.getLeagueClient().cache(CacheElement.CHAMP_SELECT_COUNTER, payload.getInt("counter"));
                 QueueDialog dialog = new QueueDialog(Frame.getFrames()[0], "Queue Notification", maxAfkMillis);
                 if (dialog.showQueueDialog().getSelection() != 1) {
                     essentials.disableQueueState();

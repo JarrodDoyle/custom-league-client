@@ -18,7 +18,12 @@ public enum CacheElement {
     PLAYER_PREFERENCE(CachedDataType.VALUE),
     PRESENCE(CachedDataType.VALUE),
     PROFILE(CachedDataType.VALUE),
-    PROFILE_MASK(CachedDataType.VALUE);
+    PROFILE_MASK(CachedDataType.VALUE),
+    CHAMP_SELECT_COUNTER(CachedDataType.VALUE),
+    LOGIN_DATA_PACKET(CachedDataType.VALUE),
+    FREE_TO_PLAY_LEVEL_CAP(CachedDataType.VALUE),
+    F2P_NEW_PLAYER(CachedDataType.VALUE),
+    F2P_VETERAN_PLAYER(CachedDataType.VALUE);
     private final CachedDataType cachedDataType;
 
     CacheElement(CachedDataType cachedDataType) {

@@ -1,4 +1,4 @@
-package com.hawolt.client.cache;
+package com.hawolt.client.exceptional;
 
 /**
  * Created: 14/08/2023 17:43

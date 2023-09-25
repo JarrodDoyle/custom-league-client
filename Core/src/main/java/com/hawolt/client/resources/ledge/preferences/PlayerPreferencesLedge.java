@@ -3,6 +3,7 @@ package com.hawolt.client.resources.ledge.preferences;
 import com.hawolt.client.LeagueClient;
 import com.hawolt.client.misc.Base64RawInflate;
 import com.hawolt.client.resources.ledge.AbstractLedgeEndpoint;
+import com.hawolt.client.resources.ledge.preferences.objects.PreferenceNotFoundException;
 import com.hawolt.client.resources.ledge.preferences.objects.PreferenceType;
 import com.hawolt.generic.Constant;
 import com.hawolt.http.OkHttp3Client;
@@ -21,7 +22,7 @@ public class PlayerPreferencesLedge extends AbstractLedgeEndpoint {
     }
 
 
-    public JSONObject getPreferences(PreferenceType preferenceType) throws IOException {
+    public JSONObject getPreferences(PreferenceType preferenceType) throws IOException, PreferenceNotFoundException {
         String uri = String.format("https://playerpreferences.riotgames.com/%s/v%s/getPreference/%s/%s/%s/",
                 name(),
                 version(),
@@ -33,6 +34,7 @@ public class PlayerPreferencesLedge extends AbstractLedgeEndpoint {
                 .get()
                 .build();
         IResponse response = OkHttp3Client.execute(request, gateway);
+        if (response.code() == 404) throw new PreferenceNotFoundException(response.asString());
         JSONObject jsonObject = new JSONObject(response.asString());
         String data = jsonObject.getString("data");
         byte[] base64Decoded = Base64RawInflate.decode(data);

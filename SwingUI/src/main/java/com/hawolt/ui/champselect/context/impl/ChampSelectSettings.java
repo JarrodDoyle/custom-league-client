@@ -3,6 +3,7 @@ package com.hawolt.ui.champselect.context.impl;
 import com.hawolt.client.LeagueClient;
 import com.hawolt.client.cache.CacheElement;
 import com.hawolt.client.cache.JWT;
+import com.hawolt.client.resources.ledge.summoner.objects.Summoner;
 import com.hawolt.ui.champselect.ChampSelectUI;
 import com.hawolt.ui.champselect.context.ChampSelectContext;
 import com.hawolt.ui.champselect.context.ChampSelectContextProvider;
@@ -13,10 +14,7 @@ import com.hawolt.ui.champselect.data.DraftMode;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Function;
 
@@ -26,7 +24,7 @@ import java.util.function.Function;
  **/
 
 public class ChampSelectSettings extends ChampSelectContextProvider implements ChampSelectSettingsContext {
-
+    private final List<Integer> F2P_QUEUE_IDS = Arrays.asList(400, 430, 830, 840, 850);
     private final Map<Integer, List<ActionObject>> actionSetMapping = new ConcurrentHashMap<>();
     protected int[] championsAvailableForBan;
     private boolean allowDuplicatePicks, skipChampionSelect, allowSkinSelection, allowOptingOutOfBanning;
@@ -248,6 +246,17 @@ public class ChampSelectSettings extends ChampSelectContextProvider implements C
         int[] ids = new int[champions.length()];
         for (int i = 0; i < champions.length(); i++) {
             ids[i] = champions.getInt(i);
+        }
+        if (F2P_QUEUE_IDS.contains(queueId)) {
+            LeagueClient leagueClient = context.getChampSelectDataContext().getLeagueClient();
+            int levelCap = leagueClient.getCachedValue(CacheElement.FREE_TO_PLAY_LEVEL_CAP);
+            Summoner self = leagueClient.getCachedValue(CacheElement.SUMMONER);
+            int[] additional = leagueClient.getCachedValue(
+                    self.getLevel() >= levelCap ? CacheElement.F2P_VETERAN_PLAYER : CacheElement.F2P_NEW_PLAYER
+            );
+            int[] modified = Arrays.copyOf(ids, ids.length + additional.length);
+            System.arraycopy(additional, 0, modified, ids.length, additional.length);
+            ids = modified;
         }
         return ids;
     }

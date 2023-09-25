@@ -1,5 +1,7 @@
 package com.hawolt.client.cache;
 
+import com.hawolt.client.exceptional.ExceptionalSupplier;
+
 /**
  * Created: 14/08/2023 19:42
  * Author: Twitter @hawolt

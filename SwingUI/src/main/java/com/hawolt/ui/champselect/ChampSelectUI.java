@@ -2,10 +2,9 @@ package com.hawolt.ui.champselect;
 
 import com.hawolt.LeagueClientUI;
 import com.hawolt.client.LeagueClient;
+import com.hawolt.client.cache.CacheElement;
 import com.hawolt.client.resources.ledge.leagues.objects.LeagueLedgeNotifications;
 import com.hawolt.client.resources.ledge.leagues.objects.LeagueNotification;
-import com.hawolt.client.resources.ledge.teambuilder.objects.MatchContext;
-import com.hawolt.client.cache.CacheElement;
 import com.hawolt.http.layer.IResponse;
 import com.hawolt.logger.Logger;
 import com.hawolt.rms.data.impl.payload.RiotMessageMessagePayload;
@@ -83,6 +82,7 @@ public class ChampSelectUI extends ChildUIComponent implements IServiceMessageLi
     }
 
     private void addRenderInstance(AbstractRenderInstance instance) {
+        leagueClient.register(CacheElement.MATCH_CONTEXT, instance);
         instance.setGlobalRunePanel(champSelect.getChampSelectInterfaceContext().getRuneSelectionPanel());
         int[] queueIds = instance.getSupportedQueueIds();
         for (int id : queueIds) {
@@ -96,9 +96,10 @@ public class ChampSelectUI extends ChildUIComponent implements IServiceMessageLi
     public void update(ChampSelectContext context) {
         int initialCounter;
         if (leagueClient != null) {
-            MatchContext matchContext = leagueClient.getCachedValue(CacheElement.MATCH_CONTEXT);
-            initialCounter = matchContext.getPayload().getCounter() + 1;
+            int counter = leagueClient.getCachedValue(CacheElement.CHAMP_SELECT_COUNTER);
+            initialCounter = counter + 1;
         } else {
+            // LOCAL: adjust this depending on local test data
             initialCounter = 5;
         }
         ChampSelectSettingsContext settingsContext = context.getChampSelectSettingsContext();
