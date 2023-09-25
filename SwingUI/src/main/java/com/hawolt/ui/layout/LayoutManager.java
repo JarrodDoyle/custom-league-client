@@ -3,10 +3,11 @@ package com.hawolt.ui.layout;
 import com.hawolt.LeagueClientUI;
 import com.hawolt.client.LeagueClient;
 import com.hawolt.ui.champselect.ChampSelectUI;
+import com.hawolt.ui.generic.utility.ChildUIComponent;
 import com.hawolt.ui.github.ReleaseWindow;
+import com.hawolt.ui.profile.ProfileWindow;
 import com.hawolt.ui.queue.QueueWindow;
 import com.hawolt.ui.store.StoreWindow;
-import com.hawolt.util.panel.ChildUIComponent;
 
 import java.awt.*;
 
@@ -21,7 +22,7 @@ public class LayoutManager extends ChildUIComponent implements ILayoutManager {
     private final ChildUIComponent center;
     private final QueueWindow queue;
     private final StoreWindow store;
-    //private final ProfileWindow profile;
+    private final ProfileWindow profile;
     private final ChampSelectUI champSelect;
     private LayoutHeader header;
 
@@ -35,7 +36,7 @@ public class LayoutManager extends ChildUIComponent implements ILayoutManager {
         this.center.add("home", new ReleaseWindow());
         this.center.add("store", store = new StoreWindow(client));
         this.center.add("play", queue = new QueueWindow(leagueClientUI));
-        //this.center.add("profile", profile = new ProfileWindow(leagueClientUI));
+        this.center.add("profile", profile = new ProfileWindow(leagueClientUI));
         this.center.add("champselect", champSelect = new ChampSelectUI(leagueClientUI));
         layout.show(center, "github");
     }
@@ -59,6 +60,10 @@ public class LayoutManager extends ChildUIComponent implements ILayoutManager {
 
     public QueueWindow getQueue() {
         return queue;
+    }
+
+    public ProfileWindow getProfile() {
+        return profile;
     }
 
     public StoreWindow getStore() {

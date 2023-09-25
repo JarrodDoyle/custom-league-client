@@ -1,7 +1,7 @@
 package com.hawolt.async.loader;
 
 import com.hawolt.client.LeagueClient;
-import com.hawolt.client.cache.ExceptionalSupplier;
+import com.hawolt.client.exceptional.ExceptionalSupplier;
 import com.hawolt.client.resources.ledge.preferences.PlayerPreferencesLedge;
 import com.hawolt.client.resources.ledge.preferences.objects.PreferenceType;
 

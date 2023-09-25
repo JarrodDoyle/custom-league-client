@@ -1,9 +1,10 @@
 package com.hawolt.client.resources.ledge.leagues;
 
 import com.hawolt.client.LeagueClient;
-import com.hawolt.client.cache.CacheType;
 import com.hawolt.client.resources.ledge.AbstractLedgeEndpoint;
 import com.hawolt.client.resources.ledge.leagues.objects.LeagueLedgeNotifications;
+import com.hawolt.client.resources.ledge.leagues.objects.RankedStatistic;
+import com.hawolt.client.cache.CacheElement;
 import com.hawolt.http.OkHttp3Client;
 import com.hawolt.http.layer.IResponse;
 import okhttp3.Request;
@@ -32,7 +33,7 @@ public class LeagueLedge extends AbstractLedgeEndpoint {
         return new JSONObject(response.asString()).getString("jwt");
     }
 
-    public JSONObject getRankedStats(String puuid) throws IOException {
+    public RankedStatistic getRankedStats(String puuid) throws IOException {
         String uri = String.format("%s/%s/v%s/rankedStats/puuid/%s",
                 base,
                 name(),
@@ -41,7 +42,7 @@ public class LeagueLedge extends AbstractLedgeEndpoint {
         );
         Request request = jsonRequest(uri).get().build();
         IResponse response = OkHttp3Client.execute(request, gateway);
-        return new JSONObject(response.asString());
+        return new RankedStatistic(new JSONObject(response.asString()));
     }
 
     public JSONObject getOwnRankedStats() throws IOException {
@@ -64,7 +65,7 @@ public class LeagueLedge extends AbstractLedgeEndpoint {
         Request request = jsonRequest(uri).get().build();
         IResponse response = OkHttp3Client.execute(request, gateway);
         LeagueLedgeNotifications notifications = new LeagueLedgeNotifications(new JSONObject(response.asString()));
-        client.cache(CacheType.LEAGUE_LEDGE_NOTIFICATION, notifications);
+        client.cache(CacheElement.LEAGUE_LEDGE_NOTIFICATION, notifications);
         return notifications;
     }
 

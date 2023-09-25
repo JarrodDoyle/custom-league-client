@@ -2,6 +2,8 @@ package com.hawolt.ui.champselect;
 
 import com.hawolt.LeagueClientUI;
 import com.hawolt.client.LeagueClient;
+import com.hawolt.client.cache.CacheListener;
+import com.hawolt.client.resources.ledge.teambuilder.objects.MatchContext;
 import com.hawolt.logger.Logger;
 import com.hawolt.rtmp.LeagueRtmpClient;
 import com.hawolt.ui.champselect.context.ChampSelectContext;
@@ -12,7 +14,7 @@ import com.hawolt.ui.champselect.generic.ChampSelectRuneSelection;
 import com.hawolt.ui.champselect.generic.ChampSelectUIComponent;
 import com.hawolt.ui.champselect.generic.impl.ChampSelectChoice;
 import com.hawolt.ui.champselect.generic.impl.ChampSelectSelectionElement;
-import com.hawolt.util.panel.ChildUIComponent;
+import com.hawolt.ui.generic.utility.ChildUIComponent;
 import com.hawolt.xmpp.event.objects.conversation.history.impl.IncomingMessage;
 import com.hawolt.xmpp.event.objects.presence.impl.JoinMucPresence;
 
@@ -27,7 +29,7 @@ import java.util.concurrent.ConcurrentHashMap;
  * Author: Twitter @hawolt
  **/
 
-public abstract class AbstractRenderInstance extends ChampSelectUIComponent implements ChampSelectRenderer, ChampSelectChoice {
+public abstract class AbstractRenderInstance extends ChampSelectUIComponent implements ChampSelectRenderer, ChampSelectChoice, CacheListener<MatchContext> {
 
     protected final ChildUIComponent component = new ChildUIComponent(new BorderLayout());
     private final Map<ChampSelectType, ChampSelectSelectionElement> map = new ConcurrentHashMap<>();

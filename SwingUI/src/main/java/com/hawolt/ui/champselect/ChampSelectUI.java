@@ -2,10 +2,9 @@ package com.hawolt.ui.champselect;
 
 import com.hawolt.LeagueClientUI;
 import com.hawolt.client.LeagueClient;
-import com.hawolt.client.cache.CacheType;
+import com.hawolt.client.cache.CacheElement;
 import com.hawolt.client.resources.ledge.leagues.objects.LeagueLedgeNotifications;
 import com.hawolt.client.resources.ledge.leagues.objects.LeagueNotification;
-import com.hawolt.client.resources.ledge.teambuilder.objects.MatchContext;
 import com.hawolt.http.layer.IResponse;
 import com.hawolt.logger.Logger;
 import com.hawolt.rms.data.impl.payload.RiotMessageMessagePayload;
@@ -20,13 +19,12 @@ import com.hawolt.ui.champselect.impl.blank.BlankChampSelectUI;
 import com.hawolt.ui.champselect.impl.blind.BlindChampSelectUI;
 import com.hawolt.ui.champselect.impl.draft.DraftChampSelectUI;
 import com.hawolt.ui.champselect.postgame.PostGameUI;
+import com.hawolt.ui.generic.utility.ChildUIComponent;
 import com.hawolt.ui.layout.LayoutComponent;
-import com.hawolt.util.panel.ChildUIComponent;
 import org.json.JSONObject;
 
 import javax.swing.*;
 import java.awt.*;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -37,8 +35,8 @@ import java.util.Map;
  **/
 
 public class ChampSelectUI extends ChildUIComponent implements IServiceMessageListener<RiotMessageServiceMessage> {
+    private final Map<Integer, AbstractRenderInstance> instances = new HashMap<>();
     private final Map<Integer, String> QUEUE_RENDERER_MAPPING = new HashMap<>();
-    private final List<AbstractRenderInstance> instances = new ArrayList<>();
     private final CardLayout layout = new CardLayout();
     private final JComponent main = new ChildUIComponent(layout);
     private final ChampSelect champSelect;
@@ -84,22 +82,24 @@ public class ChampSelectUI extends ChildUIComponent implements IServiceMessageLi
     }
 
     private void addRenderInstance(AbstractRenderInstance instance) {
+        leagueClient.register(CacheElement.MATCH_CONTEXT, instance);
         instance.setGlobalRunePanel(champSelect.getChampSelectInterfaceContext().getRuneSelectionPanel());
         int[] queueIds = instance.getSupportedQueueIds();
         for (int id : queueIds) {
             Logger.info("[champ-select] register queueId:{} as '{}'", id, instance.getCardName());
             QUEUE_RENDERER_MAPPING.put(id, instance.getCardName());
+            instances.put(id, instance);
         }
-        this.instances.add(instance);
         this.main.add(instance.getCardName(), instance);
     }
 
     public void update(ChampSelectContext context) {
         int initialCounter;
         if (leagueClient != null) {
-            MatchContext matchContext = leagueClient.getCachedValue(CacheType.MATCH_CONTEXT);
-            initialCounter = matchContext.getPayload().getCounter() + 1;
+            int counter = leagueClient.getCachedValue(CacheElement.CHAMP_SELECT_COUNTER);
+            initialCounter = counter + 1;
         } else {
+            // LOCAL: adjust this depending on local test data
             initialCounter = 5;
         }
         ChampSelectSettingsContext settingsContext = context.getChampSelectSettingsContext();
@@ -111,9 +111,7 @@ public class ChampSelectUI extends ChildUIComponent implements IServiceMessageLi
                 leagueClientUI.getHeader().selectAndShowComponent(LayoutComponent.CHAMPSELECT);
             }
         }
-        for (AbstractRenderInstance instance : instances) {
-            instance.delegate(context, initialCounter);
-        }
+        this.instances.get(settingsContext.getQueueId()).delegate(context, initialCounter);
         this.repaint();
     }
 
@@ -129,8 +127,8 @@ public class ChampSelectUI extends ChildUIComponent implements IServiceMessageLi
         return leagueClientUI;
     }
 
-    public List<AbstractRenderInstance> getInstances() {
-        return instances;
+    public AbstractRenderInstance getInstance(int queueId) {
+        return instances.get(queueId);
     }
 
     @Override

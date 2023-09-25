@@ -1,8 +1,7 @@
 package com.hawolt.async.loader;
 
-import com.hawolt.StaticConstant;
 import com.hawolt.async.ExecutorManager;
-import com.hawolt.client.cache.ExceptionalSupplier;
+import com.hawolt.client.exceptional.ExceptionalSupplier;
 import com.hawolt.cryptography.MD5;
 import com.hawolt.generic.data.Unsafe;
 import com.hawolt.http.layer.IResponse;
@@ -13,6 +12,7 @@ import com.hawolt.io.RunLevel;
 import com.hawolt.logger.Logger;
 import com.hawolt.sql.Hikari;
 import com.hawolt.sql.ResultSetTransformer;
+import com.hawolt.util.other.StaticConstant;
 import okhttp3.Request;
 import org.h2.tools.Server;
 

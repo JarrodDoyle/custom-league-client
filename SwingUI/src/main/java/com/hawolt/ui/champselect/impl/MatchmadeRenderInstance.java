@@ -2,7 +2,7 @@ package com.hawolt.ui.champselect.impl;
 
 import com.hawolt.LeagueClientUI;
 import com.hawolt.client.LeagueClient;
-import com.hawolt.client.cache.CacheType;
+import com.hawolt.client.cache.CacheElement;
 import com.hawolt.client.resources.communitydragon.spell.Spell;
 import com.hawolt.client.resources.ledge.teambuilder.objects.MatchContext;
 import com.hawolt.logger.Logger;
@@ -18,7 +18,7 @@ import com.hawolt.ui.champselect.data.ChampSelectType;
 import com.hawolt.ui.champselect.data.GameType;
 import com.hawolt.ui.champselect.generic.ChampSelectRuneSelection;
 import com.hawolt.ui.champselect.generic.impl.*;
-import com.hawolt.util.panel.ChildUIComponent;
+import com.hawolt.ui.generic.utility.ChildUIComponent;
 import com.hawolt.xmpp.core.VirtualRiotXMPPClient;
 import com.hawolt.xmpp.event.objects.conversation.history.impl.IncomingMessage;
 import com.hawolt.xmpp.event.objects.presence.impl.JoinMucPresence;
@@ -74,26 +74,6 @@ public abstract class MatchmadeRenderInstance extends AbstractRenderInstance imp
     public void push(JoinMucPresence presence) {
         if (chatUI == null) return;
         chatUI.push(presence);
-    }
-
-    @Override
-    public void init() {
-        super.init();
-        int targetQueueId = context.getChampSelectSettingsContext().getQueueId();
-        int[] supportedQueueIds = getSupportedQueueIds();
-        for (int supportedQueueId : supportedQueueIds) {
-            if (supportedQueueId == targetQueueId) {
-                LeagueClientUI.service.execute(() -> {
-                    LeagueClient client = context.getChampSelectDataContext().getLeagueClient();
-                    if (client == null) return;
-                    MatchContext context = client.getCachedValue(CacheType.MATCH_CONTEXT);
-                    if (context == null) return;
-                    chatUI.setMatchContext(context);
-                    VirtualRiotXMPPClient xmppClient = client.getXMPPClient();
-                    xmppClient.joinUnprotectedMuc(context.getPayload().getChatRoomName(), context.getPayload().getTargetRegion());
-                });
-            }
-        }
     }
 
     private void build() {
@@ -235,6 +215,23 @@ public abstract class MatchmadeRenderInstance extends AbstractRenderInstance imp
                         settingUI.getSelectedSpellOne(),
                         settingUI.getSelectedSpellTwo()
                 );
+            }
+        }
+    }
+
+    @Override
+    public void onCacheUpdate(CacheElement element, MatchContext matchContext) {
+        int targetQueueId = context.getChampSelectSettingsContext().getQueueId();
+        int[] supportedQueueIds = getSupportedQueueIds();
+        for (int supportedQueueId : supportedQueueIds) {
+            if (supportedQueueId == targetQueueId) {
+                LeagueClientUI.service.execute(() -> {
+                    LeagueClient client = context.getChampSelectDataContext().getLeagueClient();
+                    if (client == null) return;
+                    chatUI.setMatchContext(matchContext);
+                    VirtualRiotXMPPClient xmppClient = client.getXMPPClient();
+                    xmppClient.joinUnprotectedMuc(matchContext.getPayload().getChatRoomName(), matchContext.getPayload().getTargetRegion());
+                });
             }
         }
     }

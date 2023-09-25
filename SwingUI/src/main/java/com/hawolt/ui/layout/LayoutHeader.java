@@ -1,15 +1,16 @@
 package com.hawolt.ui.layout;
 
-import com.hawolt.async.LazyLoadedImageComponent;
 import com.hawolt.async.loader.ResourceLoader;
 import com.hawolt.client.LeagueClient;
 import com.hawolt.ui.chat.profile.ChatSidebarProfile;
+import com.hawolt.ui.chat.profile.ChatSidebarStatus;
+import com.hawolt.ui.generic.component.LFlatButton;
+import com.hawolt.ui.generic.component.LTextAlign;
+import com.hawolt.ui.generic.themes.ColorPalette;
+import com.hawolt.ui.generic.utility.ChildUIComponent;
+import com.hawolt.ui.generic.utility.HighlightType;
+import com.hawolt.ui.generic.utility.LazyLoadedImageComponent;
 import com.hawolt.ui.layout.wallet.HeaderWallet;
-import com.hawolt.util.ColorPalette;
-import com.hawolt.util.panel.ChildUIComponent;
-import com.hawolt.util.ui.LFlatButton;
-import com.hawolt.util.ui.LHighlightType;
-import com.hawolt.util.ui.LTextAlign;
 import com.hawolt.virtual.leagueclient.userinfo.UserInformation;
 
 import javax.swing.*;
@@ -31,7 +32,7 @@ public class LayoutHeader extends ChildUIComponent {
     private final ChatSidebarProfile profile;
     private final ILayoutManager manager;
     private final HeaderWallet wallet;
-    LazyLoadedImageComponent logo;
+    private LazyLoadedImageComponent logo;
 
     private Point initialClick;
 
@@ -76,7 +77,6 @@ public class LayoutHeader extends ChildUIComponent {
         main.add(verticalButtonAlignment, BorderLayout.WEST);
 
         for (LayoutComponent layoutComponent : LayoutComponent.values()) {
-            if (layoutComponent == LayoutComponent.PROFILE) continue;
             verticalButtonAlignment.add(Box.createRigidArea(new Dimension(10, 0)));
             verticalButtonAlignment.add(createHeaderComponent(layoutComponent));
         }
@@ -91,7 +91,7 @@ public class LayoutHeader extends ChildUIComponent {
     }
 
     public LFlatButton createHeaderComponent(LayoutComponent component) {
-        LFlatButton button = new LFlatButton(component.name().replace("_", " "), LTextAlign.CENTER, LHighlightType.TEXT);
+        LFlatButton button = new LFlatButton(component.name().replace("_", " "), LTextAlign.CENTER, HighlightType.TEXT);
         button.addActionListener(listener -> selectAndShowComponent(component));
         map.put(component, button);
         return button;
@@ -125,7 +125,11 @@ public class LayoutHeader extends ChildUIComponent {
         return wallet;
     }
 
-    public String getChatStatus() {
-        return profile.getSummoner().getStatus().getBoxStatus();
+    public ChatSidebarStatus getChatSidebarStatus() {
+        return profile.getSummoner().getStatus();
+    }
+
+    public String getSelectedStatus() {
+        return profile.getSummoner().getStatus().getSelectedStatus();
     }
 }

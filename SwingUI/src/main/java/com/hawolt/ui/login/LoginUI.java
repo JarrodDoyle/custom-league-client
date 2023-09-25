@@ -1,15 +1,16 @@
 package com.hawolt.ui.login;
 
 import com.hawolt.LeagueClientUI;
-import com.hawolt.settings.SettingService;
-import com.hawolt.settings.SettingType;
-import com.hawolt.ui.custom.LHintPasswordTextField;
-import com.hawolt.ui.custom.LHintTextField;
-import com.hawolt.util.ColorPalette;
-import com.hawolt.util.panel.MainUIComponent;
-import com.hawolt.util.ui.LFlatButton;
-import com.hawolt.util.ui.LHighlightType;
-import com.hawolt.util.ui.LTextAlign;
+import com.hawolt.ui.generic.component.LFlatButton;
+import com.hawolt.ui.generic.component.LHintPasswordTextField;
+import com.hawolt.ui.generic.component.LHintTextField;
+import com.hawolt.ui.generic.component.LTextAlign;
+import com.hawolt.ui.generic.themes.ColorPalette;
+import com.hawolt.ui.generic.utility.ChildUIComponent;
+import com.hawolt.ui.generic.utility.HighlightType;
+import com.hawolt.ui.generic.utility.MainUIComponent;
+import com.hawolt.util.paint.animation.AnimationVisualizer;
+import com.hawolt.util.paint.animation.impl.impl.SpinningAnimation;
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
@@ -25,23 +26,32 @@ import java.awt.event.KeyEvent;
  **/
 
 public class LoginUI extends MainUIComponent implements ActionListener {
+
+    private final CardLayout cardLayout = new CardLayout();
+    private final ChildUIComponent parent = new ChildUIComponent(cardLayout);
+    private final AnimationVisualizer animationVisualizer;
     private final LHintPasswordTextField password;
     private final LHintTextField username;
     private final ILoginCallback callback;
-    private final SettingService service;
     private final JCheckBox rememberMe;
     private final JButton login;
 
-
     private LoginUI(LeagueClientUI clientUI) {
         super(clientUI);
-        this.setLayout(new GridLayout(0, 1, 0, 5));
-        this.setBorder(new EmptyBorder(5, 5, 5, 5));
+        this.setLayout(new BorderLayout());
 
-        this.service = clientUI.getSettingService();
+        SpinningAnimation spinningAnimation = new SpinningAnimation(5, 45);
+        this.animationVisualizer = new AnimationVisualizer(spinningAnimation);
+        this.parent.add("false", animationVisualizer);
+        this.add(parent, BorderLayout.CENTER);
+        this.animationVisualizer.start();
+
+        ChildUIComponent login = new ChildUIComponent(new GridLayout(0, 1, 0, 5));
+        login.setBorder(new EmptyBorder(5, 5, 5, 5));
+
         this.username = new LHintTextField("username");
         this.password = new LHintPasswordTextField("password");
-        this.login = new LFlatButton("Login", LTextAlign.CENTER, LHighlightType.COMPONENT);
+        this.login = new LFlatButton("Login", LTextAlign.CENTER, HighlightType.COMPONENT);
         this.login.setActionCommand("REGULAR");
         this.rememberMe = new JCheckBox("Remember Me");
         this.rememberMe.setForeground(Color.WHITE);
@@ -51,14 +61,14 @@ public class LoginUI extends MainUIComponent implements ActionListener {
         JLabel passwordLabel = new JLabel("Password");
         passwordLabel.setForeground(Color.WHITE);
 
-        this.add(usernameLabel);
-        this.add(username);
-        this.add(passwordLabel);
-        this.add(password);
-        this.add(login);
-        this.add(rememberMe);
-        //TODO add this later
-        //this.add(optimizeRAM);
+        login.add(usernameLabel);
+        login.add(username);
+        login.add(passwordLabel);
+        login.add(password);
+        login.add(this.login);
+        login.add(rememberMe);
+        parent.add("true", login);
+
         this.setPreferredSize(new Dimension(300, 200));
         this.login.addActionListener(this);
         this.container.add(this);
@@ -83,15 +93,12 @@ public class LoginUI extends MainUIComponent implements ActionListener {
         this.init();
     }
 
-    public static LoginUI show(LeagueClientUI leagueClientUI) {
+    public static LoginUI create(LeagueClientUI leagueClientUI) {
         return new LoginUI(leagueClientUI);
     }
 
     public void toggle(boolean state) {
-        rememberMe.setEnabled(state);
-        username.setEnabled(state);
-        password.setEnabled(state);
-        login.setEnabled(state);
+        cardLayout.show(parent, String.valueOf(state));
     }
 
     public JCheckBox getRememberMe() {
@@ -103,11 +110,10 @@ public class LoginUI extends MainUIComponent implements ActionListener {
         this.toggle(false);
         String pass = new String(password.getPassword());
         String user = username.getText();
-        if (rememberMe.isSelected()) {
-            service.write(SettingType.CLIENT, "remember", true);
-            service.write(SettingType.CLIENT, "username", user);
-        }
-        service.set(user);
         LeagueClientUI.service.execute(() -> callback.onLogin(user, pass));
+    }
+
+    public AnimationVisualizer getAnimationVisualizer() {
+        return animationVisualizer;
     }
 }

@@ -2,21 +2,19 @@ package com.hawolt.ui.store;
 
 import com.hawolt.LeagueClientUI;
 import com.hawolt.client.LeagueClient;
-import com.hawolt.client.cache.CacheType;
-import com.hawolt.client.cache.CachedValueLoader;
-import com.hawolt.client.resources.ledge.store.objects.InventoryType;
 import com.hawolt.client.resources.ledge.store.objects.StoreItem;
 import com.hawolt.client.resources.purchasewidget.CurrencyType;
 import com.hawolt.client.resources.purchasewidget.PurchaseWidget;
-import com.hawolt.util.ColorPalette;
+import com.hawolt.client.cache.CacheElement;
+import com.hawolt.client.cache.CachedValueLoader;
+import com.hawolt.ui.generic.component.LLabel;
+import com.hawolt.ui.generic.component.LTextAlign;
+import com.hawolt.ui.generic.themes.ColorPalette;
+import com.hawolt.ui.generic.utility.ChildUIComponent;
 import com.hawolt.util.audio.AudioEngine;
 import com.hawolt.util.audio.Sound;
-import com.hawolt.util.panel.ChildUIComponent;
-import com.hawolt.util.ui.LLabel;
-import com.hawolt.util.ui.LTextAlign;
 import org.json.JSONObject;
 
-import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 import java.awt.*;
 import java.util.ArrayList;
@@ -110,7 +108,7 @@ public class StoreElement extends ChildUIComponent implements IStoreElement {
                     page.removeStoreElement(this);
                     LeagueClientUI.service.execute(
                             new CachedValueLoader<>(
-                                    CacheType.INVENTORY_TOKEN,
+                                    CacheElement.INVENTORY_TOKEN,
                                     () -> client.getLedge().getInventoryService().getInventoryToken(),
                                     client
                             )

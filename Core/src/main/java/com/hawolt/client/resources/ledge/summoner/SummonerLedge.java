@@ -3,6 +3,7 @@ package com.hawolt.client.resources.ledge.summoner;
 import com.hawolt.client.LeagueClient;
 import com.hawolt.client.resources.ledge.AbstractLedgeEndpoint;
 import com.hawolt.client.resources.ledge.summoner.objects.Summoner;
+import com.hawolt.client.resources.ledge.summoner.objects.SummonerProfile;
 import com.hawolt.client.resources.ledge.summoner.objects.SummonerValidation;
 import com.hawolt.generic.Constant;
 import com.hawolt.http.OkHttp3Client;
@@ -16,6 +17,8 @@ import org.json.JSONObject;
 import java.io.IOException;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
+import java.util.LinkedList;
+import java.util.List;
 
 /**
  * Created: 19/01/2023 16:38
@@ -51,12 +54,57 @@ public class SummonerLedge extends AbstractLedgeEndpoint {
         );
     }
 
+    public Summoner resolveSummonerById(long id) throws IOException {
+        return resolveSummonerByIds(id).get(0);
+    }
+
+    public List<Summoner> resolveSummonerByIds(long... ids) throws IOException {
+        String uri = String.format("%s/%s/v%s/regions/%s/summoners/summoner-ids",
+                base,
+                name(),
+                version(),
+                platform.name().toLowerCase()
+        );
+        JSONArray object = new JSONArray();
+        for (long id : ids) object.put(id);
+        Request request = jsonRequest(uri)
+                .post(RequestBody.create(object.toString(), Constant.APPLICATION_JSON))
+                .build();
+        IResponse response = OkHttp3Client.execute(request, gateway);
+        JSONArray array = new JSONArray(response.asString());
+        List<Summoner> list = new LinkedList<>();
+        for (int i = 0; i < array.length(); i++) {
+            list.add(new Summoner(array.getJSONObject(i)));
+        }
+        return list;
+    }
+
+
     public Summoner resolveSummoner(String uri) throws IOException {
         Request request = jsonRequest(uri)
                 .get()
                 .build();
         IResponse response = OkHttp3Client.execute(request, gateway);
         return new Summoner(new JSONObject(response.asString()));
+    }
+
+    public SummonerProfile resolveSummonerProfile(Summoner summoner) throws IOException {
+        return resolveSummonerProfile(summoner.getPUUID());
+    }
+
+    public SummonerProfile resolveSummonerProfile(String puuid) throws IOException {
+        String uri = String.format("%s/%s/v%s/regions/%s/summonerprofile/%s",
+                base,
+                name(),
+                version(),
+                platform.name().toLowerCase(),
+                puuid
+        );
+        Request request = jsonRequest(uri)
+                .get()
+                .build();
+        IResponse response = OkHttp3Client.execute(request, gateway);
+        return new SummonerProfile(new JSONObject(response.asString()));
     }
 
     public String getSummonerToken() throws IOException {

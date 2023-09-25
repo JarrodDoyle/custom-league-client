@@ -37,12 +37,12 @@
         <dependency>
             <groupId>com.github.hawolt</groupId>
             <artifactId>riot-xmpp</artifactId>
-            <version>794ba9d2d2</version>
+            <version>1f9f5b0db4</version>
         </dependency>
         <dependency>
             <groupId>com.github.hawolt</groupId>
             <artifactId>league-of-legends-rtmp</artifactId>
-            <version>69574d991b</version>
+            <version>b88d43094b</version>
         </dependency>
         <dependency>
             <groupId>com.github.hawolt</groupId>

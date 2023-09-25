@@ -46,6 +46,7 @@ public class RiotClient implements BiConsumer<VirtualLeagueClient, Throwable> {
             LeagueClient client = new LeagueClient(virtualLeagueClient);
             try {
                 finalize(client);
+                client.wrap();
                 callback.onClient(client);
             } catch (Exception e) {
                 callback.onLoginFlowException(e);

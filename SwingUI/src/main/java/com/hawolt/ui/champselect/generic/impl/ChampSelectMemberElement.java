@@ -1,6 +1,7 @@
 package com.hawolt.ui.champselect.generic.impl;
 
 import com.hawolt.LeagueClientUI;
+import com.hawolt.async.Debouncer;
 import com.hawolt.async.ExecutorManager;
 import com.hawolt.async.loader.ResourceLoader;
 import com.hawolt.async.loader.ResourceManager;
@@ -19,8 +20,7 @@ import com.hawolt.rtmp.service.impl.TeamBuilderService;
 import com.hawolt.ui.champselect.context.ChampSelectContext;
 import com.hawolt.ui.champselect.data.*;
 import com.hawolt.ui.champselect.generic.ChampSelectUIComponent;
-import com.hawolt.ui.impl.Debouncer;
-import com.hawolt.util.ColorPalette;
+import com.hawolt.ui.generic.themes.ColorPalette;
 import com.hawolt.util.paint.custom.GraphicalDrawableManager;
 import org.imgscalr.Scalr;
 
@@ -79,7 +79,7 @@ public class ChampSelectMemberElement extends ChampSelectUIComponent implements 
     private void configure(ChampSelectTeamMember teamMember) {
         LeagueClient client = dataContext.getLeagueClient();
         if (client == null) {
-            Logger.warn("unable to fetch name for {}, client is null", puuid);
+            Logger.warn("unable to fetch name for {}, client is null", puuid == null ? "N/A" : puuid);
             return;
         }
         if (puuid != null && puuid.equals(teamMember.getPUUID())) return;
@@ -90,7 +90,8 @@ public class ChampSelectMemberElement extends ChampSelectUIComponent implements 
             try {
                 this.name = summonerLedge.resolveSummonerByPUUD(teamMember.getPUUID()).getName();
                 switch (teamMember.getNameVisibilityType()) {
-                    case "UNHIDDEN" -> dataContext.cache(teamMember.getPUUID(), String.format("%s (%s)", name, getHiddenName()));
+                    case "UNHIDDEN" ->
+                            dataContext.cache(teamMember.getPUUID(), String.format("%s (%s)", name, getHiddenName()));
                     case "HIDDEN" -> dataContext.cache(teamMember.getPUUID(), getHiddenName());
                     case "VISIBLE" -> dataContext.cache(teamMember.getPUUID(), name);
                 }
