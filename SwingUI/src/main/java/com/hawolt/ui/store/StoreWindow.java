@@ -1,6 +1,6 @@
 package com.hawolt.ui.store;
 
-import com.hawolt.LeagueClientUI;
+import com.hawolt.Swiftrift;
 import com.hawolt.client.LeagueClient;
 import com.hawolt.client.resources.ledge.store.StoreLedge;
 import com.hawolt.client.resources.ledge.store.objects.InventoryType;
@@ -60,7 +60,7 @@ public class StoreWindow extends ChildUIComponent implements Runnable {
         }
         add(pane, BorderLayout.CENTER);
 
-        LeagueClientUI.service.execute(this);
+        Swiftrift.service.execute(this);
     }
 
     public StorePage getTabByName(String name) {

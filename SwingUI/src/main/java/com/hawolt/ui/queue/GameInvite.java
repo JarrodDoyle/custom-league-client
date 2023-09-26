@@ -1,6 +1,6 @@
 package com.hawolt.ui.queue;
 
-import com.hawolt.LeagueClientUI;
+import com.hawolt.Swiftrift;
 import com.hawolt.client.LeagueClient;
 import com.hawolt.client.resources.ledge.parties.objects.AvailableParty;
 import com.hawolt.client.resources.ledge.parties.objects.Party;
@@ -21,13 +21,13 @@ import java.io.IOException;
  **/
 
 public class GameInvite extends ChildUIComponent implements ActionListener {
-    private final LeagueClientUI leagueClientUI;
+    private final Swiftrift swiftrift;
     private final Party party;
 
-    public GameInvite(LeagueClientUI leagueClientUI, Summoner summoner, Party party) {
+    public GameInvite(Swiftrift swiftrift, Summoner summoner, Party party) {
         super(new BorderLayout());
         this.setBackground(Color.GRAY);
-        this.leagueClientUI = leagueClientUI;
+        this.swiftrift = swiftrift;
         setBackground(Color.GRAY);
         JLabel name = new JLabel(summoner.getName());
         name.setForeground(Color.WHITE);
@@ -41,15 +41,15 @@ public class GameInvite extends ChildUIComponent implements ActionListener {
 
     @Override
     public void actionPerformed(ActionEvent e) {
-        LeagueClient client = leagueClientUI.getLeagueClient();
+        LeagueClient client = swiftrift.getLeagueClient();
         try {
             int queueId = ((AvailableParty) party).getPartyGameMode().getQueueId();
             client.getLedge().getParties().role(party.getPartyId(), PartyRole.MEMBER);
-            leagueClientUI.getLayoutManager().showClientComponent("play");
+            swiftrift.getLayoutManager().showClientComponent("play");
             if (queueId == 1100 || queueId == 1090 || queueId == 1130 || queueId == 1160) {
-                leagueClientUI.getLayoutManager().getQueue().getTftLobby().actionPerformed(null);
+                swiftrift.getLayoutManager().getQueue().showMatchMadeLobby("tft");
             } else {
-                leagueClientUI.getLayoutManager().getQueue().getDraftLobby().actionPerformed(null);
+                swiftrift.getLayoutManager().getQueue().showMatchMadeLobby("draft");
             }
         } catch (IOException ex) {
             Logger.error(ex);

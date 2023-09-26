@@ -1,6 +1,6 @@
 package com.hawolt.ui.champselect.generic.impl;
 
-import com.hawolt.LeagueClientUI;
+import com.hawolt.Swiftrift;
 import com.hawolt.async.loader.ResourceLoader;
 import com.hawolt.client.resources.communitydragon.champion.Champion;
 import com.hawolt.client.resources.communitydragon.champion.ChampionIndex;
@@ -15,9 +15,8 @@ import com.hawolt.ui.generic.utility.ChildUIComponent;
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 import java.awt.*;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.List;
+import java.util.*;
 import java.util.stream.IntStream;
 
 /**
@@ -52,7 +51,7 @@ public class ChampSelectSelectionUI extends ChampSelectUIComponent {
     private void configure() {
         ChampionIndex championIndex = ChampionSource.CHAMPION_SOURCE_INSTANCE.get();
         Integer[] boxed = IntStream.of(championsAvailableAsChoice).boxed().toArray(Integer[]::new);
-        LeagueClientUI.service.execute(() -> {
+        Swiftrift.service.execute(() -> {
             Arrays.sort(boxed, (id1, id2) -> {
                 String name1 = championIndex.getChampion(id1).getName();
                 String name2 = championIndex.getChampion(id2).getName();
@@ -76,15 +75,35 @@ public class ChampSelectSelectionUI extends ChampSelectUIComponent {
     }
 
     @Override
+    public void init() {
+        List<ChampSelectSelectionElement> reference = new ArrayList<>(map.values());
+        reference.forEach(element -> element.setDisabled(false));
+    }
+
+    @Override
     public void update() {
         ChampSelectSettingsContext settingsContext = context.getChampSelectSettingsContext();
         int[] championsAvailableAsChoice = switch (type) {
             case PICK -> settingsContext.getChampionsAvailableForPick();
             case BAN -> settingsContext.getChampionsAvailableForBan();
         };
+        int[] bannedChampions = settingsContext.getBannedChampions();
+        int[] selectedChampions = settingsContext.getSelectedChampions();
+        int[] unavailableChampions = new int[bannedChampions.length + selectedChampions.length];
+        System.arraycopy(bannedChampions, 0, unavailableChampions, 0, bannedChampions.length);
+        System.arraycopy(selectedChampions, 0, unavailableChampions, bannedChampions.length, selectedChampions.length);
+        this.notify(Arrays.stream(unavailableChampions).boxed().toList());
         if (this.championsAvailableAsChoice.length == championsAvailableAsChoice.length) return;
         this.championsAvailableAsChoice = championsAvailableAsChoice;
         this.configure();
+    }
+
+    private void notify(List<Integer> bannedChampions) {
+        List<ChampSelectSelectionElement> reference = new ArrayList<>(map.values());
+        reference.forEach(element -> {
+            if (!bannedChampions.contains(element.getChampionId())) return;
+            element.setDisabled(true);
+        });
     }
 
     public void filter(String champion) {

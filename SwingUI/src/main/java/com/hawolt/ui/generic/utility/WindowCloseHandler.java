@@ -1,6 +1,6 @@
 package com.hawolt.ui.generic.utility;
 
-import com.hawolt.util.other.StaticConstant;
+import com.hawolt.Swiftrift;
 import com.hawolt.util.settings.SettingManager;
 import com.hawolt.util.settings.SettingService;
 import com.hawolt.util.settings.SettingType;
@@ -25,14 +25,10 @@ public class WindowCloseHandler extends WindowAdapter {
     @Override
     public void windowClosing(WindowEvent e) {
         super.windowClosing(e);
-        int option = JOptionPane.showOptionDialog(null,
+        int option = Swiftrift.showOptionDialog(
                 "Do you want to exit or logout?",
-                StaticConstant.PROJECT,
-                JOptionPane.YES_NO_CANCEL_OPTION,
-                JOptionPane.INFORMATION_MESSAGE,
-                null,
-                new String[]{"LOGOUT", "EXIT", "CANCEL"},
-                "EXIT");
+                "LOGOUT", "EXIT", "CANCEL"
+        );
         if (option == 0) {
             SettingService service = new SettingManager();
             service.write(SettingType.CLIENT, "remember", false);

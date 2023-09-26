@@ -13,6 +13,8 @@ public interface ISimpleValueCache<T, S> {
 
     void cache(T type, ExceptionalSupplier<S> o);
 
+    boolean isCached(CacheElement element);
+
     void dispatch(CacheElement element);
 
     void cache(T type, S o);

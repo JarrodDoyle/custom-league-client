@@ -77,4 +77,8 @@ public interface ChampSelectSettingsContext {
     JSONArray getChampionBench();
 
     DraftMode getDraftMode();
+
+    int[] getBannedChampions();
+
+    int[] getSelectedChampions();
 }

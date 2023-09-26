@@ -17,6 +17,8 @@ public interface ChampSelectInteractionContext {
 
     List<ActionObject> getBanSelection(ChampSelectTeamType type);
 
+    List<ActionObject> getPickSelection(ChampSelectTeamType type);
+
     Optional<TradeStatus> getTrade(int cellId);
 
     Optional<TradeStatus> getActiveTrade();

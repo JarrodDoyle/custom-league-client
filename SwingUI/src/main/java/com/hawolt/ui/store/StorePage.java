@@ -43,6 +43,7 @@ public class StorePage extends ChildUIComponent implements IStorePage {
     private final StoreElementComparator comparator;
     private final Debouncer debouncer = new Debouncer();
     private final ChildUIComponent inputPanel;
+    private final LScrollPane scrollPane;
     private String filter = "";
     private boolean chromaFilter = false;
 
@@ -55,24 +56,12 @@ public class StorePage extends ChildUIComponent implements IStorePage {
         grid = new ChildUIComponent(new GridLayout(0, 5, 15, 15));
         add(component, BorderLayout.NORTH);
         component.add(grid, BorderLayout.NORTH);
-        LScrollPane scrollPane = new LScrollPane(component);
+        scrollPane = new LScrollPane(component);
         scrollPane.setBackground(ColorPalette.backgroundColor);
         scrollPane.getViewport().addChangeListener(new ChangeListener() {
             @Override
             public void stateChanged(ChangeEvent e) {
-                Rectangle visible = grid.getVisibleRect();
-                for (Component child : grid.getComponents()) {
-                    if (child instanceof StoreElement element) {
-                        Rectangle bounds = element.getBounds();
-                        debouncer.debounce(String.valueOf(element.getItem().getItemId()), () -> {
-                            if (bounds.intersects(visible)) {
-                                element.getImage().load();
-                            } else {
-                                element.getImage().unload();
-                            }
-                        }, 100L, TimeUnit.MILLISECONDS);
-                    }
-                }
+                StorePage.this.loadViewport();
             }
         });
         scrollPane.getVerticalScrollBar().setUnitIncrement(15);
@@ -83,6 +72,22 @@ public class StorePage extends ChildUIComponent implements IStorePage {
         comparator = new StoreElementComparator(properties.length > 0 ? properties[0] : null, SortOrder.DESCENDING);
         inputPanel = createInputPanel(properties);
         this.add(inputPanel, BorderLayout.NORTH);
+    }
+
+    private void loadViewport() {
+        Rectangle visible = grid.getVisibleRect();
+        for (Component child : grid.getComponents()) {
+            if (child instanceof StoreElement element) {
+                Rectangle bounds = element.getBounds();
+                debouncer.debounce(String.valueOf(element.getItem().getItemId()), () -> {
+                    if (bounds.intersects(visible)) {
+                        element.getImage().load();
+                    } else {
+                        element.getImage().unload();
+                    }
+                }, 100L, TimeUnit.MILLISECONDS);
+            }
+        }
     }
 
     @NotNull

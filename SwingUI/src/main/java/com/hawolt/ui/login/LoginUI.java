@@ -1,6 +1,6 @@
 package com.hawolt.ui.login;
 
-import com.hawolt.LeagueClientUI;
+import com.hawolt.Swiftrift;
 import com.hawolt.ui.generic.component.LFlatButton;
 import com.hawolt.ui.generic.component.LHintPasswordTextField;
 import com.hawolt.ui.generic.component.LHintTextField;
@@ -36,7 +36,7 @@ public class LoginUI extends MainUIComponent implements ActionListener {
     private final JCheckBox rememberMe;
     private final JButton login;
 
-    private LoginUI(LeagueClientUI clientUI) {
+    private LoginUI(Swiftrift clientUI) {
         super(clientUI);
         this.setLayout(new BorderLayout());
 
@@ -93,8 +93,8 @@ public class LoginUI extends MainUIComponent implements ActionListener {
         this.init();
     }
 
-    public static LoginUI create(LeagueClientUI leagueClientUI) {
-        return new LoginUI(leagueClientUI);
+    public static LoginUI create(Swiftrift swiftrift) {
+        return new LoginUI(swiftrift);
     }
 
     public void toggle(boolean state) {
@@ -110,7 +110,7 @@ public class LoginUI extends MainUIComponent implements ActionListener {
         this.toggle(false);
         String pass = new String(password.getPassword());
         String user = username.getText();
-        LeagueClientUI.service.execute(() -> callback.onLogin(user, pass));
+        Swiftrift.service.execute(() -> callback.onLogin(user, pass));
     }
 
     public AnimationVisualizer getAnimationVisualizer() {

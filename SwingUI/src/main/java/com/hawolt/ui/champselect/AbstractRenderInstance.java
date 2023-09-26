@@ -1,6 +1,6 @@
 package com.hawolt.ui.champselect;
 
-import com.hawolt.LeagueClientUI;
+import com.hawolt.Swiftrift;
 import com.hawolt.client.LeagueClient;
 import com.hawolt.client.cache.CacheListener;
 import com.hawolt.client.resources.ledge.teambuilder.objects.MatchContext;
@@ -74,18 +74,21 @@ public abstract class AbstractRenderInstance extends ChampSelectUIComponent impl
 
     public void dodge(GameType type) {
         if (context == null) return;
-        LeagueClientUI.service.execute(() -> {
+        Swiftrift.service.execute(() -> {
             ChampSelectDataContext dataContext = context.getChampSelectDataContext();
             LeagueClient client = dataContext.getLeagueClient();
             LeagueRtmpClient rtmpClient = client.getRTMPClient();
-            LeagueClientUI leagueClientUI = context.getChampSelectInterfaceContext().getLeagueClientUI();
+            Swiftrift swiftrift = context.getChampSelectInterfaceContext().getLeagueClientUI();
             try {
                 switch (type) {
                     case CLASSIC ->
                             rtmpClient.getTeamBuilderService().quitGameV2Asynchronous(dataContext.getPacketCallback());
                     case CUSTOM -> Logger.debug("currently not supported");
                 }
-                leagueClientUI.getChatSidebar().getEssentials().disableQueueState();
+                swiftrift.getLayoutManager().getQueue().getAvailableLobbies().forEach(
+                        lobby -> lobby.toggleButtonState(false, true)
+                );
+                swiftrift.getChatSidebar().getEssentials().disableQueueState();
                 context.getChampSelectUtilityContext().quitChampSelect();
                 revalidate();
             } catch (IOException e) {

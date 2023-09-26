@@ -1,8 +1,19 @@
-# custom-league-client
+[license]: https://github.com/hawolt/custom-league-client/tree/master/LICENSE
 
-You can support me and this project by buying a coffee.
+[discord-invite]: https://discord.gg/3wknX5gxaW
 
-[!["Buy Me A Coffee"](https://www.buymeacoffee.com/assets/img/custom_images/orange_img.png)](https://www.buymeacoffee.com/hawolt)
+[discord-shield]: https://discordapp.com/api/guilds/1130517263280246907/widget.png?style=shield
+
+[license-shield]: https://img.shields.io/badge/License-MIT-white.svg
+
+<img align="right" src="https://raw.githubusercontent.com/hawolt/custom-league-client/main/SwingUI/src/main/resources/fullsize-logo.png" height="100" width="100">
+
+[![Hits](https://hits.seeyoufarm.com/api/count/incr/badge.svg?url=https%3A%2F%2Fgithub.com%2Fhawolt%2Fcustom-league-client&count_bg=%2379C83D&title_bg=%23555555&icon=&icon_color=%23E7E7E7&title=hits&edge_flat=false)](https://hits.seeyoufarm.com)
+[ ![license-shield][] ][license]
+[ ![discord-shield][] ][discord-invite]
+
+# Swiftrift
+
 
 ## Bugs & Feature Requests
 

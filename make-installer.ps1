@@ -12,11 +12,11 @@ jpackage `
 --app-version "1.0" `
 --input 'SwingUI\target\modules' `
 --dest "release" `
---name "SwiftRift" `
+--name "Swiftrift" `
 --type "exe" `
 --runtime-image 'jre' `
---main-jar 'swift-rift.jar' `
---main-class 'com.hawolt.LeagueClientUI' `
+--main-jar 'Swiftrift.jar' `
+--main-class 'com.hawolt.Swiftrift' `
 --win-shortcut `
 --win-dir-chooser `
 --icon 'resources\swift-rift.ico'

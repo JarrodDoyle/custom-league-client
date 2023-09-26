@@ -9,10 +9,12 @@ import com.hawolt.util.paint.PaintHelper;
 import org.imgscalr.Scalr;
 
 import javax.imageio.ImageIO;
+import javax.swing.*;
 import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.image.BufferedImage;
+import java.awt.image.ImageFilter;
 import java.io.ByteArrayInputStream;
 
 /**
@@ -21,15 +23,14 @@ import java.io.ByteArrayInputStream;
  **/
 
 public class ChampSelectSelectionElement extends ChildUIComponent implements ResourceConsumer<BufferedImage, byte[]> {
-
     private static final Dimension IMAGE_TARGET_DIMENSION = new Dimension(72, 72);
     private static final Font FONT = new Font("Arial", Font.PLAIN, 18);
+    private static final ImageFilter filter = new GrayFilter(true, 50);
     private final ChampSelectType type;
     private final int championId;
     private final String name;
-
     private BufferedImage image;
-    private boolean selected;
+    private boolean selected, disabled;
 
     public ChampSelectSelectionElement(ChampSelectChoice callback, ChampSelectType type, int championId, String name) {
         super(new BorderLayout());
@@ -46,7 +47,7 @@ public class ChampSelectSelectionElement extends ChildUIComponent implements Res
         Dimension dimension = getSize();
         int imageX = (dimension.width >> 1) - (IMAGE_TARGET_DIMENSION.width >> 1);
         if (image != null) {
-            g.drawImage(PaintHelper.circleize(image, ColorPalette.CARD_ROUNDING), imageX, 0, null);
+            g.drawImage(image, imageX, 1, null);
         }
         Graphics2D graphics2D = (Graphics2D) g;
         graphics2D.setFont(FONT);
@@ -67,6 +68,20 @@ public class ChampSelectSelectionElement extends ChildUIComponent implements Res
             graphics2D.fillRoundRect(imageX, 0, IMAGE_TARGET_DIMENSION.width, IMAGE_TARGET_DIMENSION.height,
                     ColorPalette.useRoundedCorners ? ColorPalette.CARD_ROUNDING : 0, ColorPalette.useRoundedCorners ? ColorPalette.CARD_ROUNDING : 0);
         }
+        if (!disabled) return;
+        graphics2D.setColor(new Color(80, 80, 80, 180));
+        PaintHelper.roundedSquare(
+                graphics2D,
+                imageX - 1, 0,
+                image.getWidth() + 2, image.getHeight() + 2,
+                ColorPalette.CARD_ROUNDING,
+                true, true, true, true
+        );
+    }
+
+    public void setDisabled(boolean disabled) {
+        this.disabled = disabled;
+        if (disabled) selected = false;
     }
 
     public void setSelected(boolean b) {
@@ -93,13 +108,14 @@ public class ChampSelectSelectionElement extends ChildUIComponent implements Res
 
     @Override
     public void consume(Object o, BufferedImage bufferedImage) {
-        this.image = Scalr.resize(
+        BufferedImage image = Scalr.resize(
                 bufferedImage,
                 Scalr.Method.ULTRA_QUALITY,
                 Scalr.Mode.FIT_TO_HEIGHT,
                 IMAGE_TARGET_DIMENSION.width,
                 IMAGE_TARGET_DIMENSION.height
         );
+        this.image = PaintHelper.circleize(image, ColorPalette.CARD_ROUNDING);
         this.repaint();
     }
 
@@ -117,6 +133,7 @@ public class ChampSelectSelectionElement extends ChildUIComponent implements Res
 
         @Override
         public void mousePressed(MouseEvent e) {
+            if (disabled) return;
             try {
                 Logger.info("[champ-select] indicate {}", championId);
                 Dimension dimension = getSize();

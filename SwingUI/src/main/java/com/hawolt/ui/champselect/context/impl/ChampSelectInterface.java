@@ -1,6 +1,6 @@
 package com.hawolt.ui.champselect.context.impl;
 
-import com.hawolt.LeagueClientUI;
+import com.hawolt.Swiftrift;
 import com.hawolt.client.LeagueClient;
 import com.hawolt.ui.champselect.ChampSelectUI;
 import com.hawolt.ui.champselect.context.ChampSelectContext;
@@ -39,7 +39,7 @@ public class ChampSelectInterface extends ChampSelectContextProvider implements 
     }
 
     @Override
-    public LeagueClientUI getLeagueClientUI() {
+    public Swiftrift getLeagueClientUI() {
         return champSelectUI.getLeagueClientUI();
     }
 }

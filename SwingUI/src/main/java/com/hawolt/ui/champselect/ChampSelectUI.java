@@ -1,6 +1,6 @@
 package com.hawolt.ui.champselect;
 
-import com.hawolt.LeagueClientUI;
+import com.hawolt.Swiftrift;
 import com.hawolt.client.LeagueClient;
 import com.hawolt.client.cache.CacheElement;
 import com.hawolt.client.resources.ledge.leagues.objects.LeagueLedgeNotifications;
@@ -40,17 +40,17 @@ public class ChampSelectUI extends ChildUIComponent implements IServiceMessageLi
     private final CardLayout layout = new CardLayout();
     private final JComponent main = new ChildUIComponent(layout);
     private final ChampSelect champSelect;
-    private LeagueClientUI leagueClientUI;
+    private Swiftrift swiftrift;
     private LeagueClient leagueClient;
     private PostGameUI postGameUI;
 
-    public ChampSelectUI(LeagueClientUI leagueClientUI) {
+    public ChampSelectUI(Swiftrift swiftrift) {
         super(new BorderLayout());
         this.add(main, BorderLayout.CENTER);
-        if (leagueClientUI != null) {
-            this.leagueClientUI = leagueClientUI;
-            this.postGameUI = new PostGameUI(leagueClientUI);
-            this.leagueClient = leagueClientUI.getLeagueClient();
+        if (swiftrift != null) {
+            this.swiftrift = swiftrift;
+            this.postGameUI = new PostGameUI(swiftrift);
+            this.leagueClient = swiftrift.getLeagueClient();
             this.champSelect = new ChampSelect(this);
             this.leagueClient.getRMSClient().getHandler().addMessageServiceListener(MessageService.LOL_PLATFORM, this);
             this.leagueClient.getRTMPClient().addDefaultCallback(champSelect.getChampSelectDataContext().getPacketCallback());
@@ -82,7 +82,7 @@ public class ChampSelectUI extends ChildUIComponent implements IServiceMessageLi
     }
 
     private void addRenderInstance(AbstractRenderInstance instance) {
-        leagueClient.register(CacheElement.MATCH_CONTEXT, instance);
+        if (leagueClient != null) leagueClient.register(CacheElement.MATCH_CONTEXT, instance);
         instance.setGlobalRunePanel(champSelect.getChampSelectInterfaceContext().getRuneSelectionPanel());
         int[] queueIds = instance.getSupportedQueueIds();
         for (int id : queueIds) {
@@ -107,8 +107,8 @@ public class ChampSelectUI extends ChildUIComponent implements IServiceMessageLi
             String card = QUEUE_RENDERER_MAPPING.getOrDefault(settingsContext.getQueueId(), "blank");
             Logger.info("[champ-select] switch to card {}", card);
             this.layout.show(main, card);
-            if (leagueClientUI != null) {
-                leagueClientUI.getHeader().selectAndShowComponent(LayoutComponent.CHAMPSELECT);
+            if (swiftrift != null) {
+                swiftrift.getHeader().selectAndShowComponent(LayoutComponent.CHAMPSELECT);
             }
         }
         this.instances.get(settingsContext.getQueueId()).delegate(context, initialCounter);
@@ -123,8 +123,8 @@ public class ChampSelectUI extends ChildUIComponent implements IServiceMessageLi
         return leagueClient;
     }
 
-    public LeagueClientUI getLeagueClientUI() {
-        return leagueClientUI;
+    public Swiftrift getLeagueClientUI() {
+        return swiftrift;
     }
 
     public AbstractRenderInstance getInstance(int queueId) {
@@ -142,7 +142,7 @@ public class ChampSelectUI extends ChildUIComponent implements IServiceMessageLi
         IResponse response = leagueClient.getLedge().getUnclassified().getEndOfGame(gameId);
         postGameUI.build(response, leagueNotifications);
         ChampSelectUI.this.showPostGamePanel();
-        ChampSelectUI.this.leagueClientUI.getHeader().selectAndShowComponent(LayoutComponent.CHAMPSELECT);
+        ChampSelectUI.this.swiftrift.getHeader().selectAndShowComponent(LayoutComponent.CHAMPSELECT);
         boolean processed = leagueClient.getLedge().getChallenge().notify(gameId);
         if (!processed) {
             Logger.error("unable to submit game {} as processed", gameId);

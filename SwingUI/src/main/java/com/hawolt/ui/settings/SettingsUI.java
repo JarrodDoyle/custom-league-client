@@ -1,6 +1,6 @@
 package com.hawolt.ui.settings;
 
-import com.hawolt.LeagueClientUI;
+import com.hawolt.Swiftrift;
 import com.hawolt.ui.generic.component.LComboBox;
 import com.hawolt.ui.generic.component.LFlatButton;
 import com.hawolt.ui.generic.component.LTextAlign;
@@ -8,23 +8,25 @@ import com.hawolt.ui.generic.themes.ColorPalette;
 import com.hawolt.ui.generic.themes.impl.LThemeChoice;
 import com.hawolt.ui.generic.utility.ChildUIComponent;
 import com.hawolt.ui.generic.utility.HighlightType;
+import com.hawolt.util.os.OperatingSystem;
 import com.hawolt.util.settings.SettingService;
 
 import javax.swing.*;
 import javax.swing.border.MatteBorder;
 import java.awt.*;
+import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
 public class SettingsUI extends ChildUIComponent {
     private static final Font font = new Font("Arial", Font.PLAIN, 20);
     private final List<SettingsPage> pages = new ArrayList<>();
-    private final LeagueClientUI leagueClientUI;
+    private final Swiftrift swiftrift;
     private final SettingsSidebar sidebar;
 
-    public SettingsUI(LeagueClientUI leagueClientUI) {
+    public SettingsUI(Swiftrift swiftrift) {
         super(new BorderLayout());
-        this.leagueClientUI = leagueClientUI;
+        this.swiftrift = swiftrift;
         setBorder(BorderFactory.createTitledBorder(
                         new MatteBorder(2, 2, 2, 2, Color.DARK_GRAY)
                 )
@@ -113,17 +115,24 @@ public class SettingsUI extends ChildUIComponent {
     }
 
     private SettingsPage newClientGeneralPage() {
-        SettingService service = leagueClientUI.getSettingService();
+        SettingService service = swiftrift.getSettingService();
         SettingsPage result = new SettingsPage();
         result.add(SettingUIComponent.createTagComponent("Path"));
-        result.add(SettingUIComponent.createPathComponent("League Base Directory Path", service, "GameBaseDir"));
+        String defaultGameBase = OperatingSystem.getOperatingSystemType() == OperatingSystem.OSType.WINDOWS ?
+                String.join(File.separator, "C:", "Riot Games", "League of Legends") :
+                "";
+        result.add(SettingUIComponent.createPathComponent("League Base Directory Path", service, "GameBaseDir", defaultGameBase));
+        if (OperatingSystem.getOperatingSystemType() == OperatingSystem.OSType.LINUX) {
+            result.add(SettingUIComponent.createPathComponent("Wine Prefix Path", service, "WinePrefixDir", ""));
+            result.add(SettingUIComponent.createPathComponent("Wine Binary Path (wine64)", service, "WineBinaryDir", ""));
+        }
         result.add(SettingUIComponent.createTagComponent("Friend requests"));
         result.add(SettingUIComponent.createAutoFriendComponent("Auto friend request handling", service, "autoFriends"));
         return result;
     }
 
     private SettingsPage newThemePage() {
-        SettingService service = leagueClientUI.getSettingService();
+        SettingService service = swiftrift.getSettingService();
         SettingsPage result = new SettingsPage();
 
         LComboBox<LThemeChoice> comboBox = new LComboBox<>(LThemeChoice.values());
@@ -143,7 +152,7 @@ public class SettingsUI extends ChildUIComponent {
     }
 
     private SettingsPage newClientAudioPage() {
-        SettingService service = leagueClientUI.getSettingService();
+        SettingService service = swiftrift.getSettingService();
         SettingsPage result = new SettingsPage();
         result.add(SettingUIComponent.createTagComponent("Volume"));
         result.add(SettingUIComponent.createVolumeComponent("Client Master Volume", service, "Volume", "MixerVolume"));

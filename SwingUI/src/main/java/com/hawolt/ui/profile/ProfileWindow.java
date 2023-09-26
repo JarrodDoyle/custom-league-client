@@ -1,6 +1,6 @@
 package com.hawolt.ui.profile;
 
-import com.hawolt.LeagueClientUI;
+import com.hawolt.Swiftrift;
 import com.hawolt.client.LeagueClient;
 import com.hawolt.client.cache.CacheElement;
 import com.hawolt.client.resources.ledge.leagues.LeagueLedge;
@@ -25,21 +25,21 @@ import java.util.Map;
 public class ProfileWindow extends ChildUIComponent {
     private final Map<String, ProfileContainer> reference = new HashMap<>();
     private final CardLayout layout = new CardLayout();
-    private final LeagueClientUI leagueClientUI;
+    private final Swiftrift swiftrift;
     private final ChildUIComponent center;
     private final ProfileHeader header;
 
     private ProfileContainer currentProfileContainer;
 
-    public ProfileWindow(LeagueClientUI leagueClientUI) {
+    public ProfileWindow(Swiftrift swiftrift) {
         super(new BorderLayout());
         this.setOpaque(false);
-        this.leagueClientUI = leagueClientUI;
+        this.swiftrift = swiftrift;
         this.add(header = new ProfileHeader(), BorderLayout.NORTH);
         this.add(center = new ChildUIComponent(layout), BorderLayout.CENTER);
         this.header.getSearchField().addActionListener(listener -> {
             final String lookup = header.getSearchField().getText();
-            LeagueClientUI.service.execute(() -> show(lookup));
+            Swiftrift.service.execute(() -> show(lookup));
             this.header.getSearchField().setText("");
         });
         this.header.getOverviewButton().addActionListener(listener -> {
@@ -55,8 +55,8 @@ public class ProfileWindow extends ChildUIComponent {
     }
 
     private void configure() {
-        LeagueClient leagueClient = leagueClientUI.getLeagueClient();
-        LeagueClientUI.service.execute(() -> {
+        LeagueClient leagueClient = swiftrift.getLeagueClient();
+        Swiftrift.service.execute(() -> {
             RankedStatistic rankedStatistic = leagueClient.getCachedValue(CacheElement.RANKED_STATISTIC);
             BufferedImage mask = leagueClient.getCachedValue(CacheElement.PROFILE_MASK);
             Summoner summoner = leagueClient.getCachedValue(CacheElement.SUMMONER);
@@ -67,9 +67,9 @@ public class ProfileWindow extends ChildUIComponent {
     }
 
     public void show(String name) {
-        LeagueClient leagueClient = leagueClientUI.getLeagueClient();
+        LeagueClient leagueClient = swiftrift.getLeagueClient();
         BufferedImage mask = leagueClient.getCachedValue(CacheElement.PROFILE_MASK);
-        LeagueClientUI.service.execute(() -> {
+        Swiftrift.service.execute(() -> {
             try {
                 SummonerLedge summonerLedge = leagueClient.getLedge().getSummoner();
                 LeagueLedge leagueLedge = leagueClient.getLedge().getLeague();

@@ -17,6 +17,7 @@ import org.json.JSONObject;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Function;
+import java.util.stream.Stream;
 
 /**
  * Created: 10/09/2023 03:32
@@ -30,7 +31,7 @@ public class ChampSelectSettings extends ChampSelectContextProvider implements C
     private boolean allowDuplicatePicks, skipChampionSelect, allowSkinSelection, allowOptingOutOfBanning;
     private int localPlayerCellId, currentActionSetIndex, counter, recoveryCounter, queueId;
     private long currentTotalTimeMillis, currentTimeRemainingMillis, gameId, lastUpdate;
-    private String teamId, subphase, teamChatRoomId, phaseName, contextId, filter;
+    private String teamId, subphase, teamChatRoomId, phaseName, contextId;
     private JSONArray trades, swaps, bench;
     private JSONObject cells;
 
@@ -259,5 +260,27 @@ public class ChampSelectSettings extends ChampSelectContextProvider implements C
             ids = modified;
         }
         return ids;
+    }
+
+    @Override
+    public int[] getBannedChampions() {
+        List<ActionObject> allied = context.getChampSelectInteractionContext().getBanSelection(ChampSelectTeamType.ALLIED);
+        List<ActionObject> enemy = context.getChampSelectInteractionContext().getBanSelection(ChampSelectTeamType.ENEMY);
+        return Stream.of(allied, enemy)
+                .flatMap(Collection::stream)
+                .filter(ActionObject::isCompleted)
+                .mapToInt(ActionObject::getChampionId)
+                .toArray();
+    }
+
+    @Override
+    public int[] getSelectedChampions() {
+        List<ActionObject> allied = context.getChampSelectInteractionContext().getPickSelection(ChampSelectTeamType.ALLIED);
+        List<ActionObject> enemy = context.getChampSelectInteractionContext().getPickSelection(ChampSelectTeamType.ENEMY);
+        return Stream.of(allied, enemy)
+                .flatMap(Collection::stream)
+                .filter(ActionObject::isCompleted)
+                .mapToInt(ActionObject::getChampionId)
+                .toArray();
     }
 }

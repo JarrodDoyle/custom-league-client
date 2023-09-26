@@ -1,6 +1,6 @@
 package com.hawolt.ui.champselect.impl.aram;
 
-import com.hawolt.LeagueClientUI;
+import com.hawolt.Swiftrift;
 import com.hawolt.logger.Logger;
 import com.hawolt.rtmp.LeagueRtmpClient;
 import com.hawolt.rtmp.amf.TypedObject;
@@ -51,7 +51,7 @@ public class ARAMBenchUI extends ChampSelectUIComponent {
         add(grid, BorderLayout.CENTER);
 
         LFlatButton button = new LFlatButton("⟳", LTextAlign.CENTER, HighlightType.COMPONENT);
-        button.addActionListener(listener -> LeagueClientUI.service.execute(() -> {
+        button.addActionListener(listener -> Swiftrift.service.execute(() -> {
             LeagueRtmpClient client = context.getChampSelectDataContext().getLeagueClient().getRTMPClient();
             TeamBuilderService teamBuilderService = client.getTeamBuilderService();
             try {

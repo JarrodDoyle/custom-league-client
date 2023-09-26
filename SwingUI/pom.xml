@@ -10,7 +10,7 @@
     <modelVersion>4.0.0</modelVersion>
 
     <artifactId>SwingUI</artifactId>
-    <version>alpha-1.11</version>
+    <version>alpha-1.12</version>
 
     <build>
         <plugins>
@@ -45,10 +45,10 @@
             <plugin>
                 <artifactId>maven-assembly-plugin</artifactId>
                 <configuration>
-                    <finalName>swift-rift-${version}</finalName>
+                    <finalName>Swiftrift-${version}</finalName>
                     <archive>
                         <manifest>
-                            <mainClass>com.hawolt.LeagueClientUI</mainClass>
+                            <mainClass>com.hawolt.Swiftrift</mainClass>
                         </manifest>
                     </archive>
                     <descriptorRefs>
@@ -75,7 +75,7 @@
                             <outputDirectory>${project.build.directory}/modules</outputDirectory>
                             <archive>
                                 <manifest>
-                                    <mainClass>com.hawolt.LeagueClientUI</mainClass>
+                                    <mainClass>com.hawolt.Swiftrift</mainClass>
                                 </manifest>
                             </archive>
                             <descriptorRefs>
@@ -120,6 +120,11 @@
             <groupId>com.github.hawolt.hawolt-core</groupId>
             <artifactId>SQL</artifactId>
             <version>e05000531a</version>
+        </dependency>
+        <dependency>
+            <groupId>com.github.hawolt</groupId>
+            <artifactId>league-live-api</artifactId>
+            <version>642c31c95f</version>
         </dependency>
         <dependency>
             <groupId>com.hawolt</groupId>

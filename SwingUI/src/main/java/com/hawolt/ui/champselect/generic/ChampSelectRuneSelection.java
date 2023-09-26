@@ -1,6 +1,6 @@
 package com.hawolt.ui.champselect.generic;
 
-import com.hawolt.LeagueClientUI;
+import com.hawolt.Swiftrift;
 import com.hawolt.client.LeagueClient;
 import com.hawolt.client.resources.communitydragon.rune.BasicRune;
 import com.hawolt.client.resources.communitydragon.rune.RuneIndex;
@@ -72,16 +72,16 @@ public class ChampSelectRuneSelection extends ChampSelectUIComponent {
 
 
     private void setRuneSelection() {
-        LeagueClientUI.service.execute(() -> {
+        Swiftrift.service.execute(() -> {
             try {
                 JSONObject runes = getSelectedRunes();
                 LeagueClient client = context.getChampSelectDataContext().getLeagueClient();
                 client.getLedge().getPerks().setRunesForCurrentRegistration(runes);
-                JOptionPane.showMessageDialog(Frame.getFrames()[0], "Rune Page set");
+                Swiftrift.showMessageDialog("Rune Page set");
             } catch (IncompleteRunePageException e) {
-                JOptionPane.showMessageDialog(Frame.getFrames()[0], "Rune Page incomplete");
+                Swiftrift.showMessageDialog("Rune Page incomplete");
             } catch (IOException e) {
-                JOptionPane.showMessageDialog(Frame.getFrames()[0], "Failed to save Rune Page");
+                Swiftrift.showMessageDialog("Failed to save Rune Page");
             }
         });
     }

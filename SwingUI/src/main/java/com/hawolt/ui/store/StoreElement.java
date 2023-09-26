@@ -1,12 +1,12 @@
 package com.hawolt.ui.store;
 
-import com.hawolt.LeagueClientUI;
+import com.hawolt.Swiftrift;
 import com.hawolt.client.LeagueClient;
+import com.hawolt.client.cache.CacheElement;
+import com.hawolt.client.cache.CachedValueLoader;
 import com.hawolt.client.resources.ledge.store.objects.StoreItem;
 import com.hawolt.client.resources.purchasewidget.CurrencyType;
 import com.hawolt.client.resources.purchasewidget.PurchaseWidget;
-import com.hawolt.client.cache.CacheElement;
-import com.hawolt.client.cache.CachedValueLoader;
 import com.hawolt.ui.generic.component.LLabel;
 import com.hawolt.ui.generic.component.LTextAlign;
 import com.hawolt.ui.generic.themes.ColorPalette;
@@ -15,6 +15,7 @@ import com.hawolt.util.audio.AudioEngine;
 import com.hawolt.util.audio.Sound;
 import org.json.JSONObject;
 
+import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 import java.awt.*;
 import java.util.ArrayList;
@@ -97,16 +98,23 @@ public class StoreElement extends ChildUIComponent implements IStoreElement {
 
     @Override
     public void purchase(CurrencyType currencyType, long price) {
-        LeagueClientUI.service.execute(() -> {
+        Swiftrift.service.execute(() -> {
             try {
                 PurchaseWidget widget = client.getPurchaseWidget();
+                String message = String.format(
+                        "Do you want to spend %s %s for this purchase?",
+                        price,
+                        currencyType == CurrencyType.RP ? "Riot Points" : "Blue Essence"
+                );
+                int result = Swiftrift.showOptionDialog(message, "YES", "NO");
+                if (result != 0) return;
                 JSONObject response = new JSONObject(widget.purchase(currencyType, item.getInventoryType(), item.getItemId(), price));
                 if (response.has("errorCode")) {
                     AudioEngine.play(Sound.ERROR);
                 } else {
                     AudioEngine.play(Sound.SUCCESS);
                     page.removeStoreElement(this);
-                    LeagueClientUI.service.execute(
+                    Swiftrift.service.execute(
                             new CachedValueLoader<>(
                                     CacheElement.INVENTORY_TOKEN,
                                     () -> client.getLedge().getInventoryService().getInventoryToken(),

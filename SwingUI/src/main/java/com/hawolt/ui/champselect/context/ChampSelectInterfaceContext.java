@@ -1,6 +1,6 @@
 package com.hawolt.ui.champselect.context;
 
-import com.hawolt.LeagueClientUI;
+import com.hawolt.Swiftrift;
 import com.hawolt.ui.champselect.generic.ChampSelectRuneSelection;
 
 /**
@@ -13,5 +13,5 @@ public interface ChampSelectInterfaceContext {
 
     void filterChampion(String champion);
 
-    LeagueClientUI getLeagueClientUI();
+    Swiftrift getLeagueClientUI();
 }

@@ -1,6 +1,6 @@
 package com.hawolt.ui.queue;
 
-import com.hawolt.LeagueClientUI;
+import com.hawolt.Swiftrift;
 import com.hawolt.client.resources.Loadout;
 import com.hawolt.client.resources.ledge.parties.objects.data.TFTLegend;
 import com.hawolt.logger.Logger;
@@ -16,13 +16,11 @@ import java.util.concurrent.atomic.AtomicInteger;
  * Author: Twitter @hawolt
  **/
 
-public class TFTQueueLobby extends QueueLobby {
+public class TFTGameLobby extends GameLobby {
 
-
-    public TFTQueueLobby(LeagueClientUI leagueClientUI, Container parent, CardLayout layout, QueueWindow queueWindow) {
-        super(leagueClientUI, parent, layout, queueWindow);
+    public TFTGameLobby(Swiftrift swiftrift, Container parent, CardLayout layout, QueueWindow queueWindow) {
+        super(swiftrift, parent, layout, queueWindow);
     }
-
 
     @Override
     public SummonerComponent getSummonerComponentAt(int id) {
@@ -38,10 +36,15 @@ public class TFTQueueLobby extends QueueLobby {
         return (SummonerComponent) grid.getComponent(index);
     }
 
+    @Override
+    void handleStartInteraction() {
+
+    }
+
 
     @Override
     protected void createSpecificComponents(ChildUIComponent component) {
-        Loadout loadout = new Loadout(leagueClientUI.getLeagueClient());
+        Loadout loadout = new Loadout(swiftrift.getLeagueClient());
         LComboBox<TFTLegend> legend = new LComboBox<>(TFTLegend.values());
         legend.addActionListener(e -> {
             AtomicInteger atomicItemId = new AtomicInteger();
@@ -62,9 +65,9 @@ public class TFTQueueLobby extends QueueLobby {
                 case AURELION -> atomicItemId.set(27);
                 case BARD -> atomicItemId.set(28);
             }
-            LeagueClientUI.service.execute(() -> {
+            Swiftrift.service.execute(() -> {
                 try {
-                    loadout.setLegend(atomicItemId.get(), leagueClientUI.getLeagueClient().getLedge().getInventoryService().getLegendInstanceId(atomicItemId.get()));
+                    loadout.setLegend(atomicItemId.get(), swiftrift.getLeagueClient().getLedge().getInventoryService().getLegendInstanceId(atomicItemId.get()));
                 } catch (Exception ignored) {
                 }
             });
@@ -108,6 +111,4 @@ public class TFTQueueLobby extends QueueLobby {
         grid.setBackground(Color.YELLOW);
         component.add(grid, BorderLayout.CENTER);
     }
-
-
 }
