@@ -10,7 +10,7 @@
     <modelVersion>4.0.0</modelVersion>
 
     <artifactId>SwingUI</artifactId>
-    <version>alpha-1.11</version>
+    <version>alpha-1.12</version>
 
     <build>
         <plugins>
@@ -45,7 +45,7 @@
             <plugin>
                 <artifactId>maven-assembly-plugin</artifactId>
                 <configuration>
-                    <finalName>swift-rift-${version}</finalName>
+                    <finalName>Swiftrift-${version}</finalName>
                     <archive>
                         <manifest>
                             <mainClass>com.hawolt.Swiftrift</mainClass>
