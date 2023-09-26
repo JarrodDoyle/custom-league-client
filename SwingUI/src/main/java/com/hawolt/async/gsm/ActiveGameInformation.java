@@ -1,6 +1,6 @@
 package com.hawolt.async.gsm;
 
-import com.hawolt.LeagueClientUI;
+import com.hawolt.Swiftrift;
 import com.hawolt.client.LeagueClient;
 import com.hawolt.client.resources.ledge.gsm.GameServiceMessageLedge;
 import com.hawolt.generic.data.Platform;
@@ -17,12 +17,12 @@ import java.io.IOException;
 
 public class ActiveGameInformation implements Runnable {
     private final GameServiceMessageLedge ledge;
-    private final LeagueClientUI leagueClientUI;
+    private final Swiftrift swiftrift;
     private final Platform platform;
 
-    public ActiveGameInformation(LeagueClientUI leagueClientUI) {
-        this.leagueClientUI = leagueClientUI;
-        LeagueClient client = leagueClientUI.getLeagueClient();
+    public ActiveGameInformation(Swiftrift swiftrift) {
+        this.swiftrift = swiftrift;
+        LeagueClient client = swiftrift.getLeagueClient();
         this.ledge = client.getLedge().getGameServiceMessage();
         this.platform = client.getPlayerPlatform();
     }
@@ -36,7 +36,7 @@ public class ActiveGameInformation implements Runnable {
             if (!game.has("gameState") || game.isNull("gameState")) return;
             if (!"IN_PROGRESS".equals(game.getString("gameState"))) return;
             JSONObject credentials = info.getJSONObject("playerCredentials");
-            Launcher.launch(leagueClientUI.getSettingService(), platform, credentials);
+            Launcher.launch(swiftrift.getSettingService(), platform, credentials);
         } catch (IOException e) {
             Logger.error(e);
         }

@@ -25,6 +25,7 @@ import com.hawolt.ui.MainUI;
 import com.hawolt.ui.chat.ChatSidebar;
 import com.hawolt.ui.chat.friendlist.ChatSidebarFriendlist;
 import com.hawolt.ui.chat.window.ChatUI;
+import com.hawolt.ui.generic.dialog.SwiftDialog;
 import com.hawolt.ui.generic.utility.ChildUIComponent;
 import com.hawolt.ui.generic.utility.WindowCloseHandler;
 import com.hawolt.ui.layout.LayoutHeader;
@@ -63,7 +64,7 @@ import java.util.concurrent.Executors;
  * Author: Twitter @hawolt
  **/
 
-public class LeagueClientUI extends JFrame implements IClientCallback, ILoginCallback, WindowStateListener, ResourceConsumer<JSONObject, byte[]> {
+public class Swiftrift extends JFrame implements IClientCallback, ILoginCallback, WindowStateListener, ResourceConsumer<JSONObject, byte[]> {
     public static final ExecutorService service = ExecutorManager.registerService("pool", Executors.newCachedThreadPool());
     private final LiveGameClient liveGameClient = new LiveGameClient(1000);
     private static BufferedImage logo;
@@ -79,21 +80,21 @@ public class LeagueClientUI extends JFrame implements IClientCallback, ILoginCal
         }
     }
 
-    private PresenceManager presence;
-    private ShutdownManager shutdownManager;
-    private LeagueClient leagueClient;
-    private RiotClient riotClient;
     private SettingService settingService;
+    private ShutdownManager shutdownManager;
+    private ChildUIComponent deck, main;
+    private LeagueClient leagueClient;
+    private PresenceManager presence;
     private ChatSidebar chatSidebar;
+    private RiotClient riotClient;
     private LayoutManager manager;
-    private ChatUI chatUI;
     private SettingsUI settingsUI;
     private LayoutHeader headerUI;
     private LoginUI loginUI;
+    private ChatUI chatUI;
     private MainUI mainUI;
-    private ChildUIComponent deck, main;
 
-    public LeagueClientUI(String title) {
+    public Swiftrift(String title) {
         super(title);
         this.addWindowStateListener(this);
         this.addWindowListener(new WindowCloseHandler(this));
@@ -149,7 +150,7 @@ public class LeagueClientUI extends JFrame implements IClientCallback, ILoginCal
         this.leagueClient.getRMSClient().getHandler().addMessageServiceListener(MessageService.PARTIES, presence);
         this.leagueClient.getRMSClient().getHandler().addMessageServiceListener(MessageService.TEAMBUILDER, presence);
         this.leagueClient.getRMSClient().getHandler().addMessageServiceListener(MessageService.GSM, new GameStartListener(this));
-        LeagueClientUI.service.execute(new ActiveGameInformation(this));
+        Swiftrift.service.execute(new ActiveGameInformation(this));
         VirtualRiotXMPPClient xmppClient = leagueClient.getXMPPClient();
         RMANCache.purge();
         this.chatUI.setSupplier(xmppClient);
@@ -196,14 +197,14 @@ public class LeagueClientUI extends JFrame implements IClientCallback, ILoginCal
         manager = new LayoutManager(this);
         main.add(manager, BorderLayout.CENTER);
         main.add(chatSidebar, BorderLayout.EAST);
-        main.add(headerUI = new LayoutHeader(manager, client), BorderLayout.NORTH);
+        main.add(headerUI = new LayoutHeader(manager, this), BorderLayout.NORTH);
         manager.setHeader(headerUI);
         mainUI.revalidate();
     }
 
     private void buildSidebarUI(VirtualRiotXMPPClient xmppClient) {
         ChatSidebarFriendlist friendlist = chatSidebar.getChatSidebarFriendlist();
-        LeagueClientUI.service.execute(() -> {
+        Swiftrift.service.execute(() -> {
             friendlist.onEvent(xmppClient.getFriendList());
             friendlist.revalidate();
         });
@@ -258,12 +259,7 @@ public class LeagueClientUI extends JFrame implements IClientCallback, ILoginCal
     }
 
     private void showFailureDialog(String message) {
-        JOptionPane.showMessageDialog(
-                this,
-                message,
-                "Login Failed",
-                JOptionPane.INFORMATION_MESSAGE
-        );
+        Swiftrift.showMessageDialog(message);
     }
 
     @Override
@@ -300,18 +296,10 @@ public class LeagueClientUI extends JFrame implements IClientCallback, ILoginCal
     }
 
     private ClientConfiguration getConfiguration(String username, String password) {
-        JFrame parent = this;
         return ClientConfiguration.getDefault(username, password, new MultiFactorSupplier() {
             @Override
             public String get() {
-                return (String) JOptionPane.showInputDialog(
-                        parent,
-                        "Enter 2FA Code",
-                        "Multifactor",
-                        JOptionPane.PLAIN_MESSAGE,
-                        null,
-                        null,
-                        "");
+                return Swiftrift.showInputDialog("Enter 2FA Code");
             }
         });
     }
@@ -348,29 +336,49 @@ public class LeagueClientUI extends JFrame implements IClientCallback, ILoginCal
         return new JSONObject(new String(bytes));
     }
 
+    public static void showBasicDialog(String... messages) {
+
+    }
+
     public static void main(String[] args) {
         RMANCache.preload();
         AudioEngine.install();
-        LeagueClientUI.service.execute(() -> {
+        Swiftrift.service.execute(() -> {
             if (WMIC.isProcessRunning("Discord.exe")) RichPresence.show();
         });
-        LeagueClientUI leagueClientUI = new LeagueClientUI(StaticConstant.PROJECT);
-        leagueClientUI.setIconImage(logo);
-        leagueClientUI.settingService = new SettingManager();
-        leagueClientUI.loginUI = LoginUI.create(leagueClientUI);
-        ClientSettings clientSettings = leagueClientUI.settingService.getClientSettings();
-        leagueClientUI.loginUI.getRememberMe().setSelected(clientSettings.isRememberMe());
-        leagueClientUI.loginUI.toggle(false);
+        Swiftrift swiftrift = new Swiftrift(StaticConstant.PROJECT);
+        swiftrift.setIconImage(logo);
+        swiftrift.settingService = new SettingManager();
+        swiftrift.loginUI = LoginUI.create(swiftrift);
+        ClientSettings clientSettings = swiftrift.settingService.getClientSettings();
+        swiftrift.loginUI.getRememberMe().setSelected(clientSettings.isRememberMe());
+        swiftrift.loginUI.toggle(false);
         LocalCookieSupplier localCookieSupplier = new LocalCookieSupplier();
         if (clientSettings.isRememberMe()) {
-            UserSettings userSettings = leagueClientUI.settingService.set(clientSettings.getRememberMeUsername());
+            UserSettings userSettings = swiftrift.settingService.set(clientSettings.getRememberMeUsername());
             localCookieSupplier.loadCookieState(userSettings.getCookies());
             if (localCookieSupplier.isInCompletedState()) {
                 ClientConfiguration configuration = ClientConfiguration.getDefault(localCookieSupplier);
-                leagueClientUI.createRiotClient(configuration);
+                swiftrift.createRiotClient(configuration);
             }
         }
-        leagueClientUI.loginUI.toggle(true);
-        leagueClientUI.setVisible(true);
+        swiftrift.loginUI.toggle(true);
+        swiftrift.setVisible(true);
+    }
+
+    public static int showMessageDialog(String... lines) {
+        return SwiftDialog.showMessageDialog(Frame.getFrames()[0], lines);
+    }
+
+    public static int showOptionDialog(String message, String... options) {
+        return SwiftDialog.showOptionDialog(Frame.getFrames()[0], message, options);
+    }
+
+    public static int showOptionDialog(String[] messages, String... options) {
+        return SwiftDialog.showOptionDialog(Frame.getFrames()[0], messages, options);
+    }
+
+    public static String showInputDialog(String message) {
+        return SwiftDialog.showInputDialog(Frame.getFrames()[0], message);
     }
 }

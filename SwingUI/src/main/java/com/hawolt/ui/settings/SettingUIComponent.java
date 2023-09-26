@@ -1,6 +1,7 @@
 package com.hawolt.ui.settings;
 
 
+import com.hawolt.Swiftrift;
 import com.hawolt.generic.util.Network;
 import com.hawolt.io.RunLevel;
 import com.hawolt.logger.Logger;
@@ -68,7 +69,7 @@ public class SettingUIComponent extends ChildUIComponent {
         return result;
     }
 
-    public static SettingUIComponent createPathComponent(String name, SettingService settingService, String key) {
+    public static SettingUIComponent createPathComponent(String name, SettingService settingService, String key, String defaultKey) {
         DynamicObject settings = settingService.getClientSettings();
 
         SettingUIComponent result = new SettingUIComponent(new BorderLayout());
@@ -84,7 +85,7 @@ public class SettingUIComponent extends ChildUIComponent {
         labelContainer.add(label);
 
         JTextField pathField = new JTextField("");
-        pathField.setText(settings.getByKeyOrDefault(key, "C:\\Riot Games\\League of Legends"));
+        pathField.setText(settings.getByKeyOrDefault(key, defaultKey));
         pathField.setPreferredSize(new Dimension(800, 30));
         pathContainer.add(pathField, BorderLayout.SOUTH);
 
@@ -116,7 +117,7 @@ public class SettingUIComponent extends ChildUIComponent {
         });
 
         result.addOnQuitActionListener(listener -> {
-            pathField.setText(settings.getByKeyOrDefault(key, "C:\\Riot Games\\League of Legends"));
+            pathField.setText(settings.getByKeyOrDefault(key, defaultKey));
         });
 
         return result;
@@ -306,14 +307,15 @@ public class SettingUIComponent extends ChildUIComponent {
 
         LFlatButton bug = new LFlatButton("Submit bug", LTextAlign.CENTER, HighlightType.COMPONENT);
         bug.addActionListener(listener -> {
-            JFrame temp = new JFrame();
-            int confirm = JOptionPane.showConfirmDialog(temp, "This will open a bug issue on Github. You'll need an account to continue. Do you want to continue?",
-                    "Submit bug?",
-                    JOptionPane.YES_NO_OPTION,
-                    JOptionPane.INFORMATION_MESSAGE);
-            if (confirm == JOptionPane.YES_OPTION)
-                Github.submitBug();
-            temp.dispose();
+            int confirm = Swiftrift.showOptionDialog(
+                    new String[]{
+                            "This will open a bug issue on Github.",
+                            "You'll need an account to continue.",
+                            "Do you want to continue?"
+                    },
+                    "YES", "NO"
+            );
+            if (confirm == 0) Github.submitBug();
         });
         submitBugContainer.add(bug);
 

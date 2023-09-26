@@ -1,6 +1,6 @@
 package com.hawolt.ui.layout.wallet;
 
-import com.hawolt.LeagueClientUI;
+import com.hawolt.Swiftrift;
 import com.hawolt.client.LeagueClient;
 import com.hawolt.client.resources.ledge.inventory.InventoryServiceLedge;
 import com.hawolt.logger.Logger;
@@ -31,7 +31,7 @@ public class HeaderWallet extends ChildUIComponent implements Runnable, IService
         this.add(rp = new HeaderWalletCurrency(String.join("/", BASE, "icon-rp-72.png")));
         this.LeagueClient = LeagueClient;
         this.setBackground(new Color(0, 0, 0, 0));
-        LeagueClientUI.service.execute(this);
+        Swiftrift.service.execute(this);
     }
 
     public HeaderWalletCurrency getBlueEssence() {

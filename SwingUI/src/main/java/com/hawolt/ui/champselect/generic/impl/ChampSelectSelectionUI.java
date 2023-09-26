@@ -1,6 +1,6 @@
 package com.hawolt.ui.champselect.generic.impl;
 
-import com.hawolt.LeagueClientUI;
+import com.hawolt.Swiftrift;
 import com.hawolt.async.loader.ResourceLoader;
 import com.hawolt.client.resources.communitydragon.champion.Champion;
 import com.hawolt.client.resources.communitydragon.champion.ChampionIndex;
@@ -51,7 +51,7 @@ public class ChampSelectSelectionUI extends ChampSelectUIComponent {
     private void configure() {
         ChampionIndex championIndex = ChampionSource.CHAMPION_SOURCE_INSTANCE.get();
         Integer[] boxed = IntStream.of(championsAvailableAsChoice).boxed().toArray(Integer[]::new);
-        LeagueClientUI.service.execute(() -> {
+        Swiftrift.service.execute(() -> {
             Arrays.sort(boxed, (id1, id2) -> {
                 String name1 = championIndex.getChampion(id1).getName();
                 String name2 = championIndex.getChampion(id2).getName();

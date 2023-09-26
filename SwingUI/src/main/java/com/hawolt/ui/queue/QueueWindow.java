@@ -1,6 +1,6 @@
 package com.hawolt.ui.queue;
 
-import com.hawolt.LeagueClientUI;
+import com.hawolt.Swiftrift;
 import com.hawolt.client.LeagueClient;
 import com.hawolt.client.cache.CacheElement;
 import com.hawolt.client.resources.ledge.parties.PartiesLedge;
@@ -74,28 +74,28 @@ public class QueueWindow extends ChildUIComponent implements Runnable, PacketCal
     private final ChildUIComponent main = new ChildUIComponent(new BorderLayout());
     private final Map<String, GameLobby> relation = new HashMap<>();
     private final CardLayout layout = new CardLayout();
-    private final LeagueClientUI leagueClientUI;
+    private final Swiftrift swiftrift;
     private final ChildUIComponent parent;
 
-    public QueueWindow(LeagueClientUI leagueClientUI) {
+    public QueueWindow(Swiftrift swiftrift) {
         super(new BorderLayout());
-        this.leagueClientUI = leagueClientUI;
+        this.swiftrift = swiftrift;
         this.add(parent = new ChildUIComponent(layout), BorderLayout.CENTER);
-        this.relation.put("draft", new DraftGameLobby(leagueClientUI, parent, layout, this));
-        this.relation.put("tft", new TFTGameLobby(leagueClientUI, parent, layout, this));
+        this.relation.put("draft", new DraftGameLobby(swiftrift, parent, layout, this));
+        this.relation.put("tft", new TFTGameLobby(swiftrift, parent, layout, this));
         this.button.addActionListener(listener -> layout.show(parent, "lobby"));
         this.button.setPreferredSize(new Dimension(getWidth() / 5, 30));
         this.button.setHorizontalAlignment(SwingConstants.CENTER);
         this.button.setVerticalAlignment(SwingConstants.CENTER);
         this.parent.add("draft", relation.get("draft"));
         this.parent.add("tft", relation.get("tft"));
-        LeagueClientUI.service.execute(this);
+        Swiftrift.service.execute(this);
     }
 
     @Override
     public void run() {
         try {
-            LeagueClient client = leagueClientUI.getLeagueClient();
+            LeagueClient client = swiftrift.getLeagueClient();
             client.getRMSClient().getHandler().addMessageServiceListener(MessageService.TEAMBUILDER, this);
             client.getRTMPClient().getMatchMakerService().getAllQueuesCompressedAsynchronous(this);
         } catch (IOException e) {
@@ -191,15 +191,15 @@ public class QueueWindow extends ChildUIComponent implements Runnable, PacketCal
             JSONObject info = payload.getJSONObject("backwardsTransitionInfo");
             if (!info.has("backwardsTransitionReason")) return;
             handleBackwardsTransitionReason(info);
-            leagueClientUI.getChatSidebar().getEssentials().disableQueueState();
+            swiftrift.getChatSidebar().getEssentials().disableQueueState();
             try {
-                leagueClientUI.getLeagueClient().getLedge().getParties().ready();
+                swiftrift.getLeagueClient().getLedge().getParties().ready();
             } catch (IOException e) {
                 Logger.error(e);
             }
         } else if (payload.has("phaseName")) {
             String phaseName = payload.getString("phaseName");
-            ChatSidebarEssentials essentials = leagueClientUI.getChatSidebar().getEssentials();
+            ChatSidebarEssentials essentials = swiftrift.getChatSidebar().getEssentials();
             if (phaseName.equals("MATCHMAKING")) {
                 JSONObject matchmakingState = payload.getJSONObject("matchmakingState");
                 if (matchmakingState.has("backwardsTransitionReason")) {
@@ -213,13 +213,13 @@ public class QueueWindow extends ChildUIComponent implements Runnable, PacketCal
                 AudioEngine.play(Sound.QUEUE_POP);
                 JSONObject afkCheckState = payload.getJSONObject("afkCheckState");
                 long maxAfkMillis = afkCheckState.getLong("maxAfkMillis");
-                this.leagueClientUI.getLeagueClient().cache(CacheElement.CHAMP_SELECT_COUNTER, payload.getInt("counter"));
+                this.swiftrift.getLeagueClient().cache(CacheElement.CHAMP_SELECT_COUNTER, payload.getInt("counter"));
                 QueueDialog dialog = new QueueDialog(Frame.getFrames()[0], "Queue Notification", maxAfkMillis);
                 if (dialog.showQueueDialog().getSelection() != 1) {
                     essentials.disableQueueState();
                 } else {
                     try {
-                        MatchContext context = leagueClientUI.getLeagueClient().getLedge().getTeamBuilder().indicateAfkReadiness();
+                        MatchContext context = swiftrift.getLeagueClient().getLedge().getTeamBuilder().indicateAfkReadiness();
                         Logger.info("Queue Accept: {}", context.getStatus());
                     } catch (IOException e) {
                         Logger.error(e);
@@ -240,7 +240,7 @@ public class QueueWindow extends ChildUIComponent implements Runnable, PacketCal
             case "PLAYER_TIMED_OUT_ON_REQUIRED_ACTION",
                     "PLAYER_LEFT_CHAMPION_SELECT",
                     "PLAYER_LEFT_MATCHMAKING" -> {
-                leagueClientUI.getLayoutManager().getChampSelectUI().showBlankPanel();
+                swiftrift.getLayoutManager().getChampSelectUI().showBlankPanel();
             }
         }
     }
@@ -250,7 +250,7 @@ public class QueueWindow extends ChildUIComponent implements Runnable, PacketCal
             this.layout.show(parent, "tft");
         } else {
             DraftGameLobby draftGameLobby = (DraftGameLobby) relation.get("draft");
-            LeagueClientUI.service.execute(draftGameLobby::selectPositionPreference);
+            Swiftrift.service.execute(draftGameLobby::selectPositionPreference);
             this.layout.show(parent, "draft");
         }
     }
@@ -261,7 +261,7 @@ public class QueueWindow extends ChildUIComponent implements Runnable, PacketCal
         long queueId = json.getLong("id");
         this.main.add(button, BorderLayout.SOUTH);
         long maximumParticipantListSize = json.getLong("maximumParticipantListSize");
-        PartiesLedge partiesLedge = leagueClientUI.getLeagueClient().getLedge().getParties();
+        PartiesLedge partiesLedge = swiftrift.getLeagueClient().getLedge().getParties();
         try {
             partiesLedge.role(PartyRole.DECLINED);
             partiesLedge.gamemode(

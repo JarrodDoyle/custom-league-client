@@ -1,6 +1,6 @@
 package com.hawolt.ui.layout;
 
-import com.hawolt.LeagueClientUI;
+import com.hawolt.Swiftrift;
 import com.hawolt.client.LeagueClient;
 import com.hawolt.ui.champselect.ChampSelectUI;
 import com.hawolt.ui.generic.utility.ChildUIComponent;
@@ -26,18 +26,18 @@ public class LayoutManager extends ChildUIComponent implements ILayoutManager {
     private final ChampSelectUI champSelect;
     private LayoutHeader header;
 
-    public LayoutManager(LeagueClientUI leagueClientUI) {
+    public LayoutManager(Swiftrift swiftrift) {
         super(new BorderLayout());
 
-        LeagueClient client = leagueClientUI.getLeagueClient();
+        LeagueClient client = swiftrift.getLeagueClient();
         this.add(center = new ChildUIComponent(layout), BorderLayout.CENTER);
         //this.center.setBorder(new MatteBorder(2, 0, 0, 0, Color.DARK_GRAY));
 
         this.center.add("home", new ReleaseWindow());
         this.center.add("store", store = new StoreWindow(client));
-        this.center.add("play", queue = new QueueWindow(leagueClientUI));
-        this.center.add("profile", profile = new ProfileWindow(leagueClientUI));
-        this.center.add("champselect", champSelect = new ChampSelectUI(leagueClientUI));
+        this.center.add("play", queue = new QueueWindow(swiftrift));
+        this.center.add("profile", profile = new ProfileWindow(swiftrift));
+        this.center.add("champselect", champSelect = new ChampSelectUI(swiftrift));
         layout.show(center, "github");
     }
 

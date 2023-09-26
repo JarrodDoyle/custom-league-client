@@ -1,6 +1,6 @@
 package com.hawolt.util.audio;
 
-import com.hawolt.LeagueClientUI;
+import com.hawolt.Swiftrift;
 import com.hawolt.io.Core;
 import com.hawolt.io.RunLevel;
 import com.hawolt.logger.Logger;
@@ -82,7 +82,7 @@ public class AudioEngine {
     }
 
     public static void play(Sound sound) {
-        LeagueClientUI.service.execute(() -> {
+        Swiftrift.service.execute(() -> {
             try {
                 if (!CACHE.containsKey(sound.filename)) cache(sound);
                 ByteArrayInputStream byteStream = new ByteArrayInputStream(CACHE.get(sound.filename));

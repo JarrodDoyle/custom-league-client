@@ -1,6 +1,6 @@
 package com.hawolt.ui.store;
 
-import com.hawolt.LeagueClientUI;
+import com.hawolt.Swiftrift;
 import com.hawolt.client.LeagueClient;
 import com.hawolt.client.cache.CacheElement;
 import com.hawolt.client.cache.CachedValueLoader;
@@ -98,7 +98,7 @@ public class StoreElement extends ChildUIComponent implements IStoreElement {
 
     @Override
     public void purchase(CurrencyType currencyType, long price) {
-        LeagueClientUI.service.execute(() -> {
+        Swiftrift.service.execute(() -> {
             try {
                 PurchaseWidget widget = client.getPurchaseWidget();
                 String message = String.format(
@@ -106,17 +106,15 @@ public class StoreElement extends ChildUIComponent implements IStoreElement {
                         price,
                         currencyType == CurrencyType.RP ? "Riot Points" : "Blue Essence"
                 );
-                int result = JOptionPane.showConfirmDialog(Frame.getFrames()[0], message, "Confirm Purchase",
-                        JOptionPane.YES_NO_OPTION,
-                        JOptionPane.QUESTION_MESSAGE);
-                if (result != JOptionPane.YES_OPTION) return;
+                int result = Swiftrift.showOptionDialog(message, "YES", "NO");
+                if (result != 0) return;
                 JSONObject response = new JSONObject(widget.purchase(currencyType, item.getInventoryType(), item.getItemId(), price));
                 if (response.has("errorCode")) {
                     AudioEngine.play(Sound.ERROR);
                 } else {
                     AudioEngine.play(Sound.SUCCESS);
                     page.removeStoreElement(this);
-                    LeagueClientUI.service.execute(
+                    Swiftrift.service.execute(
                             new CachedValueLoader<>(
                                     CacheElement.INVENTORY_TOKEN,
                                     () -> client.getLedge().getInventoryService().getInventoryToken(),

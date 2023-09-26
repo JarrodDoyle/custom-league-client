@@ -1,6 +1,6 @@
 package com.hawolt.ui.queue;
 
-import com.hawolt.LeagueClientUI;
+import com.hawolt.Swiftrift;
 import com.hawolt.client.resources.ledge.parties.PartiesLedge;
 import com.hawolt.client.resources.ledge.parties.objects.data.PositionPreference;
 import com.hawolt.client.resources.ledge.preferences.PlayerPreferencesLedge;
@@ -25,8 +25,8 @@ import java.io.IOException;
 public class DraftGameLobby extends GameLobby implements ActionListener {
     private LComboBox<PositionPreference> main, other;
 
-    public DraftGameLobby(LeagueClientUI leagueClientUI, Container parent, CardLayout layout, QueueWindow queueWindow) {
-        super(leagueClientUI, parent, layout, queueWindow);
+    public DraftGameLobby(Swiftrift swiftrift, Container parent, CardLayout layout, QueueWindow queueWindow) {
+        super(swiftrift, parent, layout, queueWindow);
         this.selectPositionPreference();
     }
 
@@ -64,8 +64,8 @@ public class DraftGameLobby extends GameLobby implements ActionListener {
     }
 
     public void selectPositionPreference() {
-        LeagueClientUI.service.execute(() -> {
-            JSONObject data = leagueClientUI.getSettingService().getUserSettings().getPartyPositionPreference();
+        Swiftrift.service.execute(() -> {
+            JSONObject data = swiftrift.getSettingService().getUserSettings().getPartyPositionPreference();
             main.setSelectedItem(PositionPreference.valueOf(data.getString("firstPreference")));
             other.setSelectedItem(PositionPreference.valueOf(data.getString("secondPreference")));
         });
@@ -88,15 +88,15 @@ public class DraftGameLobby extends GameLobby implements ActionListener {
     public void savePositionPreference() throws IOException {
         PositionPreference primary = main.getItemAt(main.getSelectedIndex());
         PositionPreference secondary = other.getItemAt(other.getSelectedIndex());
-        PartiesLedge partiesLedge = leagueClientUI.getLeagueClient().getLedge().getParties();
+        PartiesLedge partiesLedge = swiftrift.getLeagueClient().getLedge().getParties();
         partiesLedge.metadata(primary, secondary);
-        PlayerPreferencesLedge playerPreferencesLedge = leagueClientUI.getLeagueClient().getLedge().getPlayerPreferences();
-        JSONObject preference = leagueClientUI.getSettingService().getUserSettings().setPartyPositionPreference(
+        PlayerPreferencesLedge playerPreferencesLedge = swiftrift.getLeagueClient().getLedge().getPlayerPreferences();
+        JSONObject preference = swiftrift.getSettingService().getUserSettings().setPartyPositionPreference(
                 new JSONObject()
                         .put("firstPreference", main.getItemAt(main.getSelectedIndex()).toString())
                         .put("secondPreference", other.getItemAt(other.getSelectedIndex()).toString())
         );
         playerPreferencesLedge.setPreferences(PreferenceType.LCU_PREFERENCES, preference.toString());
-        leagueClientUI.getSettingService().write(SettingType.PLAYER, "preferences", preference);
+        swiftrift.getSettingService().write(SettingType.PLAYER, "preferences", preference);
     }
 }

@@ -1,6 +1,6 @@
 package com.hawolt.ui.queue;
 
-import com.hawolt.LeagueClientUI;
+import com.hawolt.Swiftrift;
 import com.hawolt.client.resources.ledge.parties.objects.AvailableParty;
 import com.hawolt.client.resources.ledge.parties.objects.PartiesRegistration;
 import com.hawolt.client.resources.ledge.parties.objects.Party;
@@ -24,15 +24,15 @@ import java.util.List;
  **/
 
 public class GameInvites extends ChildUIComponent implements IServiceMessageListener<RiotMessageServiceMessage> {
-    private final LeagueClientUI leagueClientUI;
+    private final Swiftrift swiftrift;
 
-    public GameInvites(LeagueClientUI leagueClientUI) {
+    public GameInvites(Swiftrift swiftrift) {
         super(new GridLayout(0, 1, 0, 5));
         this.setBorder(new EmptyBorder(5, 0, 0, 0));
-        this.leagueClientUI = leagueClientUI;
+        this.swiftrift = swiftrift;
         this.setBackground(Color.GRAY);
         this.setVisible(false);
-        this.leagueClientUI.getLeagueClient()
+        this.swiftrift.getLeagueClient()
                 .getRMSClient()
                 .getHandler()
                 .addMessageServiceListener(MessageService.PARTIES, this);
@@ -47,12 +47,12 @@ public class GameInvites extends ChildUIComponent implements IServiceMessageList
         List<Party> list = registration.getParties().stream().filter(party -> party.getRole().equals("INVITED")).toList();
         setVisible(!list.isEmpty());
         removeAll();
-        SummonerLedge ledge = leagueClientUI.getLeagueClient().getLedge().getSummoner();
+        SummonerLedge ledge = swiftrift.getLeagueClient().getLedge().getSummoner();
         try {
             for (Party party : list) {
                 AvailableParty availableParty = (AvailableParty) party;
                 Summoner summoner = ledge.resolveSummonerByPUUD(availableParty.getInvitedByPUUID());
-                add(new GameInvite(leagueClientUI, summoner, party));
+                add(new GameInvite(swiftrift, summoner, party));
             }
         } catch (IOException e) {
             Logger.error(e);

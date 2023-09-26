@@ -48,7 +48,7 @@
                     <finalName>swift-rift-${version}</finalName>
                     <archive>
                         <manifest>
-                            <mainClass>com.hawolt.LeagueClientUI</mainClass>
+                            <mainClass>com.hawolt.Swiftrift</mainClass>
                         </manifest>
                     </archive>
                     <descriptorRefs>
@@ -75,7 +75,7 @@
                             <outputDirectory>${project.build.directory}/modules</outputDirectory>
                             <archive>
                                 <manifest>
-                                    <mainClass>com.hawolt.LeagueClientUI</mainClass>
+                                    <mainClass>com.hawolt.Swiftrift</mainClass>
                                 </manifest>
                             </archive>
                             <descriptorRefs>

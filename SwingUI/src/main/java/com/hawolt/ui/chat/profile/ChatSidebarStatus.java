@@ -1,6 +1,6 @@
 package com.hawolt.ui.chat.profile;
 
-import com.hawolt.LeagueClientUI;
+import com.hawolt.Swiftrift;
 import com.hawolt.async.presence.PresenceManager;
 import com.hawolt.logger.Logger;
 import com.hawolt.ui.generic.component.LComboBox;
@@ -23,7 +23,7 @@ public class ChatSidebarStatus extends JComponent {
         box = new LComboBox<>(ChatStatus.values());
         box.setBackground(ColorPalette.accentColor);
         box.setSelectedItem(ChatStatus.DEFAULT);
-        box.addItemListener(listener -> LeagueClientUI.service.execute(() -> {
+        box.addItemListener(listener -> Swiftrift.service.execute(() -> {
             try {
                 manager.changeStatus();
             } catch (Exception e) {

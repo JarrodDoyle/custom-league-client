@@ -1,6 +1,6 @@
 package com.hawolt.util.settings;
 
-import com.hawolt.LeagueClientUI;
+import com.hawolt.Swiftrift;
 import com.hawolt.generic.data.Unsafe;
 import com.hawolt.logger.Logger;
 import com.hawolt.util.other.StaticConstant;
@@ -68,7 +68,7 @@ public class SettingManager implements SettingService {
         List<SettingListener<?>> list = map.get(name);
         if (list == null) return;
         for (SettingListener<?> listener : list) {
-            LeagueClientUI.service.execute(() -> listener.onSettingWrite(name, Unsafe.cast(value)));
+            Swiftrift.service.execute(() -> listener.onSettingWrite(name, Unsafe.cast(value)));
         }
     }
 

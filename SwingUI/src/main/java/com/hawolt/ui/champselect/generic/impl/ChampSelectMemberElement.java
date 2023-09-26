@@ -1,6 +1,6 @@
 package com.hawolt.ui.champselect.generic.impl;
 
-import com.hawolt.LeagueClientUI;
+import com.hawolt.Swiftrift;
 import com.hawolt.async.Debouncer;
 import com.hawolt.async.ExecutorManager;
 import com.hawolt.async.loader.ResourceLoader;
@@ -114,7 +114,7 @@ public class ChampSelectMemberElement extends ChampSelectUIComponent implements 
         this.drawables = new GraphicalDrawableManager(this);
         GraphicalIndicatorButton swapOrder = new GraphicalIndicatorButton();
         ResourceLoader.loadLocalResource("assets/cs_swap_order.png", swapOrder);
-        swapOrder.addExecutionListener(event -> LeagueClientUI.service.execute(() -> {
+        swapOrder.addExecutionListener(event -> Swiftrift.service.execute(() -> {
             if (event.getInitiator() instanceof MouseEvent mouseEvent) {
                 TeamBuilderLedge ledge = dataContext.getLeagueClient().getLedge().getTeamBuilder();
                 interactionContext.getPickSwap(member.getCellId()).ifPresent(trade -> {
@@ -131,7 +131,7 @@ public class ChampSelectMemberElement extends ChampSelectUIComponent implements 
         }));
         GraphicalIndicatorButton swapChampion = new GraphicalIndicatorButton();
         ResourceLoader.loadLocalResource("assets/cs_swap_champion.png", swapChampion);
-        swapChampion.addExecutionListener(event -> LeagueClientUI.service.execute(() -> {
+        swapChampion.addExecutionListener(event -> Swiftrift.service.execute(() -> {
             if (event.getInitiator() instanceof MouseEvent mouseEvent) {
                 TeamBuilderService service = dataContext.getLeagueClient().getRTMPClient().getTeamBuilderService();
                 interactionContext.getTrade(member.getCellId()).ifPresent(trade -> {

@@ -1,6 +1,6 @@
 package com.hawolt.ui.chat.friendlist;
 
-import com.hawolt.LeagueClientUI;
+import com.hawolt.Swiftrift;
 import com.hawolt.ui.generic.themes.ColorPalette;
 import com.hawolt.ui.generic.utility.ChildUIComponent;
 import com.hawolt.ui.queue.GameInvites;
@@ -20,11 +20,11 @@ public class ChatSidebarEssentials extends ChildUIComponent {
     private ChildUIComponent display;
     private ChildUIComponent requests;
 
-    public ChatSidebarEssentials(LeagueClientUI leagueClientUI, IFriendListComponent component) {
+    public ChatSidebarEssentials(Swiftrift swiftrift, IFriendListComponent component) {
         super(new BorderLayout());
         this.setBorder(new EmptyBorder(0, 5, 5, 5));
         this.setBackground(ColorPalette.accentColor);
-        VirtualRiotXMPPClient xmppClient = leagueClientUI.getLeagueClient().getXMPPClient();
+        VirtualRiotXMPPClient xmppClient = swiftrift.getLeagueClient().getXMPPClient();
         ChatSidebarFriendEssentials essentials = new ChatSidebarFriendEssentials(xmppClient, component);
         this.add(essentials, BorderLayout.CENTER);
         this.state = new QueueState();
@@ -33,7 +33,7 @@ public class ChatSidebarEssentials extends ChildUIComponent {
         display.setBackground(ColorPalette.accentColor);
         display.setBorder(new EmptyBorder(0, 5, 0, 0));
         display.add(state, BorderLayout.NORTH);
-        display.add(new GameInvites(leagueClientUI), BorderLayout.CENTER);
+        display.add(new GameInvites(swiftrift), BorderLayout.CENTER);
         this.add(display, BorderLayout.NORTH);
         requests = new ChildUIComponent(new GridLayout(0, 1, 0, 5));
         requests.setBorder(new EmptyBorder(5, 5, 0, 0));

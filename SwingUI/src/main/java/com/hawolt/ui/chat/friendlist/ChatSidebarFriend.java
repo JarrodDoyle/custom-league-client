@@ -1,6 +1,6 @@
 package com.hawolt.ui.chat.friendlist;
 
-import com.hawolt.LeagueClientUI;
+import com.hawolt.Swiftrift;
 import com.hawolt.client.LeagueClient;
 import com.hawolt.client.resources.ledge.LedgeEndpoint;
 import com.hawolt.client.resources.ledge.parties.PartiesLedge;
@@ -43,7 +43,7 @@ import java.util.Map;
 
 public class ChatSidebarFriend extends LFlatButton {
     private final VirtualRiotXMPPClient xmppClient;
-    private final LeagueClientUI leagueClientUI;
+    private final Swiftrift swiftrift;
     private final GenericFriend friend;
     private final Font statusFont = new Font("Dialog", Font.BOLD, 12);
     private GenericPresence lastKnownPresence;
@@ -54,13 +54,13 @@ public class ChatSidebarFriend extends LFlatButton {
     private String status;
     private Color color;
 
-    public ChatSidebarFriend(VirtualRiotXMPPClient xmppClient, GenericFriend friend, LeagueClientUI leagueClientUI) {
+    public ChatSidebarFriend(VirtualRiotXMPPClient xmppClient, GenericFriend friend, Swiftrift swiftrift) {
         super();
         setHighlightType(HighlightType.COMPONENT);
         this.setPreferredSize(new Dimension(0, 50));
         this.friend = friend;
         this.xmppClient = xmppClient;
-        this.leagueClientUI = leagueClientUI;
+        this.swiftrift = swiftrift;
         this.providedUsername = getProvidedUsername();
         this.setFont(new Font("Dialog", Font.BOLD, 18));
         this.setText(providedUsername);
@@ -285,7 +285,7 @@ public class ChatSidebarFriend extends LFlatButton {
 
     public void clickEvent(MouseEvent e) {
         if (SwingUtilities.isLeftMouseButton(e)) {
-            LeagueClientUI.service.execute(runnable);
+            Swiftrift.service.execute(runnable);
             this.repaint();
         } else if (SwingUtilities.isRightMouseButton(e)) {
             JPopupMenu menu = new JPopupMenu();
@@ -296,15 +296,15 @@ public class ChatSidebarFriend extends LFlatButton {
                         JMenuItem join = new JMenuItem(new AbstractAction("Join Lobby") {
                             @Override
                             public void actionPerformed(ActionEvent e) {
-                                LeagueClient client = leagueClientUI.getLeagueClient();
+                                LeagueClient client = swiftrift.getLeagueClient();
                                 try {
                                     client.getLedge().getParties().role(pty.getPartyId(), PartyRole.MEMBER);
-                                    leagueClientUI.getLayoutManager().showClientComponent("play");
+                                    swiftrift.getLayoutManager().showClientComponent("play");
                                     game.getPresenceInfo().ifPresent(info -> {
                                         if (info.getGameMode().toLowerCase().contains("tft")) {
-                                            leagueClientUI.getLayoutManager().getQueue().showMatchMadeLobby("tft");
+                                            swiftrift.getLayoutManager().getQueue().showMatchMadeLobby("tft");
                                         } else {
-                                            leagueClientUI.getLayoutManager().getQueue().showMatchMadeLobby("draft");
+                                            swiftrift.getLayoutManager().getQueue().showMatchMadeLobby("draft");
                                         }
                                     });
                                 } catch (IOException ex) {
@@ -319,7 +319,7 @@ public class ChatSidebarFriend extends LFlatButton {
             JMenuItem invite = new JMenuItem(new AbstractAction("Invite Friend") {
                 @Override
                 public void actionPerformed(ActionEvent e) {
-                    LedgeEndpoint ledges = leagueClientUI.getLeagueClient().getLedge();
+                    LedgeEndpoint ledges = swiftrift.getLeagueClient().getLedge();
                     SummonerLedge summonerLedge = ledges.getSummoner();
                     PartiesLedge partiesLedge = ledges.getParties();
                     try {

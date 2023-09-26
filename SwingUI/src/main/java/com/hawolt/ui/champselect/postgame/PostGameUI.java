@@ -1,6 +1,6 @@
 package com.hawolt.ui.champselect.postgame;
 
-import com.hawolt.LeagueClientUI;
+import com.hawolt.Swiftrift;
 import com.hawolt.client.resources.ledge.leagues.objects.LeagueNotification;
 import com.hawolt.http.layer.IResponse;
 import com.hawolt.logger.Logger;
@@ -24,19 +24,19 @@ import java.util.List;
  **/
 
 public class PostGameUI extends ChildUIComponent implements ActionListener {
-    private final LeagueClientUI leagueClientUI;
+    private final Swiftrift swiftrift;
     private final PostGameHeader header;
     private final PostGameScoreboard scoreboard;
     private final LFlatButton close;
 
-    public PostGameUI(LeagueClientUI leagueClientUI) {
+    public PostGameUI(Swiftrift swiftrift) {
         super(new BorderLayout());
         this.setBorder(new EmptyBorder(5, 5, 5, 5));
         this.add(header = new PostGameHeader(), BorderLayout.NORTH);
         this.add(scoreboard = new PostGameScoreboard(), BorderLayout.CENTER);
         this.add(close = new LFlatButton("Play Again", LTextAlign.CENTER, HighlightType.COMPONENT), BorderLayout.SOUTH);
         this.close.addActionListener(this);
-        this.leagueClientUI = leagueClientUI;
+        this.swiftrift = swiftrift;
     }
 
     public void build(IResponse response, List<LeagueNotification> notifications) {
@@ -57,18 +57,18 @@ public class PostGameUI extends ChildUIComponent implements ActionListener {
 
     @Override
     public void actionPerformed(ActionEvent e) {
-        LeagueClientUI.service.execute(() -> {
+        Swiftrift.service.execute(() -> {
             try {
-                this.leagueClientUI.getLayoutManager().getQueue().getAvailableLobbies().forEach(lobby -> lobby.toggleButtonState(false, true));
-                this.leagueClientUI.getLeagueClient().getLedge().getParties().ready();
-                this.leagueClientUI.getLayoutManager()
+                this.swiftrift.getLayoutManager().getQueue().getAvailableLobbies().forEach(lobby -> lobby.toggleButtonState(false, true));
+                this.swiftrift.getLeagueClient().getLedge().getParties().ready();
+                this.swiftrift.getLayoutManager()
                         .getChampSelectUI()
                         .getChampSelect()
                         .getChampSelectDataContext()
                         .getPUUIDResolver()
                         .clear();
-                this.leagueClientUI.getHeader().selectAndShowComponent(LayoutComponent.PLAY);
-                this.leagueClientUI.getLayoutManager().getChampSelectUI().showBlankPanel();
+                this.swiftrift.getHeader().selectAndShowComponent(LayoutComponent.PLAY);
+                this.swiftrift.getLayoutManager().getChampSelectUI().showBlankPanel();
             } catch (IOException ex) {
                 Logger.error(ex);
             }

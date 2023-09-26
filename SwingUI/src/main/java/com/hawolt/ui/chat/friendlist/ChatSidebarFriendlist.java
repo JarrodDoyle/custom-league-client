@@ -1,6 +1,6 @@
 package com.hawolt.ui.chat.friendlist;
 
-import com.hawolt.LeagueClientUI;
+import com.hawolt.Swiftrift;
 import com.hawolt.client.misc.SortOrder;
 import com.hawolt.ui.champselect.context.ChampSelectDataContext;
 import com.hawolt.ui.champselect.context.impl.ChampSelect;
@@ -44,15 +44,15 @@ public class ChatSidebarFriendlist extends ChildUIComponent implements SettingLi
     private final List<GenericPresence> buffer = new LinkedList<>();
     private String name, friendHandling = "User choice";
     private JComponent component;
-    private LeagueClientUI leagueClientUI;
+    private Swiftrift swiftrift;
     private Map<GenericFriend, ChildUIComponent> tmp = new HashMap<>();
 
-    public ChatSidebarFriendlist(IChatWindow window, LeagueClientUI leagueClientUI) {
+    public ChatSidebarFriendlist(IChatWindow window, Swiftrift swiftrift) {
         super(new GridLayout(0, 1, 0, 0));
         this.window = window;
         this.window.setIFriendListComponent(this);
-        this.leagueClientUI = leagueClientUI;
-        this.leagueClientUI.getSettingService().addSettingListener("autoFriends", this);
+        this.swiftrift = swiftrift;
+        this.swiftrift.getSettingService().addSettingListener("autoFriends", this);
         setBackground(ColorPalette.accentColor);
     }
 
@@ -151,7 +151,7 @@ public class ChatSidebarFriendlist extends ChildUIComponent implements SettingLi
     }
 
     private void addFriendComponent(GenericFriend friend) {
-        ChatSidebarFriend button = new ChatSidebarFriend(window.getXMPPClient(), friend, leagueClientUI);
+        ChatSidebarFriend button = new ChatSidebarFriend(window.getXMPPClient(), friend, swiftrift);
         button.setRoundingCorners(false, true, false, true);
         button.executeOnClick(() -> window.showChat(friend));
         addFriendComponent(button);
@@ -323,7 +323,7 @@ public class ChatSidebarFriendlist extends ChildUIComponent implements SettingLi
 
     @Override
     public void onJoinMucPresence(JoinMucPresence presence) {
-        ChampSelect champSelect = leagueClientUI.getLayoutManager().getChampSelectUI().getChampSelect();
+        ChampSelect champSelect = swiftrift.getLayoutManager().getChampSelectUI().getChampSelect();
         ChampSelectDataContext dataContext = champSelect.getChampSelectDataContext();
         dataContext.push(presence);
         handle(presence);

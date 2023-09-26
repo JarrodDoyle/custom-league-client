@@ -1,6 +1,6 @@
 package com.hawolt.ui.queue;
 
-import com.hawolt.LeagueClientUI;
+import com.hawolt.Swiftrift;
 import com.hawolt.async.ExecutorManager;
 import com.hawolt.client.resources.ledge.LedgeEndpoint;
 import com.hawolt.client.resources.ledge.parties.PartiesLedge;
@@ -21,7 +21,6 @@ import com.hawolt.ui.generic.utility.ChildUIComponent;
 import com.hawolt.ui.generic.utility.HighlightType;
 import org.json.JSONObject;
 
-import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 import java.awt.*;
 import java.io.IOException;
@@ -42,7 +41,7 @@ import java.util.stream.Stream;
 public abstract class GameLobby extends ChildUIComponent implements IServiceMessageListener<RiotMessageServiceMessage> {
     public final ScheduledExecutorService scheduler = ExecutorManager.getScheduledService("queue-resumer");
 
-    public final LeagueClientUI leagueClientUI;
+    public final Swiftrift swiftrift;
     public ScheduledFuture<?> future;
     public int queueId;
 
@@ -52,14 +51,14 @@ public abstract class GameLobby extends ChildUIComponent implements IServiceMess
     private CurrentParty party;
     private String puuid;
 
-    public GameLobby(LeagueClientUI leagueClientUI, Container parent, CardLayout layout, QueueWindow queueWindow) {
+    public GameLobby(Swiftrift swiftrift, Container parent, CardLayout layout, QueueWindow queueWindow) {
         super(new BorderLayout());
 
         createGrid(component);
         ChildUIComponent newButton = new ChildUIComponent(new BorderLayout());
-        this.leagueClientUI = leagueClientUI;
-        this.leagueClientUI.getLeagueClient().getRMSClient().getHandler().addMessageServiceListener(MessageService.PARTIES, this);
-        this.leagueClientUI.getLeagueClient().getRMSClient().getHandler().addMessageServiceListener(MessageService.LOL_PLATFORM, this);
+        this.swiftrift = swiftrift;
+        this.swiftrift.getLeagueClient().getRMSClient().getHandler().addMessageServiceListener(MessageService.PARTIES, this);
+        this.swiftrift.getLeagueClient().getRMSClient().getHandler().addMessageServiceListener(MessageService.LOL_PLATFORM, this);
 
         ChildUIComponent top = new ChildUIComponent(new GridLayout(0, 1, 0, 0));
         LFlatButton close = new LFlatButton("Choose mode", LTextAlign.CENTER, HighlightType.COMPONENT);
@@ -72,7 +71,7 @@ public abstract class GameLobby extends ChildUIComponent implements IServiceMess
             this.start.setEnabled(true);
             layout.show(parent, "modes");
             try {
-                leagueClientUI.getLeagueClient().getLedge().getParties().role(PartyRole.DECLINED);
+                swiftrift.getLeagueClient().getLedge().getParties().role(PartyRole.DECLINED);
                 queueId = 0;
                 queueWindow.rebase();
             } catch (IOException e) {
@@ -86,16 +85,9 @@ public abstract class GameLobby extends ChildUIComponent implements IServiceMess
         newButton.add(close, BorderLayout.CENTER);
         add(newButton, BorderLayout.NORTH);
         invite.addActionListener(listener -> {
-            String name = (String) JOptionPane.showInputDialog(
-                    this,
-                    "Summonername",
-                    "Invite",
-                    JOptionPane.PLAIN_MESSAGE,
-                    null,
-                    null,
-                    "");
+            String name = Swiftrift.showInputDialog("Who do you want to Invite?");
             if (name == null) return;
-            LedgeEndpoint ledges = leagueClientUI.getLeagueClient().getLedge();
+            LedgeEndpoint ledges = swiftrift.getLeagueClient().getLedge();
             SummonerLedge summonerLedge = ledges.getSummoner();
             PartiesLedge partiesLedge = ledges.getParties();
             try {
@@ -108,7 +100,7 @@ public abstract class GameLobby extends ChildUIComponent implements IServiceMess
         top.add(close);
         top.add(invite);
         component.add(top, BorderLayout.NORTH);
-        LeagueClientUI.service.execute(() -> createSpecificComponents(component));
+        Swiftrift.service.execute(() -> createSpecificComponents(component));
 
         add(component, BorderLayout.CENTER);
         ChildUIComponent bottom = new ChildUIComponent(new GridLayout(0, 2, 5, 0));
@@ -125,12 +117,12 @@ public abstract class GameLobby extends ChildUIComponent implements IServiceMess
         stop.setHighlightColor(ColorPalette.buttonSelectionAltColor);
         stop.addActionListener(listener -> {
             if (future != null) future.cancel(true);
-            PartiesLedge partiesLedge = leagueClientUI.getLeagueClient().getLedge().getParties();
+            PartiesLedge partiesLedge = swiftrift.getLeagueClient().getLedge().getParties();
             PartiesRegistration registration = partiesLedge.getCurrentRegistration();
             try {
                 if (registration == null) return;
                 partiesLedge.setQueueAction(PartyAction.STOP);
-                leagueClientUI.getChatSidebar().getEssentials().disableQueueState();
+                swiftrift.getChatSidebar().getEssentials().disableQueueState();
                 this.flipButtonState();
             } catch (IOException e) {
                 Logger.error(e);
@@ -177,7 +169,7 @@ public abstract class GameLobby extends ChildUIComponent implements IServiceMess
             PartyRestriction restriction = party.getPartyRestriction();
             if (restriction != null) handleGatekeeperRestriction(restriction.getRestrictionList());
             partyParticipants.stream().filter(participant -> participant.getPUUID().equals(puuid)).findFirst().ifPresent(self -> {
-                SummonerLedge summonerLedge = leagueClientUI.getLeagueClient().getLedge().getSummoner();
+                SummonerLedge summonerLedge = swiftrift.getLeagueClient().getLedge().getSummoner();
                 try {
                     getSummonerComponentAt(0).update(self, summonerLedge.resolveSummonerByPUUD(puuid));
                     partyParticipants.remove(self);
@@ -205,14 +197,14 @@ public abstract class GameLobby extends ChildUIComponent implements IServiceMess
                 .toList();
         GatekeeperRestriction gatekeeperRestriction = sorted.get(0);
         Logger.debug("Restriction: {}", gatekeeperRestriction);
-        leagueClientUI.getChatSidebar().getEssentials().toggleQueueState(
+        swiftrift.getChatSidebar().getEssentials().toggleQueueState(
                 System.currentTimeMillis(),
                 gatekeeperRestriction.getRemainingMillis(),
                 true
         );
         future = scheduler.schedule(() -> {
             try {
-                leagueClientUI.getLeagueClient().getLedge().getParties().resume();
+                swiftrift.getLeagueClient().getLedge().getParties().resume();
             } catch (IOException e) {
                 Logger.error(e);
             }
@@ -222,7 +214,7 @@ public abstract class GameLobby extends ChildUIComponent implements IServiceMess
     abstract public SummonerComponent getSummonerComponentAt(int id);
 
     public void startQueue() {
-        PartiesLedge partiesLedge = leagueClientUI.getLeagueClient().getLedge().getParties();
+        PartiesLedge partiesLedge = swiftrift.getLeagueClient().getLedge().getParties();
         try {
             partiesLedge.ready();
             JSONObject response = partiesLedge.setQueueAction(PartyAction.START);

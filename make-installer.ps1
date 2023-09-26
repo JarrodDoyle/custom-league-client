@@ -16,7 +16,7 @@ jpackage `
 --type "exe" `
 --runtime-image 'jre' `
 --main-jar 'swift-rift.jar' `
---main-class 'com.hawolt.LeagueClientUI' `
+--main-class 'com.hawolt.Swiftrift' `
 --win-shortcut `
 --win-dir-chooser `
 --icon 'resources\swift-rift.ico'

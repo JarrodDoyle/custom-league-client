@@ -1,6 +1,6 @@
 package com.hawolt.ui.champselect.impl;
 
-import com.hawolt.LeagueClientUI;
+import com.hawolt.Swiftrift;
 import com.hawolt.client.LeagueClient;
 import com.hawolt.client.cache.CacheElement;
 import com.hawolt.client.resources.communitydragon.spell.Spell;
@@ -23,7 +23,6 @@ import com.hawolt.xmpp.core.VirtualRiotXMPPClient;
 import com.hawolt.xmpp.event.objects.conversation.history.impl.IncomingMessage;
 import com.hawolt.xmpp.event.objects.presence.impl.JoinMucPresence;
 
-import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -187,13 +186,11 @@ public abstract class MatchmadeRenderInstance extends AbstractRenderInstance imp
     public void actionPerformed(ActionEvent e) {
         switch (e.getActionCommand()) {
             case "Dodge" -> {
-                int result = JOptionPane.showConfirmDialog(
-                        Frame.getFrames()[0],
+                int result = Swiftrift.showOptionDialog(
                         "Dodging will result in loss of LP, are you sure?",
-                        "Warning",
-                        JOptionPane.YES_NO_OPTION
+                        "YES", "NO"
                 );
-                if (result == JOptionPane.YES_OPTION) dodge(GameType.CLASSIC);
+                if (result == 0) dodge(GameType.CLASSIC);
             }
             case "Submit Choice" -> {
                 int size = context.getChampSelectSettingsContext().getActionSetMapping().size();
@@ -233,7 +230,7 @@ public abstract class MatchmadeRenderInstance extends AbstractRenderInstance imp
         int[] supportedQueueIds = getSupportedQueueIds();
         for (int supportedQueueId : supportedQueueIds) {
             if (supportedQueueId == targetQueueId) {
-                LeagueClientUI.service.execute(() -> {
+                Swiftrift.service.execute(() -> {
                     LeagueClient client = context.getChampSelectDataContext().getLeagueClient();
                     if (client == null || matchContext == null) return;
                     chatUI.setMatchContext(matchContext);

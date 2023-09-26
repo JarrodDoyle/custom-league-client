@@ -1,6 +1,6 @@
 package com.hawolt.async.presence;
 
-import com.hawolt.LeagueClientUI;
+import com.hawolt.Swiftrift;
 import com.hawolt.client.LeagueClient;
 import com.hawolt.client.misc.MapQueueId;
 import com.hawolt.client.resources.ledge.gsm.GameServiceMessageLedge;
@@ -30,13 +30,13 @@ import java.util.HashMap;
  **/
 
 public class PresenceManager implements PacketCallback, IServiceMessageListener<RiotMessageServiceMessage> {
-    private final LeagueClientUI leagueClientUI;
+    private final Swiftrift swiftrift;
     private final LeagueClient leagueClient;
     private String currentDefaultStatus;
 
-    public PresenceManager(LeagueClientUI leagueClientUI) {
-        this.leagueClientUI = leagueClientUI;
-        this.leagueClient = leagueClientUI.getLeagueClient();
+    public PresenceManager(Swiftrift swiftrift) {
+        this.swiftrift = swiftrift;
+        this.leagueClient = swiftrift.getLeagueClient();
     }
 
     private int getPresenceTierId(String tier) {
@@ -135,7 +135,7 @@ public class PresenceManager implements PacketCallback, IServiceMessageListener<
         int queueId = payload.getInt("queueId");
 
         leagueClient.getCachedValueOrElse(CacheElement.PRESENCE, this::configure, Logger::error).ifPresent(base -> {
-            String status = leagueClientUI.getHeader().getSelectedStatus();
+            String status = swiftrift.getHeader().getSelectedStatus();
             Presence.Builder builder = new Presence.Builder()
                     .setGameQueueType(MapQueueId.getGameQueueType(queueId))
                     .setGameMode(MapQueueId.getGameMode(queueId))
@@ -187,23 +187,23 @@ public class PresenceManager implements PacketCallback, IServiceMessageListener<
 
 
     private void set(String status, Presence presence) {
-        leagueClientUI.getLeagueClient().getXMPPClient().setCustomPresence(
-                status, leagueClientUI.getLeagueClient().getCachedValue(CacheElement.CHAT_STATUS), presence
+        swiftrift.getLeagueClient().getXMPPClient().setCustomPresence(
+                status, swiftrift.getLeagueClient().getCachedValue(CacheElement.CHAT_STATUS), presence
         );
     }
 
     public void setIdlePresence() {
         leagueClient.getCachedValueOrElse(CacheElement.PRESENCE, this::configure, Logger::error).ifPresent(base -> {
             Presence.Builder builder = new Presence.Builder().setGameStatus("outOfGame");
-            String status = leagueClientUI.getHeader().getSelectedStatus();
+            String status = swiftrift.getHeader().getSelectedStatus();
             currentDefaultStatus = "chat";
             set("default".equals(status) ? "chat" : status, builder.merge(base));
         });
     }
 
     private void setQueuePresence() {
-        String status = leagueClientUI.getHeader().getSelectedStatus();
-        PartiesLedge partiesLedge = leagueClientUI.getLeagueClient().getLedge().getParties();
+        String status = swiftrift.getHeader().getSelectedStatus();
+        PartiesLedge partiesLedge = swiftrift.getLeagueClient().getLedge().getParties();
         PartiesRegistration registration = partiesLedge.getCurrentRegistration();
         int queueId = registration.getCurrentParty().getPartyGameMode().getQueueId();
         leagueClient.getCachedValueOrElse(CacheElement.PRESENCE, this::configure, Logger::error).ifPresent(base -> {
@@ -252,7 +252,7 @@ public class PresenceManager implements PacketCallback, IServiceMessageListener<
                             builder.setPTY(pty.toString());
                         }
                         builder.setQueueId(String.valueOf(mode.getQueueId()));
-                        String status = leagueClientUI.getHeader().getSelectedStatus();
+                        String status = swiftrift.getHeader().getSelectedStatus();
                         currentDefaultStatus = "chat";
                         set("default".equals(status) ? "chat" : status, builder.merge(base));
                     });
@@ -263,7 +263,7 @@ public class PresenceManager implements PacketCallback, IServiceMessageListener<
         String gameId = String.valueOf(payload.getLong("gameId"));
         String gameMode = payload.getString("gameMode");
         long summonerId = payload.getLong("summonerId");
-        GameServiceMessageLedge gmsLedge = leagueClientUI.getLeagueClient().getLedge().getGameServiceMessage();
+        GameServiceMessageLedge gmsLedge = swiftrift.getLeagueClient().getLedge().getGameServiceMessage();
         JSONObject data = gmsLedge.getGameInfoByGameId(gameId);
         leagueClient.getCachedValueOrElse(CacheElement.PRESENCE, this::configure, Logger::error).ifPresent(base -> {
             Presence.Builder builder = new Presence.Builder();
@@ -286,7 +286,7 @@ public class PresenceManager implements PacketCallback, IServiceMessageListener<
                         builder.setGameQueueType(data.getString("queueTypeName"));
                         builder.setQueueId(String.valueOf(data.getInt("gameQueueConfigId")));
                         builder.setMapId(String.valueOf(data.getInt("mapId")));
-                        String status = leagueClientUI.getHeader().getSelectedStatus();
+                        String status = swiftrift.getHeader().getSelectedStatus();
                         currentDefaultStatus = "dnd";
                         set("default".equals(status) ? "dnd" : status, builder.merge(base));
                     });
@@ -320,7 +320,7 @@ public class PresenceManager implements PacketCallback, IServiceMessageListener<
 
     public void changeStatus() {
         if (currentDefaultStatus == null) currentDefaultStatus = "chat";
-        String status = leagueClientUI.getHeader().getSelectedStatus();
+        String status = swiftrift.getHeader().getSelectedStatus();
         leagueClient.getCachedValueOrElse(CacheElement.PRESENCE, this::configure, Logger::error).ifPresent(base -> {
             set("default".equals(status) ? "dnd" : status, base);
         });

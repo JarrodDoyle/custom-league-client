@@ -1,7 +1,7 @@
 package com.hawolt.ui.layout;
 
+import com.hawolt.Swiftrift;
 import com.hawolt.async.loader.ResourceLoader;
-import com.hawolt.client.LeagueClient;
 import com.hawolt.ui.chat.profile.ChatSidebarProfile;
 import com.hawolt.ui.chat.profile.ChatSidebarStatus;
 import com.hawolt.ui.generic.component.LFlatButton;
@@ -11,6 +11,8 @@ import com.hawolt.ui.generic.utility.ChildUIComponent;
 import com.hawolt.ui.generic.utility.HighlightType;
 import com.hawolt.ui.generic.utility.LazyLoadedImageComponent;
 import com.hawolt.ui.layout.wallet.HeaderWallet;
+import com.hawolt.util.os.OperatingSystem;
+import com.hawolt.util.settings.SettingService;
 import com.hawolt.virtual.leagueclient.userinfo.UserInformation;
 
 import javax.swing.*;
@@ -29,16 +31,17 @@ import java.util.Map;
 
 public class LayoutHeader extends ChildUIComponent {
     private final Map<LayoutComponent, LFlatButton> map = new HashMap<>();
+    private final Swiftrift swiftrift;
     private final ChatSidebarProfile profile;
     private final ILayoutManager manager;
     private final HeaderWallet wallet;
-    private LazyLoadedImageComponent logo;
 
     private Point initialClick;
 
-    public LayoutHeader(ILayoutManager manager, LeagueClient client) {
+    public LayoutHeader(ILayoutManager manager, Swiftrift swiftrift) {
         super(new BorderLayout());
         this.manager = manager;
+        this.swiftrift = swiftrift;
         this.setBackground(ColorPalette.backgroundColor);
         this.setPreferredSize(new Dimension(0, 90));
         this.addMouseListener(new MouseAdapter() {
@@ -82,8 +85,8 @@ public class LayoutHeader extends ChildUIComponent {
         }
         selectAndShowComponent(LayoutComponent.HOME);
 
-        main.add(wallet = new HeaderWallet(client), BorderLayout.EAST);
-        UserInformation userInformation = client.getVirtualLeagueClient()
+        main.add(wallet = new HeaderWallet(swiftrift.getLeagueClient()), BorderLayout.EAST);
+        UserInformation userInformation = swiftrift.getLeagueClient().getVirtualLeagueClient()
                 .getVirtualLeagueClientInstance()
                 .getUserInformation();
         add(profile = new ChatSidebarProfile(userInformation, new BorderLayout()), BorderLayout.EAST);
@@ -98,6 +101,22 @@ public class LayoutHeader extends ChildUIComponent {
     }
 
     public void selectAndShowComponent(LayoutComponent component) {
+        if (component != LayoutComponent.PLAY || OperatingSystem.getOperatingSystemType() == OperatingSystem.OSType.WINDOWS) {
+            selectAndShow(component);
+        } else {
+            SettingService service = swiftrift.getSettingService();
+            String gameBaseDir = service.getClientSettings().getByKeyOrDefault("GameBaseDir", null);
+            String winePrefixDirectory = service.getClientSettings().getByKeyOrDefault("WinePrefixDir", null);
+            String wineBinaryDirectory = service.getClientSettings().getByKeyOrDefault("WineBinaryDir", null);
+            if (gameBaseDir == null || winePrefixDirectory == null || wineBinaryDirectory == null) {
+                Swiftrift.showMessageDialog("Please configure your Settings first");
+            } else {
+                selectAndShow(component);
+            }
+        }
+    }
+
+    private void selectAndShow(LayoutComponent component) {
         map.values().forEach(button -> button.setSelected(false));
         manager.showComponent(component.toString());
         LFlatButton button = map.get(component);
