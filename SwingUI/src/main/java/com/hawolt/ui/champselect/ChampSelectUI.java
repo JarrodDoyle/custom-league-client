@@ -82,7 +82,7 @@ public class ChampSelectUI extends ChildUIComponent implements IServiceMessageLi
     }
 
     private void addRenderInstance(AbstractRenderInstance instance) {
-        leagueClient.register(CacheElement.MATCH_CONTEXT, instance);
+        if (leagueClient != null) leagueClient.register(CacheElement.MATCH_CONTEXT, instance);
         instance.setGlobalRunePanel(champSelect.getChampSelectInterfaceContext().getRuneSelectionPanel());
         int[] queueIds = instance.getSupportedQueueIds();
         for (int id : queueIds) {

@@ -34,18 +34,27 @@ public class ChampSelectInteraction extends ChampSelectContextProvider implement
         return context.getChampSelectSettingsContext().getActionSetMapping();
     }
 
-    @Override
-    public List<ActionObject> getBanSelection(ChampSelectTeamType type) {
+    private List<ActionObject> getSelection(ChampSelectTeamType teamType, String type) {
         ChampSelectSettingsContext settingsContext = context.getChampSelectSettingsContext();
-        List<Integer> cellIds = Arrays.stream(settingsContext.getCells(type, MemberFunction.INSTANCE))
+        List<Integer> cellIds = Arrays.stream(settingsContext.getCells(teamType, MemberFunction.INSTANCE))
                 .map(ChampSelectMember::getCellId)
                 .toList();
         return getActionSetMapping().values()
                 .stream()
                 .flatMap(Collection::stream)
-                .filter(actionObject -> actionObject.getType().equals("BAN"))
+                .filter(actionObject -> actionObject.getType().equals(type))
                 .filter(actionObject -> cellIds.contains(actionObject.getActorCellId()))
                 .collect(Collectors.toList());
+    }
+
+    @Override
+    public List<ActionObject> getBanSelection(ChampSelectTeamType type) {
+        return getSelection(type, "BAN");
+    }
+
+    @Override
+    public List<ActionObject> getPickSelection(ChampSelectTeamType type) {
+        return getSelection(type, "PICK");
     }
 
     @Override

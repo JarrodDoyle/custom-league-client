@@ -47,9 +47,9 @@ public class GameInvite extends ChildUIComponent implements ActionListener {
             client.getLedge().getParties().role(party.getPartyId(), PartyRole.MEMBER);
             leagueClientUI.getLayoutManager().showClientComponent("play");
             if (queueId == 1100 || queueId == 1090 || queueId == 1130 || queueId == 1160) {
-                leagueClientUI.getLayoutManager().getQueue().getTftLobby().actionPerformed(null);
+                leagueClientUI.getLayoutManager().getQueue().showMatchMadeLobby("tft");
             } else {
-                leagueClientUI.getLayoutManager().getQueue().getDraftLobby().actionPerformed(null);
+                leagueClientUI.getLayoutManager().getQueue().showMatchMadeLobby("draft");
             }
         } catch (IOException ex) {
             Logger.error(ex);

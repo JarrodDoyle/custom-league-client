@@ -30,6 +30,7 @@ public abstract class ClientCache implements ISimpleValueCache<CacheElement, Obj
 
     @Override
     public void register(CacheElement element, CacheListener<?> listener) {
+        Logger.debug("Register {} listener, source: {}", element, listener.getClass().getCanonicalName());
         if (!listeners.containsKey(element)) listeners.put(element, new LinkedList<>());
         listeners.get(element).add(listener);
     }
@@ -38,6 +39,7 @@ public abstract class ClientCache implements ISimpleValueCache<CacheElement, Obj
     public void cache(CacheElement type, ExceptionalSupplier<Object> o) {
         try {
             cache(type, o.get());
+            dispatch(type);
         } catch (Exception e) {
             Logger.error("Failed to fetch cache value for {}", type);
         }
@@ -45,6 +47,7 @@ public abstract class ClientCache implements ISimpleValueCache<CacheElement, Obj
 
     @Override
     public void dispatch(CacheElement element) {
+        Logger.debug("dispatch {} from cache", element);
         if (!listeners.containsKey(element)) return;
         Object reference = cache.get(element);
         this.listeners.get(element).forEach(listener -> listener.onCacheUpdate(element, Unsafe.cast(reference)));
@@ -55,17 +58,18 @@ public abstract class ClientCache implements ISimpleValueCache<CacheElement, Obj
         Logger.info("Storing value for {} in cache as {}", element, value);
         if (element.getCachedDataType() != CachedDataType.JWT) {
             this.cache.put(element, value);
+            this.dispatch(element);
         } else {
             JWT jwt = new JWT(value.toString());
             if (jwt.isExpired()) {
                 Logger.warn("Attempting to store expired JWT in Cache has been prevented");
             } else {
                 this.cache.put(element, jwt);
+                this.dispatch(element);
                 long timestamp = Math.max(
                         1,
                         jwt.getExpirationTime() - System.currentTimeMillis() - TimeUnit.MINUTES.toMillis(1)
                 );
-                Logger.error(jwt.getExpirationTime());
                 this.service.schedule(
                         () -> {
                             Logger.info("Removing {} from cache, JWT expired", element);
@@ -133,6 +137,11 @@ public abstract class ClientCache implements ISimpleValueCache<CacheElement, Obj
             }
             cache(loader.getType(), loader.getValue());
         }
+    }
+
+    @Override
+    public boolean isCached(CacheElement element) {
+        return cache.containsKey(element);
     }
 
     protected abstract LeagueClient getClient();

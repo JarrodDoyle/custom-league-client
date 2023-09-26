@@ -2,11 +2,11 @@ package com.hawolt.ui.store;
 
 import com.hawolt.LeagueClientUI;
 import com.hawolt.client.LeagueClient;
+import com.hawolt.client.cache.CacheElement;
+import com.hawolt.client.cache.CachedValueLoader;
 import com.hawolt.client.resources.ledge.store.objects.StoreItem;
 import com.hawolt.client.resources.purchasewidget.CurrencyType;
 import com.hawolt.client.resources.purchasewidget.PurchaseWidget;
-import com.hawolt.client.cache.CacheElement;
-import com.hawolt.client.cache.CachedValueLoader;
 import com.hawolt.ui.generic.component.LLabel;
 import com.hawolt.ui.generic.component.LTextAlign;
 import com.hawolt.ui.generic.themes.ColorPalette;
@@ -15,6 +15,7 @@ import com.hawolt.util.audio.AudioEngine;
 import com.hawolt.util.audio.Sound;
 import org.json.JSONObject;
 
+import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 import java.awt.*;
 import java.util.ArrayList;
@@ -100,6 +101,15 @@ public class StoreElement extends ChildUIComponent implements IStoreElement {
         LeagueClientUI.service.execute(() -> {
             try {
                 PurchaseWidget widget = client.getPurchaseWidget();
+                String message = String.format(
+                        "Do you want to spend %s %s for this purchase?",
+                        price,
+                        currencyType == CurrencyType.RP ? "Riot Points" : "Blue Essence"
+                );
+                int result = JOptionPane.showConfirmDialog(Frame.getFrames()[0], message, "Confirm Purchase",
+                        JOptionPane.YES_NO_OPTION,
+                        JOptionPane.QUESTION_MESSAGE);
+                if (result != JOptionPane.YES_OPTION) return;
                 JSONObject response = new JSONObject(widget.purchase(currencyType, item.getInventoryType(), item.getItemId(), price));
                 if (response.has("errorCode")) {
                     AudioEngine.play(Sound.ERROR);

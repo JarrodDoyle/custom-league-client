@@ -4,7 +4,6 @@ import com.hawolt.LeagueClientUI;
 import com.hawolt.client.LeagueClient;
 import com.hawolt.client.cache.CacheElement;
 import com.hawolt.client.resources.ledge.parties.PartiesLedge;
-import com.hawolt.client.resources.ledge.parties.objects.PartiesRegistration;
 import com.hawolt.client.resources.ledge.parties.objects.data.PartyRole;
 import com.hawolt.client.resources.ledge.parties.objects.data.PartyType;
 import com.hawolt.client.resources.ledge.teambuilder.objects.MatchContext;
@@ -43,64 +42,68 @@ import java.util.*;
  **/
 
 public class QueueWindow extends ChildUIComponent implements Runnable, PacketCallback, IServiceMessageListener<RiotMessageServiceMessage> {
+    private final Map<Integer, String> mapping = new HashMap<>() {{
+        //TFT
+        put(1090, "NORMAL");
+        put(1100, "RANKED");
+        put(1130, "HYPER ROLL");
+        put(1160, "DOUBLE UP");
+
+        //TUTORIAL
+        put(2000, "TUTORIAL 1");
+        put(2010, "TUTORIAL 2");
+        put(2020, "TUTORIAL 3");
+
+        //ARAM
+        put(450, "ARAM");
+
+        //BOT
+        put(830, "INTRO");
+        put(840, "EASY");
+        put(850, "INTERMEDIATE");
+
+        //NORMAL
+        put(400, "BLIND PICK");
+        put(420, "RANKED SOLO/DUO");
+        put(430, "DRAFT PICK");
+        put(440, "RANKED FLEX");
+    }};
+
+    private final List<String> supportedModes = Arrays.asList("TUTORIAL", "ARAM", "BOTS", "BLIND", "DRAFT", "RANKED-FLEX", "RANKED-SOLO", "TFT");
+    private final LFlatButton button = new LFlatButton("Show Lobby", LTextAlign.CENTER, HighlightType.COMPONENT);
+    private final ChildUIComponent main = new ChildUIComponent(new BorderLayout());
+    private final Map<String, GameLobby> relation = new HashMap<>();
     private final CardLayout layout = new CardLayout();
     private final LeagueClientUI leagueClientUI;
     private final ChildUIComponent parent;
-    private final DraftQueueLobby lobby;
-    private final TFTQueueLobby tftLobby;
-    private final List<String> supportedModes = Arrays.asList("TUTORIAL", "ARAM", "BOTS", "BLIND", "DRAFT", "RANKED-FLEX", "RANKED-SOLO", "TFT");
-    Boolean init = false;
-    ChildUIComponent main = new ChildUIComponent(new BorderLayout());
-    private LFlatButton button = new LFlatButton("Show Lobby", LTextAlign.CENTER);
-
 
     public QueueWindow(LeagueClientUI leagueClientUI) {
         super(new BorderLayout());
         this.leagueClientUI = leagueClientUI;
         this.add(parent = new ChildUIComponent(layout), BorderLayout.CENTER);
-        lobby = new DraftQueueLobby(leagueClientUI, parent, layout, this);
-        tftLobby = new TFTQueueLobby(leagueClientUI, parent, layout, this);
+        this.relation.put("draft", new DraftGameLobby(leagueClientUI, parent, layout, this));
+        this.relation.put("tft", new TFTGameLobby(leagueClientUI, parent, layout, this));
+        this.button.addActionListener(listener -> layout.show(parent, "lobby"));
+        this.button.setPreferredSize(new Dimension(getWidth() / 5, 30));
+        this.button.setHorizontalAlignment(SwingConstants.CENTER);
+        this.button.setVerticalAlignment(SwingConstants.CENTER);
+        this.parent.add("draft", relation.get("draft"));
+        this.parent.add("tft", relation.get("tft"));
         LeagueClientUI.service.execute(this);
     }
 
-    public DraftQueueLobby getDraftLobby() {
-        Component[] components = this.parent.getComponents();
-        boolean alreadyShown = false;
-        for (int i = 0; i < components.length; i++) {
-            if (!alreadyShown && components[i].getClass().getCanonicalName().equals("com.hawolt.ui.queue.DraftQueueLobby"))
-                alreadyShown = true;
-            if (components[i].getClass().getCanonicalName().equals("com.hawolt.ui.queue.TFTQueueLobby"))
-                this.parent.remove(i);
-        }
-        if (!alreadyShown) {
-            this.parent.add("lobby", lobby);
-        }
-        layout.show(parent, "lobby");
-        return lobby;
-    }
-
-    public TFTQueueLobby getTftLobby() {
-        Component[] components = this.parent.getComponents();
-        boolean alreadyShown = false;
-        for (int i = 0; i < components.length; i++) {
-            if (!alreadyShown && components[i].getClass().getCanonicalName().equals("com.hawolt.ui.queue.TFTQueueLobby"))
-                alreadyShown = true;
-            if (components[i].getClass().getCanonicalName().equals("com.hawolt.ui.queue.DraftQueueLobby"))
-                this.parent.remove(i);
-        }
-        if (!alreadyShown) {
-            this.parent.add("lobby", tftLobby);
-        }
-        layout.show(parent, "lobby");
-        return tftLobby;
-    }
-
     @Override
-    public void onPacket(RtmpPacket rtmpPacket, TypedObject typedObject) throws Exception {
-        TypedObject data = typedObject.getTypedObject("data");
-        TypedObject message = data.getTypedObject("flex.messaging.messages.AcknowledgeMessage");
-        String body = Base64GZIP.unzipBase64(message.getString("body"));
-        JSONArray array = new JSONArray(body);
+    public void run() {
+        try {
+            LeagueClient client = leagueClientUI.getLeagueClient();
+            client.getRMSClient().getHandler().addMessageServiceListener(MessageService.TEAMBUILDER, this);
+            client.getRTMPClient().getMatchMakerService().getAllQueuesCompressedAsynchronous(this);
+        } catch (IOException e) {
+            Logger.error(e);
+        }
+    }
+
+    private Map<String, List<JSONObject>> getQueueMapping(JSONArray array) {
         Map<String, List<JSONObject>> map = new HashMap<>();
         for (int i = 0; i < array.length(); i++) {
             JSONObject object = array.getJSONObject(i);
@@ -117,21 +120,29 @@ public class QueueWindow extends ChildUIComponent implements Runnable, PacketCal
             if (!supported) continue;
             String gameMode = object.getString("gameMode");
             if (gameMode.contains("TUTORIAL")) gameMode = "TUTORIAL";
+            if ("BOT".equals(object.getString("type"))) gameMode = "BOT";
             if (!map.containsKey(gameMode)) map.put(gameMode, new ArrayList<>());
             map.get(gameMode).add(object);
         }
-        ChildUIComponent modes = new ChildUIComponent(new GridLayout(0, (int) map.keySet().stream().filter(o -> !o.contains("TUTORIAL")).count(), 5, 0));
+        return map;
+    }
+
+    private void configureQueueMapping(String body) {
+        JSONArray array = new JSONArray(body);
+        Map<String, List<JSONObject>> map = getQueueMapping(array);
+        //int count = (int) map.keySet().stream().filter(o -> !o.contains("TUTORIAL")).count();
+        ChildUIComponent modes = new ChildUIComponent(new GridLayout(0, 3, 5, 0));
         modes.setBorder(new EmptyBorder(5, 5, 5, 5));
         main.setBackground(ColorPalette.backgroundColor);
         modes.setBackground(ColorPalette.backgroundColor);
         for (String key : map.keySet()) {
+            LLabel label = new LLabel(key, LTextAlign.CENTER, true);
             ChildUIComponent parent = new ChildUIComponent(new BorderLayout());
             ChildUIComponent grid = new ChildUIComponent(new GridLayout(0, 1, 0, 5)) {
                 @Override
                 protected void paintComponent(Graphics g) {
                     Graphics2D g2d = (Graphics2D) g.create();
                     g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-                    //background issues fix if buttons are all grid long
                     g2d.setColor(ColorPalette.backgroundColor);
                     g2d.fillRect(getX(), getY(), getWidth(), getHeight());
                     g2d.setColor(ColorPalette.cardColor);
@@ -140,63 +151,16 @@ public class QueueWindow extends ChildUIComponent implements Runnable, PacketCal
                 }
             };
             parent.setBackground(ColorPalette.backgroundColor);
-
-            //Mode label
-            LLabel label = new LLabel(key, LTextAlign.CENTER, true);
-
             grid.add(label);
 
             for (JSONObject object : map.get(key)) {
                 String name = object.getString("shortName");
-                if (name.contains("CLASH") /*|| name.contains("TFT-TUTORIAL")*/) {
-                    continue;
-                }
-
-                //parse mode name
-                String modeName = "";
-                if (name.contains("NORMAL")) {
-                    modeName = "Normal";
-                    if (name.contains("DRAFT"))
-                        modeName += " Draft";
-                    else if (name.contains("BLIND"))
-                        modeName += " Blind";
-                } else if (name.contains("RANKED")) {
-                    modeName = "Ranked";
-                    if (name.contains("SOLO"))
-                        modeName += " Solo/Duo";
-                    else if (name.contains("FLEX"))
-                        modeName += " Flex";
-                    else if (name.contains("TURBO"))
-                        modeName = "Hyper Roll";
-                    else if (name.contains("DOUBLE"))
-                        modeName = "Double Up";
-                } else if (name.contains("BOTS")) {
-                    modeName = "Bots";
-                    if (name.contains("INTRO"))
-                        modeName += " Intro";
-                    else if (name.contains("EASY"))
-                        modeName += " Easy";
-                    else if (name.contains("MEDIUM"))
-                        modeName += " Medium";
-                } else if (name.contains("ARAM")) {
-                    modeName = "ARAM";
-                }
-                modeName = modeName.toUpperCase();
-
+                if (name.contains("CLASH") || name.contains("TFT-TUTORIAL")) continue;
+                String modeName = mapping.getOrDefault(object.getInt("id"), "UNKNOWN");
                 LFlatButton button = new LFlatButton(modeName.isEmpty() ? name : modeName, LTextAlign.CENTER, HighlightType.COMPONENT);
-
                 button.setPreferredSize(new Dimension(grid.getWidth() / 4, 30));
-
                 button.setActionCommand(object.toString());
-                if (key.contains("CLASSIC")) {
-                    button.addActionListener(e -> goToLobby(e, "CLASSIC"));
-                } else if (key.contains("TFT")) {
-                    button.addActionListener(e -> goToLobby(e, "TFT"));
-                } else if (key.contains("ARAM")) {
-                    button.addActionListener(e -> goToLobby(e, "ARAM"));
-                } else if (key.contains("TUTORIAL")) {
-                    button.addActionListener(e -> goToLobby(e, "TUTORIAL"));
-                }
+                button.addActionListener(e -> createMatchMadeLobby(e, key));
                 grid.add(button);
             }
             parent.add(grid, BorderLayout.NORTH);
@@ -204,21 +168,20 @@ public class QueueWindow extends ChildUIComponent implements Runnable, PacketCal
             modes.add(parent);
         }
         main.add(modes, BorderLayout.CENTER);
-
         this.parent.add("modes", main);
         layout.show(parent, "modes");
         revalidate();
     }
 
     @Override
-    public void run() {
-        try {
-            LeagueClient client = leagueClientUI.getLeagueClient();
-            client.getRMSClient().getHandler().addMessageServiceListener(MessageService.TEAMBUILDER, this);
-            client.getRTMPClient().getMatchMakerService().getAllQueuesCompressedAsynchronous(this);
-        } catch (IOException e) {
-            Logger.error(e);
-        }
+    public void onPacket(RtmpPacket rtmpPacket, TypedObject typedObject) throws Exception {
+        TypedObject data = typedObject.getTypedObject("data");
+        TypedObject message = data.getTypedObject("flex.messaging.messages.AcknowledgeMessage");
+        configureQueueMapping(Base64GZIP.unzipBase64(message.getString("body")));
+    }
+
+    public Collection<GameLobby> getAvailableLobbies() {
+        return new ArrayList<>(relation.values());
     }
 
     @Override
@@ -282,33 +245,24 @@ public class QueueWindow extends ChildUIComponent implements Runnable, PacketCal
         }
     }
 
-    public void goToLobby(ActionEvent e, String mode) {
-        Logger.error("goTo Lobby mode: " + mode);
-        if (mode.equals("CLASSIC") || mode.equals("ARAM") || mode.equals("TUTORIAL")) {
-            this.parent.add("lobby", lobby);
-            layout.show(parent, "lobby");
-            lobby.actionPerformed(null);
-        } else if (mode.equals("TFT")) {
-            this.parent.add("lobby", tftLobby);
-            layout.show(parent, "lobby");
-            lobby.actionPerformed(null);
+    public void showMatchMadeLobby(String mode) {
+        if (mode.equals("TFT")) {
+            this.layout.show(parent, "tft");
+        } else {
+            DraftGameLobby draftGameLobby = (DraftGameLobby) relation.get("draft");
+            LeagueClientUI.service.execute(draftGameLobby::selectPositionPreference);
+            this.layout.show(parent, "draft");
         }
-        if (!init) {
-            LFlatButton button = new LFlatButton("Show Lobby", LTextAlign.CENTER, HighlightType.COMPONENT);
-            button.setPreferredSize(new Dimension(getWidth() / 5, 30));
-            button.setHorizontalAlignment(SwingConstants.CENTER);
-            button.setVerticalAlignment(SwingConstants.CENTER);
-            button.addActionListener(listener -> layout.show(parent, "lobby"));
-            main.add(button, BorderLayout.SOUTH);
-            init = true;
-        }
+    }
+
+    public void createMatchMadeLobby(ActionEvent e, String mode) {
         JSONObject json = new JSONObject(e.getActionCommand());
+        this.showMatchMadeLobby(mode);
         long queueId = json.getLong("id");
+        this.main.add(button, BorderLayout.SOUTH);
         long maximumParticipantListSize = json.getLong("maximumParticipantListSize");
         PartiesLedge partiesLedge = leagueClientUI.getLeagueClient().getLedge().getParties();
         try {
-            PartiesRegistration registration = partiesLedge.getCurrentRegistration();
-            if (registration == null) partiesLedge.register();
             partiesLedge.role(PartyRole.DECLINED);
             partiesLedge.gamemode(
                     partiesLedge.getCurrentPartyId(),
@@ -324,6 +278,5 @@ public class QueueWindow extends ChildUIComponent implements Runnable, PacketCal
 
     public void rebase() {
         main.remove(button);
-        init = false;
     }
 }

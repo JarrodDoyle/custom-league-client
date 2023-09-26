@@ -219,15 +219,23 @@ public abstract class MatchmadeRenderInstance extends AbstractRenderInstance imp
         }
     }
 
+    private MatchContext matchContext;
+
     @Override
     public void onCacheUpdate(CacheElement element, MatchContext matchContext) {
+        this.matchContext = matchContext;
+    }
+
+    @Override
+    public void init() {
+        super.init();
         int targetQueueId = context.getChampSelectSettingsContext().getQueueId();
         int[] supportedQueueIds = getSupportedQueueIds();
         for (int supportedQueueId : supportedQueueIds) {
             if (supportedQueueId == targetQueueId) {
                 LeagueClientUI.service.execute(() -> {
                     LeagueClient client = context.getChampSelectDataContext().getLeagueClient();
-                    if (client == null) return;
+                    if (client == null || matchContext == null) return;
                     chatUI.setMatchContext(matchContext);
                     VirtualRiotXMPPClient xmppClient = client.getXMPPClient();
                     xmppClient.joinUnprotectedMuc(matchContext.getPayload().getChatRoomName(), matchContext.getPayload().getTargetRegion());

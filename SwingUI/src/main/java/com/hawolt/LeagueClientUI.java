@@ -2,6 +2,7 @@ package com.hawolt;
 
 import com.hawolt.async.ExecutorManager;
 import com.hawolt.async.gsm.ActiveGameInformation;
+import com.hawolt.async.gsm.GameStartHandler;
 import com.hawolt.async.loader.PreferenceLoader;
 import com.hawolt.async.loader.ResourceConsumer;
 import com.hawolt.async.loader.ResourceLoader;
@@ -64,6 +65,7 @@ import java.util.concurrent.Executors;
 
 public class LeagueClientUI extends JFrame implements IClientCallback, ILoginCallback, WindowStateListener, ResourceConsumer<JSONObject, byte[]> {
     public static final ExecutorService service = ExecutorManager.registerService("pool", Executors.newCachedThreadPool());
+    private final LiveGameClient liveGameClient = new LiveGameClient(1000);
     private static BufferedImage logo;
 
     static {
@@ -113,6 +115,7 @@ public class LeagueClientUI extends JFrame implements IClientCallback, ILoginCal
         this.shutdownManager = new ShutdownManager(client);
         this.presence = new PresenceManager(this);
         this.configure(loginUI == null || loginUI.getRememberMe().isSelected());
+        this.liveGameClient.register("GameStart", new GameStartHandler(leagueClient));
     }
 
     @Override

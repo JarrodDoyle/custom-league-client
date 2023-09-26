@@ -302,9 +302,9 @@ public class ChatSidebarFriend extends LFlatButton {
                                     leagueClientUI.getLayoutManager().showClientComponent("play");
                                     game.getPresenceInfo().ifPresent(info -> {
                                         if (info.getGameMode().toLowerCase().contains("tft")) {
-                                            leagueClientUI.getLayoutManager().getQueue().getTftLobby().actionPerformed(null);
+                                            leagueClientUI.getLayoutManager().getQueue().showMatchMadeLobby("tft");
                                         } else {
-                                            leagueClientUI.getLayoutManager().getQueue().getDraftLobby().actionPerformed(null);
+                                            leagueClientUI.getLayoutManager().getQueue().showMatchMadeLobby("draft");
                                         }
                                     });
                                 } catch (IOException ex) {

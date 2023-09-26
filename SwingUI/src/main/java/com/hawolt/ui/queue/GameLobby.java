@@ -10,6 +10,7 @@ import com.hawolt.client.resources.ledge.parties.objects.data.PartyRole;
 import com.hawolt.client.resources.ledge.summoner.SummonerLedge;
 import com.hawolt.client.resources.ledge.summoner.objects.Summoner;
 import com.hawolt.logger.Logger;
+import com.hawolt.rms.data.impl.payload.RiotMessageMessagePayload;
 import com.hawolt.rms.data.subject.service.IServiceMessageListener;
 import com.hawolt.rms.data.subject.service.MessageService;
 import com.hawolt.rms.data.subject.service.RiotMessageServiceMessage;
@@ -23,8 +24,6 @@ import org.json.JSONObject;
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -40,24 +39,27 @@ import java.util.stream.Stream;
  * Author: Twitter @hawolt
  **/
 
-abstract public class QueueLobby extends ChildUIComponent implements ActionListener, IServiceMessageListener<RiotMessageServiceMessage> {
+public abstract class GameLobby extends ChildUIComponent implements IServiceMessageListener<RiotMessageServiceMessage> {
     public final ScheduledExecutorService scheduler = ExecutorManager.getScheduledService("queue-resumer");
 
     public final LeagueClientUI leagueClientUI;
     public ScheduledFuture<?> future;
     public int queueId;
-    public ChildUIComponent grid;
+
     public ChildUIComponent component = new ChildUIComponent(new BorderLayout());
+    private LFlatButton stop, start;
+    public ChildUIComponent grid;
     private CurrentParty party;
     private String puuid;
 
-    public QueueLobby(LeagueClientUI leagueClientUI, Container parent, CardLayout layout, QueueWindow queueWindow) {
+    public GameLobby(LeagueClientUI leagueClientUI, Container parent, CardLayout layout, QueueWindow queueWindow) {
         super(new BorderLayout());
 
         createGrid(component);
         ChildUIComponent newButton = new ChildUIComponent(new BorderLayout());
         this.leagueClientUI = leagueClientUI;
         this.leagueClientUI.getLeagueClient().getRMSClient().getHandler().addMessageServiceListener(MessageService.PARTIES, this);
+        this.leagueClientUI.getLeagueClient().getRMSClient().getHandler().addMessageServiceListener(MessageService.LOL_PLATFORM, this);
 
         ChildUIComponent top = new ChildUIComponent(new GridLayout(0, 1, 0, 0));
         LFlatButton close = new LFlatButton("Choose mode", LTextAlign.CENTER, HighlightType.COMPONENT);
@@ -66,6 +68,8 @@ abstract public class QueueLobby extends ChildUIComponent implements ActionListe
         LFlatButton invite = new LFlatButton("Invite another Summoner", LTextAlign.CENTER, HighlightType.COMPONENT);
         LFlatButton leave = new LFlatButton("Leave Party", LTextAlign.CENTER, HighlightType.COMPONENT);
         leave.addActionListener(listener -> {
+            this.stop.setEnabled(false);
+            this.start.setEnabled(true);
             layout.show(parent, "modes");
             try {
                 leagueClientUI.getLeagueClient().getLedge().getParties().role(PartyRole.DECLINED);
@@ -109,12 +113,13 @@ abstract public class QueueLobby extends ChildUIComponent implements ActionListe
         add(component, BorderLayout.CENTER);
         ChildUIComponent bottom = new ChildUIComponent(new GridLayout(0, 2, 5, 0));
         bottom.setBorder(new EmptyBorder(5, 5, 5, 5));
-        LFlatButton start = new LFlatButton("Start", LTextAlign.CENTER, HighlightType.COMPONENT);
+        this.start = new LFlatButton("Start", LTextAlign.CENTER, HighlightType.COMPONENT);
         start.setRounding(ColorPalette.BUTTON_SMALL_ROUNDING);
         start.setBackground(ColorPalette.buttonSelectionColor);
         start.setHighlightColor(ColorPalette.buttonSelectionAltColor);
         start.addActionListener(listener -> startQueue());
-        LFlatButton stop = new LFlatButton("×", LTextAlign.CENTER, HighlightType.COMPONENT);
+        this.stop = new LFlatButton("×", LTextAlign.CENTER, HighlightType.COMPONENT);
+        stop.setEnabled(false);
         stop.setRounding(ColorPalette.BUTTON_SMALL_ROUNDING);
         stop.setBackground(ColorPalette.buttonSelectionColor);
         stop.setHighlightColor(ColorPalette.buttonSelectionAltColor);
@@ -126,6 +131,7 @@ abstract public class QueueLobby extends ChildUIComponent implements ActionListe
                 if (registration == null) return;
                 partiesLedge.setQueueAction(PartyAction.STOP);
                 leagueClientUI.getChatSidebar().getEssentials().disableQueueState();
+                this.flipButtonState();
             } catch (IOException e) {
                 Logger.error(e);
             }
@@ -135,54 +141,61 @@ abstract public class QueueLobby extends ChildUIComponent implements ActionListe
         add(bottom, BorderLayout.SOUTH);
     }
 
+    public LFlatButton getStopButton() {
+        return stop;
+    }
+
+    public LFlatButton getStartButton() {
+        return start;
+    }
+
+    public void toggleButtonState(boolean stop, boolean start) {
+        this.start.setEnabled(start);
+        this.stop.setEnabled(stop);
+    }
+
+    public void flipButtonState() {
+        this.toggleButtonState(!stop.isEnabled(), !start.isEnabled());
+    }
+
     protected abstract void createSpecificComponents(ChildUIComponent component);
 
     protected abstract void createGrid(ChildUIComponent component);
 
     @Override
     public void onMessage(RiotMessageServiceMessage riotMessageServiceMessage) {
-        JSONObject payload = riotMessageServiceMessage.getPayload().getPayload();
-        if (!payload.has("player") || payload.isNull("player")) return;
-        PartiesRegistration registration = new PartiesRegistration(payload.getJSONObject("player"));
-        puuid = registration.getPUUID();
-        party = registration.getCurrentParty();
-        List<PartyParticipant> partyParticipants = party.getPlayers();
-        if (party == null) return;
-        PartyRestriction restriction = party.getPartyRestriction();
-        if (restriction != null) handleGatekeeperRestriction(restriction.getRestrictionList());
-        partyParticipants.stream().filter(participant -> participant.getPUUID().equals(puuid)).findFirst().ifPresent(self -> {
-            SummonerLedge summonerLedge = leagueClientUI.getLeagueClient().getLedge().getSummoner();
-            try {
-                getSummonerComponentAt(0).update(self, summonerLedge.resolveSummonerByPUUD(puuid));
-                partyParticipants.remove(self);
-                int memberPosition = 1;
-                for (PartyParticipant participant : partyParticipants) {
-                    Summoner summoner = summonerLedge.resolveSummonerByPUUD(participant.getPUUID());
-                    if (participant.getRole().equals("MEMBER") || participant.getRole().equals("LEADER")) {
-                        getSummonerComponentAt(memberPosition++).update(participant, summoner);
+        RiotMessageMessagePayload base = riotMessageServiceMessage.getPayload();
+        JSONObject payload = base.getPayload();
+        if (base.getResource().endsWith("teambuilder/v1/removedFromServiceV1")) {
+            this.flipButtonState();
+        } else if (payload.has("player") && !payload.isNull("player")) {
+            PartiesRegistration registration = new PartiesRegistration(payload.getJSONObject("player"));
+            puuid = registration.getPUUID();
+            party = registration.getCurrentParty();
+            List<PartyParticipant> partyParticipants = party.getPlayers();
+            if (party == null) return;
+            PartyRestriction restriction = party.getPartyRestriction();
+            if (restriction != null) handleGatekeeperRestriction(restriction.getRestrictionList());
+            partyParticipants.stream().filter(participant -> participant.getPUUID().equals(puuid)).findFirst().ifPresent(self -> {
+                SummonerLedge summonerLedge = leagueClientUI.getLeagueClient().getLedge().getSummoner();
+                try {
+                    getSummonerComponentAt(0).update(self, summonerLedge.resolveSummonerByPUUD(puuid));
+                    partyParticipants.remove(self);
+                    int memberPosition = 1;
+                    for (PartyParticipant participant : partyParticipants) {
+                        Summoner summoner = summonerLedge.resolveSummonerByPUUD(participant.getPUUID());
+                        if (participant.getRole().equals("MEMBER") || participant.getRole().equals("LEADER")) {
+                            getSummonerComponentAt(memberPosition++).update(participant, summoner);
+                        }
                     }
+                    for (int i = memberPosition; i < party.getMaxPartySize(); i++) {
+                        getSummonerComponentAt(i).update(null, null);
+                    }
+                } catch (IOException e) {
+                    throw new RuntimeException(e);
                 }
-                for (int i = memberPosition; i < party.getMaxPartySize(); i++) {
-                    getSummonerComponentAt(i).update(null, null);
-                }
-            } catch (IOException e) {
-                throw new RuntimeException(e);
-            }
-            revalidate();
-        });
-        if (party.getPartyGameMode() != null && queueId != party.getPartyGameMode().getQueueId()) {
-            queueId = party.getPartyGameMode().getQueueId();
-            try {
-                leagueClientUI.getLeagueClient().getLedge().getParties().role(party.getPartyId(), PartyRole.MEMBER);
-                if (queueId == 1100 || queueId == 1090 || queueId == 1130 || queueId == 1160) {
-                    leagueClientUI.getLayoutManager().getQueue().getTftLobby().actionPerformed(null);
-                } else {
-                    leagueClientUI.getLayoutManager().getQueue().getDraftLobby().actionPerformed(null);
-                }
-                leagueClientUI.getLayoutManager().showClientComponent("play");
-            } catch (IOException ex) {
-                Logger.error(ex);
-            }
+                revalidate();
+            });
         }
     }
 
@@ -208,15 +221,9 @@ abstract public class QueueLobby extends ChildUIComponent implements ActionListe
 
     abstract public SummonerComponent getSummonerComponentAt(int id);
 
-    @Override
-    public void actionPerformed(ActionEvent e) {
-    }
-
     public void startQueue() {
         PartiesLedge partiesLedge = leagueClientUI.getLeagueClient().getLedge().getParties();
-        PartiesRegistration registration = partiesLedge.getCurrentRegistration();
         try {
-            if (registration == null) partiesLedge.register();
             partiesLedge.ready();
             JSONObject response = partiesLedge.setQueueAction(PartyAction.START);
             List<GatekeeperRestriction> direct = response.has("errorCode") &&
@@ -226,6 +233,8 @@ abstract public class QueueLobby extends ChildUIComponent implements ActionListe
             PartyRestriction restriction = party.getPartyRestriction();
             List<GatekeeperRestriction> indirect = restriction != null ?
                     restriction.getRestrictionList() : new ArrayList<>();
+            this.flipButtonState();
+            this.handleStartInteraction();
             if (direct.isEmpty() && indirect.isEmpty()) return;
             handleGatekeeperRestriction(
                     Stream.of(direct, indirect).flatMap(Collection::stream).collect(Collectors.toList())
@@ -235,5 +244,5 @@ abstract public class QueueLobby extends ChildUIComponent implements ActionListe
         }
     }
 
-
+    abstract void handleStartInteraction();
 }

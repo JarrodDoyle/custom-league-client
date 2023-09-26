@@ -25,8 +25,11 @@ public class GameStartListener implements IServiceMessageListener<RiotMessageSer
         boolean gameStart = riotMessageServiceMessage.getPayload().getResource().endsWith("player-credentials-update");
         if (!gameStart) return;
         Launcher.launch(leagueClientUI.getSettingService(), platform, riotMessageServiceMessage.getPayload().getPayload());
-        leagueClientUI.getChatSidebar().getEssentials().disableQueueState();
+        leagueClientUI.getLayoutManager().getQueue().getAvailableLobbies().forEach(
+                lobby -> lobby.toggleButtonState(false, false)
+        );
         leagueClientUI.getLayoutManager().getChampSelectUI().showBlankPanel();
+        leagueClientUI.getChatSidebar().getEssentials().disableQueueState();
     }
 
 }

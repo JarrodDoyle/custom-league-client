@@ -57,9 +57,9 @@ public class PostGameUI extends ChildUIComponent implements ActionListener {
 
     @Override
     public void actionPerformed(ActionEvent e) {
-        this.leagueClientUI.getHeader().selectAndShowComponent(LayoutComponent.PLAY);
         LeagueClientUI.service.execute(() -> {
             try {
+                this.leagueClientUI.getLayoutManager().getQueue().getAvailableLobbies().forEach(lobby -> lobby.toggleButtonState(false, true));
                 this.leagueClientUI.getLeagueClient().getLedge().getParties().ready();
                 this.leagueClientUI.getLayoutManager()
                         .getChampSelectUI()
@@ -67,6 +67,8 @@ public class PostGameUI extends ChildUIComponent implements ActionListener {
                         .getChampSelectDataContext()
                         .getPUUIDResolver()
                         .clear();
+                this.leagueClientUI.getHeader().selectAndShowComponent(LayoutComponent.PLAY);
+                this.leagueClientUI.getLayoutManager().getChampSelectUI().showBlankPanel();
             } catch (IOException ex) {
                 Logger.error(ex);
             }

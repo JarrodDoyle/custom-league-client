@@ -166,8 +166,8 @@ public class LeagueClient extends ClientCache implements PacketCallback {
         if (!data.containsKey("flex.messaging.messages.AcknowledgeMessage")) return;
         TypedObject message = data.getTypedObject("flex.messaging.messages.AcknowledgeMessage");
         if (!message.containsKey("body")) return;
-        TypedObject body = message.getTypedObject("body");
-        if (body == null) return;
+        Object object = message.get("body");
+        if (!(object instanceof TypedObject body)) return;
         if (!body.containsKey("com.riotgames.platform.clientfacade.domain.LoginDataPacket")) return;
         TypedObject packet = body.getTypedObject("com.riotgames.platform.clientfacade.domain.LoginDataPacket");
         cache(CacheElement.LOGIN_DATA_PACKET, packet);

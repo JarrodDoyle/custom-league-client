@@ -122,6 +122,11 @@
             <version>e05000531a</version>
         </dependency>
         <dependency>
+            <groupId>com.github.hawolt</groupId>
+            <artifactId>league-live-api</artifactId>
+            <version>642c31c95f</version>
+        </dependency>
+        <dependency>
             <groupId>com.hawolt</groupId>
             <artifactId>Core</artifactId>
             <version>1.0</version>

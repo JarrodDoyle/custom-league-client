@@ -85,6 +85,9 @@ public abstract class AbstractRenderInstance extends ChampSelectUIComponent impl
                             rtmpClient.getTeamBuilderService().quitGameV2Asynchronous(dataContext.getPacketCallback());
                     case CUSTOM -> Logger.debug("currently not supported");
                 }
+                leagueClientUI.getLayoutManager().getQueue().getAvailableLobbies().forEach(
+                        lobby -> lobby.toggleButtonState(false, true)
+                );
                 leagueClientUI.getChatSidebar().getEssentials().disableQueueState();
                 context.getChampSelectUtilityContext().quitChampSelect();
                 revalidate();

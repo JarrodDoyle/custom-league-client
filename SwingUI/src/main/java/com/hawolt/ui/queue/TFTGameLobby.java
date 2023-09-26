@@ -16,13 +16,11 @@ import java.util.concurrent.atomic.AtomicInteger;
  * Author: Twitter @hawolt
  **/
 
-public class TFTQueueLobby extends QueueLobby {
+public class TFTGameLobby extends GameLobby {
 
-
-    public TFTQueueLobby(LeagueClientUI leagueClientUI, Container parent, CardLayout layout, QueueWindow queueWindow) {
+    public TFTGameLobby(LeagueClientUI leagueClientUI, Container parent, CardLayout layout, QueueWindow queueWindow) {
         super(leagueClientUI, parent, layout, queueWindow);
     }
-
 
     @Override
     public SummonerComponent getSummonerComponentAt(int id) {
@@ -36,6 +34,11 @@ public class TFTQueueLobby extends QueueLobby {
         else if (id == 6) index = 4;
         else index = 7;
         return (SummonerComponent) grid.getComponent(index);
+    }
+
+    @Override
+    void handleStartInteraction() {
+
     }
 
 
@@ -108,6 +111,4 @@ public class TFTQueueLobby extends QueueLobby {
         grid.setBackground(Color.YELLOW);
         component.add(grid, BorderLayout.CENTER);
     }
-
-
 }
