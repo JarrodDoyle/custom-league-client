@@ -50,7 +50,7 @@ public abstract class MatchmadeRenderInstance extends AbstractRenderInstance imp
         ChildUIComponent component = new ChildUIComponent(new BorderLayout());
         this.centerUI.getSouthernChild().add(component, BorderLayout.NORTH);
         component.add(new ChampSelectDebugUI(), BorderLayout.NORTH);
-        component.add(settingUI = new ChampSelectGameSettingUI(getAllowedSummonerSpells()), BorderLayout.CENTER);
+        component.add(settingUI = new ChampSelectGameSettingUI(this, getAllowedSummonerSpells()), BorderLayout.CENTER);
         this.centerUI.getSouthernChild().add(chatUI = new ChampSelectChatUI(), BorderLayout.CENTER);
         this.build();
     }
@@ -235,6 +235,7 @@ public abstract class MatchmadeRenderInstance extends AbstractRenderInstance imp
                     if (client == null || matchContext == null) return;
                     chatUI.setMatchContext(matchContext);
                     VirtualRiotXMPPClient xmppClient = client.getXMPPClient();
+                    if (xmppClient.getIdentity() == null) return;
                     xmppClient.joinUnprotectedMuc(matchContext.getPayload().getChatRoomName(), matchContext.getPayload().getTargetRegion());
                 });
             }

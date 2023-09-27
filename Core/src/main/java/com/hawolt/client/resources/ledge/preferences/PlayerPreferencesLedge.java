@@ -8,6 +8,7 @@ import com.hawolt.client.resources.ledge.preferences.objects.PreferenceType;
 import com.hawolt.generic.Constant;
 import com.hawolt.http.OkHttp3Client;
 import com.hawolt.http.layer.IResponse;
+import com.hawolt.logger.Logger;
 import okhttp3.Request;
 import okhttp3.RequestBody;
 import org.json.JSONObject;
@@ -58,7 +59,9 @@ public class PlayerPreferencesLedge extends AbstractLedgeEndpoint {
                 .put(RequestBody.create(sendData.toString(), Constant.APPLICATION_JSON))
                 .build();
         IResponse response = OkHttp3Client.execute(request, gateway);
-        return response.code();
+        int code = response.code();
+        Logger.debug("[settings] call to store preference:{} with code {}", code);
+        return code;
     }
 
     private JSONObject convertYamlToJson(String yamlString) {

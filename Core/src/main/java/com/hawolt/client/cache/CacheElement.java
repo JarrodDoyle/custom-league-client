@@ -24,7 +24,8 @@ public enum CacheElement {
     FREE_TO_PLAY_LEVEL_CAP(CachedDataType.VALUE),
     F2P_NEW_PLAYER(CachedDataType.VALUE),
     F2P_VETERAN_PLAYER(CachedDataType.VALUE),
-    PARTY_REGISTRATION(CachedDataType.VALUE);
+    PARTY_REGISTRATION(CachedDataType.VALUE),
+    LCU_PREFERENCES(CachedDataType.VALUE);
     private final CachedDataType cachedDataType;
 
     CacheElement(CachedDataType cachedDataType) {

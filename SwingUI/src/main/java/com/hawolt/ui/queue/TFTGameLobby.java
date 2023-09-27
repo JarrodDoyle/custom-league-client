@@ -37,12 +37,6 @@ public class TFTGameLobby extends GameLobby {
     }
 
     @Override
-    void handleStartInteraction() {
-
-    }
-
-
-    @Override
     protected void createSpecificComponents(ChildUIComponent component) {
         Loadout loadout = new Loadout(swiftrift.getLeagueClient());
         LComboBox<TFTLegend> legend = new LComboBox<>(TFTLegend.values());

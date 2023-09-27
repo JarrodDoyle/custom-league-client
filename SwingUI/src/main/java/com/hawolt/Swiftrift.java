@@ -102,7 +102,7 @@ public class Swiftrift extends JFrame implements IClientCallback, ILoginCallback
     }
 
     private void configure(boolean remember) {
-        ResourceLoader.loadResource("local", new PreferenceLoader(leagueClient), this);
+        ResourceLoader.forceLoadResource("local", new PreferenceLoader(leagueClient), this);
         if (!remember) return;
         this.settingService.write(
                 SettingType.PLAYER,
@@ -116,11 +116,10 @@ public class Swiftrift extends JFrame implements IClientCallback, ILoginCallback
         this.shutdownManager = new ShutdownManager(client);
         this.presence = new PresenceManager(this);
         this.configure(loginUI == null || loginUI.getRememberMe().isSelected());
-        this.liveGameClient.register("GameStart", new GameStartHandler(leagueClient));
+        this.liveGameClient.register("GameStart", new GameStartHandler(this));
     }
 
-    @Override
-    public void consume(Object o, JSONObject object) {
+    private void handlePlayerPartyPreference(JSONObject object) {
         if (!object.has("partiesPositionPreferences") || object.isNull("partiesPositionPreferences")) {
             JSONObject partiesPositionPreferences = new JSONObject();
             JSONObject data = new JSONObject();
@@ -131,6 +130,11 @@ public class Swiftrift extends JFrame implements IClientCallback, ILoginCallback
             partiesPositionPreferences.put("data", data);
             object.put("partiesPositionPreferences", partiesPositionPreferences);
         }
+    }
+
+    @Override
+    public void consume(Object o, JSONObject object) {
+        this.handlePlayerPartyPreference(object);
         this.leagueClient.cache(CacheElement.PLAYER_PREFERENCE, object);
         this.settingService.write(SettingType.PLAYER, "preferences", object);
         this.dispose();
@@ -307,7 +311,6 @@ public class Swiftrift extends JFrame implements IClientCallback, ILoginCallback
     @Override
     public void onLogin(String username, String password) {
         if (loginUI.getRememberMe().isSelected()) {
-            System.out.println("write settings?");
             settingService.write(SettingType.CLIENT, "remember", true);
             settingService.write(SettingType.CLIENT, "username", username);
         }
@@ -334,10 +337,6 @@ public class Swiftrift extends JFrame implements IClientCallback, ILoginCallback
     @Override
     public JSONObject transform(byte[] bytes) throws Exception {
         return new JSONObject(new String(bytes));
-    }
-
-    public static void showBasicDialog(String... messages) {
-
     }
 
     public static void main(String[] args) {

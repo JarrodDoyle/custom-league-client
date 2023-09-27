@@ -1,6 +1,7 @@
 package com.hawolt.ui.queue;
 
 import com.hawolt.Swiftrift;
+import com.hawolt.async.Debouncer;
 import com.hawolt.client.resources.ledge.parties.PartiesLedge;
 import com.hawolt.client.resources.ledge.parties.objects.data.PositionPreference;
 import com.hawolt.client.resources.ledge.preferences.PlayerPreferencesLedge;
@@ -16,6 +17,7 @@ import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.IOException;
+import java.util.concurrent.TimeUnit;
 
 /**
  * Created: 11/08/2023 23:00
@@ -23,11 +25,11 @@ import java.io.IOException;
  **/
 
 public class DraftGameLobby extends GameLobby implements ActionListener {
+    private final Debouncer debouncer = new Debouncer();
     private LComboBox<PositionPreference> main, other;
 
     public DraftGameLobby(Swiftrift swiftrift, Container parent, CardLayout layout, QueueWindow queueWindow) {
         super(swiftrift, parent, layout, queueWindow);
-        this.selectPositionPreference();
     }
 
     @Override
@@ -41,6 +43,7 @@ public class DraftGameLobby extends GameLobby implements ActionListener {
         other.addActionListener(this);
         roles.add(other);
         component.add(roles, BorderLayout.SOUTH);
+        this.selectPositionPreference();
     }
 
     @Override
@@ -72,24 +75,24 @@ public class DraftGameLobby extends GameLobby implements ActionListener {
     }
 
     @Override
-    void handleStartInteraction() {
-        this.actionPerformed(null);
-    }
-
-    @Override
     public void actionPerformed(ActionEvent e) {
+        PositionPreference primary = main.getItemAt(main.getSelectedIndex());
+        PositionPreference secondary = other.getItemAt(other.getSelectedIndex());
         try {
-            savePositionPreference();
+            swiftrift.getLeagueClient().getLedge().getParties().metadata(primary, secondary);
         } catch (IOException ex) {
             Logger.error(ex);
         }
+        debouncer.debounce("save", () -> {
+            try {
+                savePositionPreference();
+            } catch (IOException ex) {
+                Logger.error(e);
+            }
+        }, 5, TimeUnit.SECONDS);
     }
 
     public void savePositionPreference() throws IOException {
-        PositionPreference primary = main.getItemAt(main.getSelectedIndex());
-        PositionPreference secondary = other.getItemAt(other.getSelectedIndex());
-        PartiesLedge partiesLedge = swiftrift.getLeagueClient().getLedge().getParties();
-        partiesLedge.metadata(primary, secondary);
         PlayerPreferencesLedge playerPreferencesLedge = swiftrift.getLeagueClient().getLedge().getPlayerPreferences();
         JSONObject preference = swiftrift.getSettingService().getUserSettings().setPartyPositionPreference(
                 new JSONObject()

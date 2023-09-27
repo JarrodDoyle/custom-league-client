@@ -1,6 +1,5 @@
 package com.hawolt.util.settings;
 
-import com.hawolt.virtual.misc.DynamicObject;
 import org.json.JSONObject;
 
 /**
@@ -8,9 +7,9 @@ import org.json.JSONObject;
  * Author: Twitter @hawolt
  **/
 
-public class ClientSettings extends DynamicObject {
-    public ClientSettings(JSONObject o) {
-        super(o);
+public class ClientSettings extends DynamicSettings {
+    public ClientSettings(JSONObject o, SettingService service) {
+        super(o, service);
     }
 
     public boolean isRememberMe() {

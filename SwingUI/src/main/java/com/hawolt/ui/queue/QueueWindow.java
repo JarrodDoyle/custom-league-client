@@ -257,7 +257,6 @@ public class QueueWindow extends ChildUIComponent implements Runnable, PacketCal
 
     public void createMatchMadeLobby(ActionEvent e, String mode) {
         JSONObject json = new JSONObject(e.getActionCommand());
-        this.showMatchMadeLobby(mode);
         long queueId = json.getLong("id");
         this.main.add(button, BorderLayout.SOUTH);
         long maximumParticipantListSize = json.getLong("maximumParticipantListSize");
@@ -271,6 +270,7 @@ public class QueueWindow extends ChildUIComponent implements Runnable, PacketCal
                     queueId
             );
             partiesLedge.partytype(PartyType.OPEN);
+            showMatchMadeLobby(mode);
         } catch (IOException ex) {
             Logger.error(ex);
         }
