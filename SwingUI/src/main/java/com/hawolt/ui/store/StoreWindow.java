@@ -74,6 +74,12 @@ public class StoreWindow extends ChildUIComponent implements Runnable {
 
     public StorePage createStorePage(LeagueClient client, String type, JSONObject items) {
         JSONArray itemTypeArray = items.getJSONArray(type);
+        if (type.equals(InventoryType.CHAMPION_SKIN.name())) {
+            JSONArray vintageSkinArray = items.getJSONArray("VINTAGE_CHAMPION_SKIN");
+            for (int i = 0; i < vintageSkinArray.length(); i++) {
+                itemTypeArray.put(vintageSkinArray.get(i));
+            }
+        }
         List<Long> itemTypeList = itemTypeArray.toList()
                 .stream()
                 .map(Object::toString)
