@@ -36,15 +36,4 @@ public class SwiftNotificationDialog extends SwiftDialog {
     protected ChildUIComponent getContainer() {
         return new ChildUIComponent(new BorderLayout());
     }
-
-    @Override
-    public void actionPerformed(ActionEvent e) {
-        this.selection = DialogOption.valueOf(e.getActionCommand()).ordinal();
-        this.dispose();
-    }
-
-    @Override
-    public int getSelection() {
-        return selection;
-    }
 }
