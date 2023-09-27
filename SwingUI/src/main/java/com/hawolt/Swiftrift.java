@@ -119,8 +119,7 @@ public class Swiftrift extends JFrame implements IClientCallback, ILoginCallback
         this.liveGameClient.register("GameStart", new GameStartHandler(this));
     }
 
-    @Override
-    public void consume(Object o, JSONObject object) {
+    private void handlePlayerPartyPreference(JSONObject object) {
         if (!object.has("partiesPositionPreferences") || object.isNull("partiesPositionPreferences")) {
             JSONObject partiesPositionPreferences = new JSONObject();
             JSONObject data = new JSONObject();
@@ -131,6 +130,11 @@ public class Swiftrift extends JFrame implements IClientCallback, ILoginCallback
             partiesPositionPreferences.put("data", data);
             object.put("partiesPositionPreferences", partiesPositionPreferences);
         }
+    }
+
+    @Override
+    public void consume(Object o, JSONObject object) {
+        this.handlePlayerPartyPreference(object);
         this.leagueClient.cache(CacheElement.PLAYER_PREFERENCE, object);
         this.settingService.write(SettingType.PLAYER, "preferences", object);
         this.dispose();
@@ -307,7 +311,6 @@ public class Swiftrift extends JFrame implements IClientCallback, ILoginCallback
     @Override
     public void onLogin(String username, String password) {
         if (loginUI.getRememberMe().isSelected()) {
-            System.out.println("write settings?");
             settingService.write(SettingType.CLIENT, "remember", true);
             settingService.write(SettingType.CLIENT, "username", username);
         }

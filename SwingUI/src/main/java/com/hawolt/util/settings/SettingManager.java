@@ -46,6 +46,7 @@ public class SettingManager implements SettingService {
 
     @Override
     public void write(SettingType type, String name, Object o) {
+        Logger.debug("[settings] write '{}' for '{}' as '{}'", name, type, o == null ? "null" : o);
         DynamicObject object = switch (type) {
             case CLIENT -> client;
             case PLAYER -> player;
@@ -60,11 +61,13 @@ public class SettingManager implements SettingService {
 
     @Override
     public void addSettingListener(String name, SettingListener<?> listener) {
+        Logger.debug("[settings] add '{}' listener with source '{}'", name, listener.getClass().getCanonicalName());
         if (!map.containsKey(name)) map.put(name, new ArrayList<>());
         this.map.get(name).add(listener);
     }
 
     private void dispatch(String name, Object value) {
+        Logger.debug("[settings] dispatch '{}' as '{}'", name, value == null ? "null" : value);
         List<SettingListener<?>> list = map.get(name);
         if (list == null) return;
         for (SettingListener<?> listener : list) {
@@ -78,6 +81,7 @@ public class SettingManager implements SettingService {
     }
 
     private JSONObject load(SettingType type) {
+        Logger.debug("[settings] load local setting for:{}", type);
         Path path = switch (type) {
             case CLIENT -> StaticConstant.APPLICATION_SETTINGS.resolve(StaticConstant.CLIENT_SETTING_fILE);
             case PLAYER ->
@@ -92,6 +96,7 @@ public class SettingManager implements SettingService {
     }
 
     private void write(SettingType type) {
+        Logger.debug("[settings] write local setting for:{}", type);
         Path path = switch (type) {
             case CLIENT -> StaticConstant.APPLICATION_SETTINGS.resolve(StaticConstant.CLIENT_SETTING_fILE);
             case PLAYER ->

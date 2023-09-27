@@ -1,13 +1,13 @@
 package com.hawolt.client.resources.ledge.perks;
 
 import com.hawolt.client.LeagueClient;
+import com.hawolt.client.cache.CacheElement;
 import com.hawolt.client.resources.ledge.AbstractLedgeEndpoint;
 import com.hawolt.client.resources.ledge.parties.objects.PartiesRegistration;
 import com.hawolt.client.resources.ledge.summoner.objects.Summoner;
 import com.hawolt.generic.Constant;
 import com.hawolt.http.OkHttp3Client;
 import com.hawolt.http.layer.IResponse;
-import com.hawolt.virtual.leagueclient.userinfo.child.UserInformationLeagueAccount;
 import okhttp3.Request;
 import okhttp3.RequestBody;
 import org.json.JSONObject;
@@ -38,12 +38,9 @@ public class PerksLedge extends AbstractLedgeEndpoint {
     }
 
     public String setRunesForCurrentRegistration(JSONObject runes) throws IOException {
-        PartiesRegistration registration = client.getLedge().getParties().getCurrentRegistration();
+        PartiesRegistration registration = client.getCachedValue(CacheElement.PARTY_REGISTRATION);
         int queueId = registration.getCurrentParty().getPartyGameMode().getQueueId();
-
-        UserInformationLeagueAccount account = userInformation.getUserInformationLeagueAccount();
-        Summoner self = client.getLedge().getSummoner().resolveSummonerByName(account.getSummonerName());
-
+        Summoner self = client.getCachedValue(CacheElement.SUMMONER);
         String uri = String.format("%s/%s/v%s/queues/%s/customizations/perks/accountId/%s/summonerId/%s",
                 base,
                 name(),
@@ -52,7 +49,6 @@ public class PerksLedge extends AbstractLedgeEndpoint {
                 self.getAccountId(),
                 self.getSummonerId()
         );
-
         Request request = jsonRequest(uri)
                 .post(RequestBody.create(escape(runes.toString()), Constant.APPLICATION_JSON))
                 .build();
