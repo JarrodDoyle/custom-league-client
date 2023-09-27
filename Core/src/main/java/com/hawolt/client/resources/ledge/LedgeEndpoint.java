@@ -9,6 +9,7 @@ import com.hawolt.client.resources.ledge.leagues.LeagueLedge;
 import com.hawolt.client.resources.ledge.loot.LootLedge;
 import com.hawolt.client.resources.ledge.parties.PartiesLedge;
 import com.hawolt.client.resources.ledge.perks.PerksLedge;
+import com.hawolt.client.resources.ledge.personalizedoffers.PersonalizedOffersLedge;
 import com.hawolt.client.resources.ledge.preferences.PlayerPreferencesLedge;
 import com.hawolt.client.resources.ledge.store.StoreLedge;
 import com.hawolt.client.resources.ledge.summoner.SummonerLedge;
@@ -22,6 +23,7 @@ import com.hawolt.client.resources.ledge.unclassified.UnclassifiedLedge;
 
 public class LedgeEndpoint {
     private final GameServiceMessageLedge gameServiceMessageLedge;
+    private final PersonalizedOffersLedge personalizedOffersLedge;
     private final PlayerPreferencesLedge playerPreferencesLedge;
     private final InventoryServiceLedge inventoryServiceLedge;
     private final ChampionMasteryLedge championMasteryLedge;
@@ -49,6 +51,11 @@ public class LedgeEndpoint {
         this.inventoryServiceLedge = new InventoryServiceLedge(client);
         this.playerPreferencesLedge = new PlayerPreferencesLedge(client);
         this.gameServiceMessageLedge = new GameServiceMessageLedge(client);
+        this.personalizedOffersLedge = new PersonalizedOffersLedge(client);
+    }
+
+    public PersonalizedOffersLedge getPersonalizedOffers() {
+        return personalizedOffersLedge;
     }
 
     public GameServiceMessageLedge getGameServiceMessage() {
