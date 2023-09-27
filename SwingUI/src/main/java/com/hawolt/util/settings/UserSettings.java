@@ -1,6 +1,5 @@
 package com.hawolt.util.settings;
 
-import com.hawolt.virtual.misc.DynamicObject;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
@@ -84,6 +83,7 @@ public class UserSettings extends DynamicSettings {
                         String key = String.valueOf(queueId);
                         if (spells.has(key)) spells.remove(key);
                         spells.put(key, preference);
+                        data.put("spells", spells);
                     }
                 }
             }

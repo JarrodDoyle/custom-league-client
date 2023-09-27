@@ -1,9 +1,12 @@
 package com.hawolt.ui.champselect.generic.impl;
 
+import com.hawolt.Swiftrift;
 import com.hawolt.async.Debouncer;
 import com.hawolt.client.resources.communitydragon.spell.Spell;
 import com.hawolt.client.resources.communitydragon.spell.SpellIndex;
 import com.hawolt.client.resources.communitydragon.spell.SpellSource;
+import com.hawolt.logger.Logger;
+import com.hawolt.ui.champselect.AbstractRenderInstance;
 import com.hawolt.ui.champselect.generic.ChampSelectUIComponent;
 import com.hawolt.ui.generic.component.LComboBox;
 import com.hawolt.ui.generic.component.LFlatButton;
@@ -12,6 +15,7 @@ import com.hawolt.ui.generic.component.LTextAlign;
 import com.hawolt.ui.generic.themes.ColorPalette;
 import com.hawolt.ui.generic.utility.ChildUIComponent;
 import com.hawolt.ui.generic.utility.HighlightType;
+import com.hawolt.util.settings.UserSettings;
 import org.json.JSONArray;
 
 import javax.swing.*;
@@ -31,11 +35,13 @@ import java.util.concurrent.TimeUnit;
 
 public class ChampSelectGameSettingUI extends ChampSelectUIComponent {
     private final Debouncer debouncer = new Debouncer();
+    private final AbstractRenderInstance renderInstance;
     private final LComboBox<Spell> spellOne, spellTwo;
     private final LFlatButton submit, runes, dodge;
 
-    public ChampSelectGameSettingUI(Integer... allowedSpellIds) {
+    public ChampSelectGameSettingUI(AbstractRenderInstance renderInstance, Integer... allowedSpellIds) {
         this.setLayout(new BorderLayout());
+        this.renderInstance = renderInstance;
         this.setBackground(ColorPalette.backgroundColor);
         this.setBorder(BorderFactory.createMatteBorder(0, 1, 0, 1, Color.DARK_GRAY));
         //TODO find a data source for this
@@ -131,6 +137,26 @@ public class ChampSelectGameSettingUI extends ChampSelectUIComponent {
             if (spell.getId() == spellId) {
                 selection.setSelectedIndex(i);
                 break;
+            }
+        }
+    }
+
+    @Override
+    public void init() {
+        super.init();
+        int targetQueueId = context.getChampSelectSettingsContext().getQueueId();
+        int[] supportedQueueIds = renderInstance.getSupportedQueueIds();
+        for (int supportedQueueId : supportedQueueIds) {
+            if (supportedQueueId == targetQueueId) {
+                Swiftrift.service.execute(() -> {
+                    Swiftrift swiftrift = context.getChampSelectInterfaceContext().getLeagueClientUI();
+                    if (swiftrift == null) return;
+                    UserSettings settings = swiftrift.getSettingService().getUserSettings();
+                    JSONArray preference = settings.getChampSelectSpellPreference(targetQueueId);
+                    Logger.error(preference);
+                    if (preference == null) return;
+                    preselectSummonerSpells(preference);
+                });
             }
         }
     }

@@ -339,10 +339,6 @@ public class Swiftrift extends JFrame implements IClientCallback, ILoginCallback
         return new JSONObject(new String(bytes));
     }
 
-    public static void showBasicDialog(String... messages) {
-
-    }
-
     public static void main(String[] args) {
         RMANCache.preload();
         AudioEngine.install();

@@ -19,11 +19,9 @@ import com.hawolt.ui.champselect.data.GameType;
 import com.hawolt.ui.champselect.generic.ChampSelectRuneSelection;
 import com.hawolt.ui.champselect.generic.impl.*;
 import com.hawolt.ui.generic.utility.ChildUIComponent;
-import com.hawolt.util.settings.UserSettings;
 import com.hawolt.xmpp.core.VirtualRiotXMPPClient;
 import com.hawolt.xmpp.event.objects.conversation.history.impl.IncomingMessage;
 import com.hawolt.xmpp.event.objects.presence.impl.JoinMucPresence;
-import org.json.JSONArray;
 
 import java.awt.*;
 import java.awt.event.ActionEvent;
@@ -52,7 +50,7 @@ public abstract class MatchmadeRenderInstance extends AbstractRenderInstance imp
         ChildUIComponent component = new ChildUIComponent(new BorderLayout());
         this.centerUI.getSouthernChild().add(component, BorderLayout.NORTH);
         component.add(new ChampSelectDebugUI(), BorderLayout.NORTH);
-        component.add(settingUI = new ChampSelectGameSettingUI(getAllowedSummonerSpells()), BorderLayout.CENTER);
+        component.add(settingUI = new ChampSelectGameSettingUI(this, getAllowedSummonerSpells()), BorderLayout.CENTER);
         this.centerUI.getSouthernChild().add(chatUI = new ChampSelectChatUI(), BorderLayout.CENTER);
         this.build();
     }
@@ -237,20 +235,8 @@ public abstract class MatchmadeRenderInstance extends AbstractRenderInstance imp
                     if (client == null || matchContext == null) return;
                     chatUI.setMatchContext(matchContext);
                     VirtualRiotXMPPClient xmppClient = client.getXMPPClient();
+                    if (xmppClient.getIdentity() == null) return;
                     xmppClient.joinUnprotectedMuc(matchContext.getPayload().getChatRoomName(), matchContext.getPayload().getTargetRegion());
-                });
-                Swiftrift.service.execute(() -> {
-                    try {
-                        Swiftrift swiftrift = context.getChampSelectInterfaceContext().getLeagueClientUI();
-                        if (swiftrift == null) return;
-                        UserSettings settings = swiftrift.getSettingService().getUserSettings();
-                        JSONArray preference = settings.getChampSelectSpellPreference(targetQueueId);
-                        Logger.error(preference);
-                        if (preference == null) return;
-                        settingUI.preselectSummonerSpells(preference);
-                    } catch (Exception e) {
-                        Logger.error(e);
-                    }
                 });
             }
         }

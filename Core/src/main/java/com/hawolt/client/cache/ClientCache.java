@@ -5,12 +5,14 @@ import com.hawolt.client.exceptional.ExceptionalFunction;
 import com.hawolt.client.exceptional.ExceptionalSupplier;
 import com.hawolt.generic.data.Unsafe;
 import com.hawolt.logger.Logger;
+import com.hawolt.rtmp.amf.Pair;
 
 import java.util.*;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
+import java.util.function.Supplier;
 
 /**
  * Created: 24/09/2023 09:32
@@ -18,14 +20,18 @@ import java.util.function.Consumer;
  **/
 
 public abstract class ClientCache implements ISimpleValueCache<CacheElement, Object>, Consumer<CachedValueLoader<CacheElement, ?>> {
-    private final Map<CacheElement, ExceptionalFunction<LeagueClient, ?>> sources = new HashMap<>();
+    private final Map<CacheElement, Pair<ExceptionalFunction<LeagueClient, ?>, Supplier<?>>> sources = new HashMap<>();
 
     private final ScheduledExecutorService service = Executors.newSingleThreadScheduledExecutor();
     private final Map<CacheElement, List<CacheListener<?>>> listeners = new HashMap<>();
     private final Map<CacheElement, Object> cache = new HashMap<>();
 
     public void setElementSource(CacheElement element, ExceptionalFunction<LeagueClient, ?> function) {
-        this.sources.put(element, function);
+        this.setElementSource(element, function, null);
+    }
+
+    public void setElementSource(CacheElement element, ExceptionalFunction<LeagueClient, ?> function, Supplier<?> fallback) {
+        this.sources.put(element, Pair.from(function, fallback));
     }
 
     @Override
@@ -83,13 +89,21 @@ public abstract class ClientCache implements ISimpleValueCache<CacheElement, Obj
     }
 
     public <T> T getCachedValue(CacheElement element) {
-        if (!cache.containsKey(element)) {
+        if (!cache.containsKey(element) && sources.containsKey(element)) {
             Logger.info("Fetch cache value for {}", element);
+            Pair<ExceptionalFunction<LeagueClient, ?>, Supplier<?>> pair = sources.get(element);
             try {
-                Object value = sources.get(element).apply(getClient());
+                Object value = pair.getKey().apply(getClient());
                 cache(element, value);
             } catch (Exception e) {
-                Logger.error("Failed to fetch cache value for {}", element);
+                Supplier<?> fallback = pair.getValue();
+                if (fallback != null) {
+                    Logger.warn("Failed to fetch cache value for {}, using available fallback", element);
+                    cache(element, fallback.get());
+                } else {
+                    Logger.error("Failed to fetch cache value for {}", element);
+                    Logger.error(e);
+                }
             }
         }
         if (!cache.containsKey(element)) throw new CacheException(element);

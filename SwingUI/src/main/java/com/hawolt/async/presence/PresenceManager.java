@@ -2,6 +2,7 @@ package com.hawolt.async.presence;
 
 import com.hawolt.Swiftrift;
 import com.hawolt.client.LeagueClient;
+import com.hawolt.client.cache.CacheElement;
 import com.hawolt.client.misc.MapQueueId;
 import com.hawolt.client.resources.ledge.gsm.GameServiceMessageLedge;
 import com.hawolt.client.resources.ledge.parties.PartiesLedge;
@@ -9,7 +10,6 @@ import com.hawolt.client.resources.ledge.parties.objects.CurrentParty;
 import com.hawolt.client.resources.ledge.parties.objects.PartiesRegistration;
 import com.hawolt.client.resources.ledge.parties.objects.PartyGameMode;
 import com.hawolt.client.resources.ledge.summoner.objects.Summoner;
-import com.hawolt.client.cache.CacheElement;
 import com.hawolt.logger.Logger;
 import com.hawolt.rms.data.impl.payload.RiotMessageMessagePayload;
 import com.hawolt.rms.data.subject.service.IServiceMessageListener;
@@ -187,6 +187,7 @@ public class PresenceManager implements PacketCallback, IServiceMessageListener<
 
 
     private void set(String status, Presence presence) {
+        Logger.debug("setting presence");
         swiftrift.getLeagueClient().getXMPPClient().setCustomPresence(
                 status, swiftrift.getLeagueClient().getCachedValue(CacheElement.CHAT_STATUS), presence
         );
