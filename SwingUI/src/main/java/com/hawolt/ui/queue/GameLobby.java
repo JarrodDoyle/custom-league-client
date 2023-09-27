@@ -226,7 +226,6 @@ public abstract class GameLobby extends ChildUIComponent implements IServiceMess
             List<GatekeeperRestriction> indirect = restriction != null ?
                     restriction.getRestrictionList() : new ArrayList<>();
             this.flipButtonState();
-            this.handleStartInteraction();
             if (direct.isEmpty() && indirect.isEmpty()) return;
             handleGatekeeperRestriction(
                     Stream.of(direct, indirect).flatMap(Collection::stream).collect(Collectors.toList())
@@ -235,6 +234,4 @@ public abstract class GameLobby extends ChildUIComponent implements IServiceMess
             Logger.error(e);
         }
     }
-
-    abstract void handleStartInteraction();
 }

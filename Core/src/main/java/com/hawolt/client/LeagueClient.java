@@ -78,6 +78,7 @@ public class LeagueClient extends ClientCache implements PacketCallback {
         service.execute(new CachedValueLoader<>(CacheElement.SUMMONER, () -> ledge.getSummoner().resolveSummonerById(getVirtualLeagueClientInstance().getUserInformation().getUserInformationLeagueAccount().getSummonerId()), this));
         service.execute(new CachedValueLoader<>(CacheElement.PROFILE, () -> ledge.getSummoner().resolveSummonerProfile(getVirtualRiotClient().getRiotClientUser().getPUUID()), this));
         service.execute(new CachedValueLoader<>(CacheElement.RANKED_STATISTIC, () -> ledge.getLeague().getRankedStats(getVirtualRiotClient().getRiotClientUser().getPUUID()), this));
+        service.execute(new CachedValueLoader<>(CacheElement.LCU_PREFERENCES, () -> ledge.getPlayerPreferences().getPreferences(PreferenceType.LCU_PREFERENCES), this));
         service.shutdown();
     }
 

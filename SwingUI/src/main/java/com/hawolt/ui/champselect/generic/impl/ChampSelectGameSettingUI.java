@@ -12,6 +12,7 @@ import com.hawolt.ui.generic.component.LTextAlign;
 import com.hawolt.ui.generic.themes.ColorPalette;
 import com.hawolt.ui.generic.utility.ChildUIComponent;
 import com.hawolt.ui.generic.utility.HighlightType;
+import org.json.JSONArray;
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
@@ -117,5 +118,20 @@ public class ChampSelectGameSettingUI extends ChampSelectUIComponent {
 
     public LFlatButton getDodgeButton() {
         return dodge;
+    }
+
+    public void preselectSummonerSpells(JSONArray preference) {
+        this.setSpellId(spellOne, preference.getInt(0));
+        this.setSpellId(spellTwo, preference.getInt(1));
+    }
+
+    private void setSpellId(JComboBox<Spell> selection, int spellId) {
+        for (int i = 0; i < selection.getItemCount(); i++) {
+            Spell spell = selection.getItemAt(i);
+            if (spell.getId() == spellId) {
+                selection.setSelectedIndex(i);
+                break;
+            }
+        }
     }
 }

@@ -29,13 +29,13 @@ public class SettingManager implements SettingService {
     private String username;
 
     public SettingManager() {
-        this.client = new ClientSettings(load(SettingType.CLIENT));
+        this.client = new ClientSettings(load(SettingType.CLIENT), this);
     }
 
     @Override
     public UserSettings set(String username) {
         this.username = username;
-        this.player = new UserSettings(load(SettingType.PLAYER));
+        this.player = new UserSettings(load(SettingType.PLAYER), this);
         return player;
     }
 

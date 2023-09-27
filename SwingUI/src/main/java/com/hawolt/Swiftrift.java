@@ -102,7 +102,7 @@ public class Swiftrift extends JFrame implements IClientCallback, ILoginCallback
     }
 
     private void configure(boolean remember) {
-        ResourceLoader.loadResource("local", new PreferenceLoader(leagueClient), this);
+        ResourceLoader.forceLoadResource("local", new PreferenceLoader(leagueClient), this);
         if (!remember) return;
         this.settingService.write(
                 SettingType.PLAYER,
@@ -116,7 +116,7 @@ public class Swiftrift extends JFrame implements IClientCallback, ILoginCallback
         this.shutdownManager = new ShutdownManager(client);
         this.presence = new PresenceManager(this);
         this.configure(loginUI == null || loginUI.getRememberMe().isSelected());
-        this.liveGameClient.register("GameStart", new GameStartHandler(leagueClient));
+        this.liveGameClient.register("GameStart", new GameStartHandler(this));
     }
 
     @Override
