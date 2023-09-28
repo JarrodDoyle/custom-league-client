@@ -189,13 +189,20 @@ public class PresenceManager implements PacketCallback, IServiceMessageListener<
 
     private void set(String status, Presence presence) {
         Logger.debug("setting presence");
-        LCUSocialPreferences lcuSocialPreferences = swiftrift.getLeagueClient().getCachedValue(CacheElement.LCU_SOCIAL_PREFERENCES);
-        lcuSocialPreferences.getChatStatusMessage().ifPresent(x -> swiftrift.getLeagueClient().getXMPPClient().setCustomPresence(status, x, presence));
+        Object reference = swiftrift.getLeagueClient().getCachedValue(CacheElement.LCU_SOCIAL_PREFERENCES);
+        if (reference instanceof LCUSocialPreferences lcuSocialPreferences) {
+            lcuSocialPreferences.getChatStatusMessage().ifPresent(
+                    x -> swiftrift.getLeagueClient().getXMPPClient().setCustomPresence(status, x, presence)
+            );
+        } else {
+            swiftrift.getLeagueClient().getXMPPClient().setCustomPresence(status, "", presence);
+        }
     }
 
     public void setIdlePresence() {
         leagueClient.getCachedValueOrElse(CacheElement.PRESENCE, this::configure, Logger::error).ifPresent(base -> {
             Presence.Builder builder = new Presence.Builder().setGameStatus("outOfGame");
+            builder.setPTY("");
             String status = swiftrift.getHeader().getSelectedStatus();
             currentDefaultStatus = "chat";
             set("default".equals(status) ? "chat" : status, builder.merge(base));
