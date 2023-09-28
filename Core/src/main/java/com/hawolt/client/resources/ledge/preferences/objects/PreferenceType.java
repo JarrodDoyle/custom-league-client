@@ -6,12 +6,20 @@ package com.hawolt.client.resources.ledge.preferences.objects;
  **/
 
 public enum PreferenceType {
-    LCU_SOCIAL_PREFERENCES("LcuSocialPreferences"),
-    LCU_PREFERENCES("LCUPreferences");
-    final String name;
+    LCU_SOCIAL_PREFERENCES("LcuSocialPreferences", PreferenceDataType.YAML),
+    PERKS_PREFERENCE("PerksPreferences", PreferenceDataType.JSON),
+    LCU_PREFERENCES("LCUPreferences", PreferenceDataType.YAML);
 
-    PreferenceType(String name) {
+    final String name;
+    final PreferenceDataType data;
+
+    PreferenceType(String name, PreferenceDataType data) {
         this.name = name;
+        this.data = data;
+    }
+
+    public PreferenceDataType getDataType() {
+        return data;
     }
 
     public String getName() {

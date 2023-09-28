@@ -1,0 +1,41 @@
+lol-general:
+    data:
+        uploadCrashReports: true
+    schemaVersion: 0
+lol-honor:
+    data:
+        recallReleaseNotified: true
+    schemaVersion: 1
+lol-npe-rewards:
+    data:
+        challenges:
+            allMissionsCompleted: false
+            totalCount: 0
+        login:
+            allRewardsClaimed: false
+            lastCompletedMissionDate: -1
+            lastCompletedMissionInternalName: ""
+    schemaVersion: 1
+lol-npe-tutorial-path:
+    data:
+        hasSeenTutorialPath: false
+        hasSkippedTutorialPath: false
+        shouldSeeNewPlayerExperience: true
+    schemaVersion: 1
+lol-player-behavior:
+    data:
+        codeOfConductAccepted: true
+    schemaVersion: 0
+lol-premade-voice:
+    data:
+        autoJoin: false
+        inputMode: "voiceActivity"
+        muteOnConnect: false
+        pushToTalkKey: "[<Unbound>]"
+        showFirstExperienceInGame: true
+        showFirstExperienceInLCU: true
+    schemaVersion: 1
+lol-tft:
+    data:
+        previouslySeenSeasons: "1694628000000"
+    schemaVersion: 1
