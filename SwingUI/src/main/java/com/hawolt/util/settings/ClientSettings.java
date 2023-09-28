@@ -35,4 +35,20 @@ public class ClientSettings extends DynamicSettings {
     public int getClientTheme() {
         return getByKeyOrDefault("Theme", 0);
     }
+
+    public String getWinePrefixDirectory() {
+        return getByKeyOrDefault("WinePrefixDir", "");
+    }
+
+    public String getWineBinaryDirectory() {
+        return getByKeyOrDefault("WineBinaryDir", "");
+    }
+
+    public boolean isMangoHudEnabled() {
+        return getByKeyOrDefault("mangoHud", false);
+    }
+
+    public boolean isGameModeEnabled() {
+        return getByKeyOrDefault("gameModeRun", false);
+    }
 }

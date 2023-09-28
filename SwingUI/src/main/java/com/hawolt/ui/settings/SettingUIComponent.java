@@ -123,6 +123,35 @@ public class SettingUIComponent extends ChildUIComponent {
         return result;
     }
 
+    public static SettingUIComponent createCheckBoxComponent(String name, SettingService settingService, String key, boolean defaultValue) {
+        DynamicObject settings = settingService.getClientSettings();
+
+        SettingUIComponent result = new SettingUIComponent(new BorderLayout());
+        result.setPreferredSize(new Dimension(10, 64));
+
+        ChildUIComponent labelContainer = createDefaultFlowLayout();
+        result.add(labelContainer, BorderLayout.WEST);
+
+        JLabel label = createLabel(name);
+        labelContainer.add(label);
+
+        JCheckBox checkBox = new JCheckBox();
+        labelContainer.add(checkBox);
+
+        checkBox.setSelected(settings.getByKeyOrDefault(key, defaultValue));
+
+        checkBox.addActionListener(e -> {
+            boolean isSelected = checkBox.isSelected();
+            settingService.write(SettingType.CLIENT, key, isSelected);
+        });
+
+        result.addOnQuitActionListener(listener -> {
+            checkBox.setSelected(settings.getByKeyOrDefault(key, defaultValue));
+        });
+
+        return result;
+    }
+
     public static SettingUIComponent createAutoFriendComponent(String name, SettingService settingService, String key) {
         DynamicObject settings = settingService.getClientSettings();
         SettingUIComponent result = new SettingUIComponent(new BorderLayout());

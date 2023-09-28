@@ -43,15 +43,21 @@ public class Launcher {
                 Map<String, String> env = builder.environment();
 
                 if (OperatingSystem.getOperatingSystemType() == OperatingSystem.OSType.LINUX) {
-                    String winePrefixDirectory = service.getClientSettings().getByKey("WinePrefixDir");
-                    String wineBinaryDirectory = service.getClientSettings().getByKey("WineBinaryDir");
-                    env.put("PATH", wineBinaryDirectory);
+                    String winePrefixDirectory = service.getClientSettings().getWinePrefixDirectory();
+                    String wineBinaryDirectory = service.getClientSettings().getWineBinaryDirectory();
+                    env.put("PATH", String.join(":", System.getenv().get("PATH"), wineBinaryDirectory));
                     env.put("WINELOADER", String.join(File.separator, wineBinaryDirectory, "wine64"));
                     env.put("WINEPREFIX", winePrefixDirectory);
                     env.put("WINEESYNC", "1");
                     env.put("WINEFSYNC", "1");
                     env.put("WINEDEBUG", "-all");
                     env.put("WINEDLLOVERRIDES", "dxgi,d3d9,d3d10core,d3d11=n;winemenubuilder.exe=d;mscoree,mshtml=");
+                    if (service.getClientSettings().isMangoHudEnabled()) {
+                        env.put("MANGOHUD", "1");
+                    }
+                    if (service.getClientSettings().isGameModeEnabled()) {
+                        command.add("gamemoderun");
+                    }
                     command.add(builder.environment().get("WINELOADER"));
                 }
 

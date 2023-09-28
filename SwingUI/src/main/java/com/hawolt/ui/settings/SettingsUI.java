@@ -128,6 +128,11 @@ public class SettingsUI extends ChildUIComponent {
         }
         result.add(SettingUIComponent.createTagComponent("Friend requests"));
         result.add(SettingUIComponent.createAutoFriendComponent("Auto friend request handling", service, "autoFriends"));
+        if (OperatingSystem.getOperatingSystemType() == OperatingSystem.OSType.LINUX) {
+            result.add(SettingUIComponent.createTagComponent("Linux Launch Options"));
+            result.add(SettingUIComponent.createCheckBoxComponent("MangoHUD", service, "mangoHud", false));
+            result.add(SettingUIComponent.createCheckBoxComponent("GameMode", service, "gameModeRun", false));
+        }
         return result;
     }
 
