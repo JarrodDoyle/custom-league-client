@@ -2,9 +2,11 @@ package com.hawolt.ui.champselect.generic.impl;
 
 import com.hawolt.Swiftrift;
 import com.hawolt.async.Debouncer;
+import com.hawolt.client.cache.CacheElement;
 import com.hawolt.client.resources.communitydragon.spell.Spell;
 import com.hawolt.client.resources.communitydragon.spell.SpellIndex;
 import com.hawolt.client.resources.communitydragon.spell.SpellSource;
+import com.hawolt.client.resources.ledge.preferences.objects.lcupreferences.LCUPreferences;
 import com.hawolt.logger.Logger;
 import com.hawolt.ui.champselect.AbstractRenderInstance;
 import com.hawolt.ui.champselect.generic.ChampSelectUIComponent;
@@ -15,7 +17,6 @@ import com.hawolt.ui.generic.component.LTextAlign;
 import com.hawolt.ui.generic.themes.ColorPalette;
 import com.hawolt.ui.generic.utility.ChildUIComponent;
 import com.hawolt.ui.generic.utility.HighlightType;
-import com.hawolt.util.settings.UserSettings;
 import org.json.JSONArray;
 
 import javax.swing.*;
@@ -151,8 +152,8 @@ public class ChampSelectGameSettingUI extends ChampSelectUIComponent {
                 Swiftrift.service.execute(() -> {
                     Swiftrift swiftrift = context.getChampSelectInterfaceContext().getLeagueClientUI();
                     if (swiftrift == null) return;
-                    UserSettings settings = swiftrift.getSettingService().getUserSettings();
-                    JSONArray preference = settings.getChampSelectSpellPreference(targetQueueId);
+                    LCUPreferences lcuPreferences = swiftrift.getLeagueClient().getCachedValue(CacheElement.LCU_PREFERENCES);
+                    JSONArray preference = lcuPreferences.getChampSelectPreference().get().getSummonerSpells(targetQueueId);
                     Logger.error(preference);
                     if (preference == null) return;
                     preselectSummonerSpells(preference);

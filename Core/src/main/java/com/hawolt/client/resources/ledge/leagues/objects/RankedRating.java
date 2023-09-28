@@ -10,10 +10,10 @@ import java.util.Optional;
  **/
 
 public class RankedRating {
-    private QueueType queueType;
     private final int provisionalGameThreshold, leaguePoints, wins, losses, provisionalGamesRemaining, ratedRating;
     private final boolean premadeMmrRestricted;
     private final String tier, rank, highestTier, highestRank, previousSeasonEndTier, previousSeasonEndRank;
+    private QueueType queueType;
 
     public RankedRating(JSONObject object) {
         this.queueType = QueueType.valueOf(object.getString("queueType"));

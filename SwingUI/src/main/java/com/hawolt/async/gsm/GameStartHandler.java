@@ -1,7 +1,9 @@
 package com.hawolt.async.gsm;
 
 import com.hawolt.Swiftrift;
+import com.hawolt.client.cache.CacheElement;
 import com.hawolt.client.resources.ledge.preferences.objects.PreferenceType;
+import com.hawolt.client.resources.ledge.preferences.objects.lcupreferences.LCUPreferences;
 import com.hawolt.event.EventListener;
 import com.hawolt.event.impl.GameStartEvent;
 import com.hawolt.logger.Logger;
@@ -34,9 +36,8 @@ public class GameStartHandler implements EventListener<GameStartEvent> {
         ChampSelectTeamMember member = champSelect.getChampSelectUtilityContext().getSelf();
         JSONArray selection = new JSONArray().put(member.getSpell1Id(), member.getSpell2Id());
         int queueId = champSelect.getChampSelectSettingsContext().getQueueId();
-        JSONObject preference = swiftrift.getSettingService().getUserSettings().setSummonerSpellPreference(queueId, selection);
-        if (preference == null) return;
-        swiftrift.getLeagueClient().getLedge().getPlayerPreferences().setPreferences(PreferenceType.LCU_PREFERENCES, preference.toString());
-        swiftrift.getSettingService().write(SettingType.PLAYER, "preferences", preference);
+        LCUPreferences lcuPreferences = swiftrift.getLeagueClient().getCachedValue(CacheElement.LCU_PREFERENCES);
+        lcuPreferences.getChampSelectPreference().get().setSummonerSpells(queueId, selection);
+        swiftrift.getLeagueClient().getLedge().getPlayerPreferences().setPreferences(PreferenceType.LCU_PREFERENCES, lcuPreferences.toString());
     }
 }

@@ -3,9 +3,6 @@ package com.hawolt;
 import com.hawolt.async.ExecutorManager;
 import com.hawolt.async.gsm.ActiveGameInformation;
 import com.hawolt.async.gsm.GameStartHandler;
-import com.hawolt.async.loader.PreferenceLoader;
-import com.hawolt.async.loader.ResourceConsumer;
-import com.hawolt.async.loader.ResourceLoader;
 import com.hawolt.async.presence.PresenceManager;
 import com.hawolt.async.rms.GameStartListener;
 import com.hawolt.async.shutdown.ShutdownManager;
@@ -13,7 +10,6 @@ import com.hawolt.authentication.LocalCookieSupplier;
 import com.hawolt.client.IClientCallback;
 import com.hawolt.client.LeagueClient;
 import com.hawolt.client.RiotClient;
-import com.hawolt.client.cache.CacheElement;
 import com.hawolt.client.misc.ClientConfiguration;
 import com.hawolt.generic.token.impl.StringTokenSupplier;
 import com.hawolt.io.RunLevel;
@@ -47,7 +43,6 @@ import com.hawolt.xmpp.core.VirtualRiotXMPPClient;
 import com.hawolt.xmpp.event.EventListener;
 import com.hawolt.xmpp.event.EventType;
 import com.hawolt.xmpp.event.objects.other.PlainData;
-import org.json.JSONObject;
 
 import javax.imageio.ImageIO;
 import javax.swing.*;
@@ -65,7 +60,7 @@ import java.util.concurrent.TimeUnit;
  * Author: Twitter @hawolt
  **/
 
-public class Swiftrift extends JFrame implements IClientCallback, ILoginCallback, WindowStateListener, ResourceConsumer<JSONObject, byte[]> {
+public class Swiftrift extends JFrame implements IClientCallback, ILoginCallback, WindowStateListener {
     public static final ExecutorService service = ExecutorManager.registerService("pool", Executors.newCachedThreadPool());
     private final LiveGameClient liveGameClient = new LiveGameClient(1000);
     private static BufferedImage logo;
@@ -103,13 +98,19 @@ public class Swiftrift extends JFrame implements IClientCallback, ILoginCallback
     }
 
     private void configure(boolean remember) {
-        ResourceLoader.forceLoadResource("local", new PreferenceLoader(leagueClient), this);
         if (!remember) return;
         this.settingService.write(
                 SettingType.PLAYER,
                 "cookies",
                 leagueClient.getVirtualRiotClientInstance().getCookieSupplier().getCurrentCookieState()
         );
+        this.dispose();
+        this.loginUI.getAnimationVisualizer().stop();
+        this.setUndecorated(true);
+        this.setVisible(true);
+        this.initialize();
+        this.buildUI(leagueClient);
+        this.wrap();
     }
 
     private void bootstrap(LeagueClient client) {
@@ -120,32 +121,7 @@ public class Swiftrift extends JFrame implements IClientCallback, ILoginCallback
         this.liveGameClient.register("GameStart", new GameStartHandler(this));
     }
 
-    private void handlePlayerPartyPreference(JSONObject object) {
-        if (!object.has("partiesPositionPreferences") || object.isNull("partiesPositionPreferences")) {
-            JSONObject partiesPositionPreferences = new JSONObject();
-            JSONObject data = new JSONObject();
-            String firstPreference = "UNSELECTED";
-            String secondPreference = "UNSELECTED";
-            data.put("firstPreference", firstPreference);
-            data.put("secondPreference", secondPreference);
-            partiesPositionPreferences.put("data", data);
-            object.put("partiesPositionPreferences", partiesPositionPreferences);
-        }
-    }
 
-    @Override
-    public void consume(Object o, JSONObject object) {
-        this.handlePlayerPartyPreference(object);
-        this.leagueClient.cache(CacheElement.PLAYER_PREFERENCE, object);
-        this.settingService.write(SettingType.PLAYER, "preferences", object);
-        this.dispose();
-        this.loginUI.getAnimationVisualizer().stop();
-        this.setUndecorated(true);
-        this.setVisible(true);
-        this.initialize();
-        this.buildUI(leagueClient);
-        this.wrap();
-    }
 
     private void wrap() {
         this.layout.show(deck, "main");
@@ -330,15 +306,6 @@ public class Swiftrift extends JFrame implements IClientCallback, ILoginCallback
         this.riotClient = new RiotClient(configuration, this);
     }
 
-    @Override
-    public void onException(Object o, Exception e) {
-        this.onLoginFlowException(new IOException("PREFERENCE_FAILURE"));
-    }
-
-    @Override
-    public JSONObject transform(byte[] bytes) throws Exception {
-        return new JSONObject(new String(bytes));
-    }
 
     public static void main(String[] args) {
         RMANCache.preload();

@@ -7,7 +7,7 @@ package com.hawolt.client.resources.ledge.preferences.objects;
 
 public enum PreferenceType {
     LCU_SOCIAL_PREFERENCES("LcuSocialPreferences", PreferenceDataType.YAML),
-    PERKS_PREFERENCE("PerksPreferences", PreferenceDataType.JSON),
+    PERKS_PREFERENCE("PerksPreferences", PreferenceDataType.YAML),
     LCU_PREFERENCES("LCUPreferences", PreferenceDataType.YAML);
 
     final String name;

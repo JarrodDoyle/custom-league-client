@@ -11,6 +11,8 @@ import com.hawolt.client.handler.XMPPHandler;
 import com.hawolt.client.resources.ledge.LedgeEndpoint;
 import com.hawolt.client.resources.ledge.leagues.objects.RankedStatistic;
 import com.hawolt.client.resources.ledge.preferences.objects.PreferenceType;
+import com.hawolt.client.resources.ledge.preferences.objects.lcupreferences.LCUPreferences;
+import com.hawolt.client.resources.ledge.preferences.objects.lcusocialpreferences.LCUSocialPreferences;
 import com.hawolt.client.resources.ledge.summoner.objects.Summoner;
 import com.hawolt.client.resources.ledge.summoner.objects.SummonerProfile;
 import com.hawolt.client.resources.platform.PlatformEndpoint;
@@ -75,13 +77,13 @@ public class LeagueClient extends ClientCache implements PacketCallback {
         cache(CacheElement.ACCOUNT_ID, getVirtualLeagueClientInstance().getUserInformation().getUserInformationLeague().getCUID());
         cache(CacheElement.SUMMONER_ID, getVirtualLeagueClientInstance().getUserInformation().getUserInformationLeagueAccount().getSummonerId());
         setElementSource(CacheElement.INVENTORY_TOKEN, (ExceptionalFunction<LeagueClient, String>) client -> ledge.getInventoryService().getInventoryToken());
-        setElementSource(CacheElement.CHAT_STATUS, (ExceptionalFunction<LeagueClient, String>) client -> ledge.getPlayerPreferences().getPreferences(PreferenceType.LCU_SOCIAL_PREFERENCES).getString("chat-status-message"), () -> "");
-        setElementSource(CacheElement.SUMMONER, (ExceptionalFunction<LeagueClient, Summoner>) client -> ledge.getSummoner().resolveSummonerById(getVirtualLeagueClientInstance().getUserInformation().getUserInformationLeagueAccount().getSummonerId()));
-        setElementSource(CacheElement.PROFILE, (ExceptionalFunction<LeagueClient, SummonerProfile>) client -> ledge.getSummoner().resolveSummonerProfile(getVirtualRiotClient().getRiotClientUser().getPUUID()));
         setElementSource(CacheElement.RANKED_STATISTIC, (ExceptionalFunction<LeagueClient, RankedStatistic>) client -> ledge.getLeague().getRankedStats(getVirtualRiotClient().getRiotClientUser().getPUUID()));
+        setElementSource(CacheElement.PROFILE, (ExceptionalFunction<LeagueClient, SummonerProfile>) client -> ledge.getSummoner().resolveSummonerProfile(getVirtualRiotClient().getRiotClientUser().getPUUID()));
+        setElementSource(CacheElement.LCU_PREFERENCES, (ExceptionalFunction<LeagueClient, LCUPreferences>) client -> new LCUPreferences(ledge.getPlayerPreferences().getPreferences(PreferenceType.LCU_PREFERENCES)));
+        setElementSource(CacheElement.SUMMONER, (ExceptionalFunction<LeagueClient, Summoner>) client -> ledge.getSummoner().resolveSummonerById(getVirtualLeagueClientInstance().getUserInformation().getUserInformationLeagueAccount().getSummonerId()));
+        setElementSource(CacheElement.LCU_SOCIAL_PREFERENCES, (ExceptionalFunction<LeagueClient, LCUSocialPreferences>) client -> new LCUSocialPreferences(ledge.getPlayerPreferences().getPreferences(PreferenceType.LCU_SOCIAL_PREFERENCES)), () -> "");
         ExecutorService service = Executors.newCachedThreadPool();
         service.execute(new CachedValueLoader<>(CacheElement.PROFILE_MASK, () -> ImageIO.read(RunLevel.get("assets/profile-mask.png")), this));
-        service.execute(new CachedValueLoader<>(CacheElement.LCU_PREFERENCES, () -> ledge.getPlayerPreferences().getPreferences(PreferenceType.LCU_PREFERENCES), this));
         service.shutdown();
     }
 
