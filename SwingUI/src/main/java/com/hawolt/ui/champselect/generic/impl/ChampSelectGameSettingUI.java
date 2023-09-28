@@ -153,10 +153,12 @@ public class ChampSelectGameSettingUI extends ChampSelectUIComponent {
                     Swiftrift swiftrift = context.getChampSelectInterfaceContext().getLeagueClientUI();
                     if (swiftrift == null) return;
                     LCUPreferences lcuPreferences = swiftrift.getLeagueClient().getCachedValue(CacheElement.LCU_PREFERENCES);
-                    JSONArray preference = lcuPreferences.getChampSelectPreference().get().getSummonerSpells(targetQueueId);
-                    Logger.error(preference);
-                    if (preference == null) return;
-                    preselectSummonerSpells(preference);
+                    lcuPreferences.getChampSelectPreference().ifPresent(champSelectPreference -> {
+                        JSONArray preference = champSelectPreference.getSummonerSpells(targetQueueId);
+                        Logger.error(preference);
+                        if (preference == null) return;
+                        preselectSummonerSpells(preference);
+                    });
                 });
             }
         }

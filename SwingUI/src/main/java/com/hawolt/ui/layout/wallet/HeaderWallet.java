@@ -44,34 +44,6 @@ public class HeaderWallet extends ChildUIComponent implements Runnable, IService
 
     @Override
     public void onMessage(RiotMessageServiceMessage riotMessageServiceMessage) {
-        /*
-        RiotMessageServiceMessage{
-            payload=GenericRiotMessagePayload{
-                payload={
-                    "resource":"store/v1/wallet",
-                    "payload":"{\"accountId\":2660041413928448,\"balances\":[{\"currency\":\"IP\",\"amount\":21350},{\"currency\":\"RP\",\"amount\":0}]}",
-                    "service":"store-purchase",
-                    "timestamp":1691592219744
-                }
-            }
-        }
-
-        {
-           "accountId":2660041413928448,
-           "balances":[
-              {
-                 "currency":"IP",
-                 "amount":21350
-              },
-              {
-                 "currency":"RP",
-                 "amount":0
-              }
-           ]
-        }
-
-         */
-        Logger.error(riotMessageServiceMessage);
         JSONObject balance = riotMessageServiceMessage.getPayload().getPayload();
         for (String key : balance.keySet()) {
             JSONObject detail = balance.getJSONObject(key);
@@ -92,7 +64,6 @@ public class HeaderWallet extends ChildUIComponent implements Runnable, IService
         try {
             InventoryServiceLedge ledge = LeagueClient.getLedge().getInventoryService();
             JSONObject balance = ledge.getBalances();
-            Logger.error(balance);
             if (!balance.has("data")) return;
             JSONObject data = balance.getJSONObject("data");
             JSONObject balances = data.getJSONObject("balances");

@@ -129,7 +129,7 @@ public class ChatSidebarFriendlist extends ChildUIComponent implements SettingLi
     private void sort() {
         synchronized (lock) {
             removeAll();
-            map.values()
+            new ArrayList<>(map.values())
                     .stream()
                     .filter(ChatSidebarFriend::isEnabled)
                     .sorted(alphabeticalComparator)

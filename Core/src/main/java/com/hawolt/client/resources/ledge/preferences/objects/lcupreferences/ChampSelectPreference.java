@@ -11,8 +11,10 @@ public class ChampSelectPreference extends DynamicPreferenceObject {
 
     public JSONArray getSummonerSpells(int queueId) {
         if (getDataSource().has("spells")) {
-            if (getDataSource().getJSONObject("spells").has(String.valueOf(queueId))) {
-                return getDataSource().getJSONObject("spells").getJSONArray(String.valueOf(queueId));
+            JSONObject spells = getDataSource().getJSONObject("spells");
+            if (spells.has(String.valueOf(queueId))) {
+                JSONArray stored = spells.getJSONArray(String.valueOf(queueId));
+                if (stored.length() == 2) return stored;
             }
         }
         return new JSONArray().put(6).put(7);
@@ -22,7 +24,12 @@ public class ChampSelectPreference extends DynamicPreferenceObject {
         if (!getDataSource().has("spells")) {
             getDataSource().put("spells", new JSONObject());
         }
-        getDataSource().getJSONObject("spells").put(String.valueOf(queueId), spells);
+        String queue = String.valueOf(queueId);
+        JSONObject reference = getDataSource().getJSONObject("spells");
+        if (reference.has(queue)) {
+            reference.remove(queue);
+        }
+        reference.put(String.valueOf(queueId), spells);
     }
 
 }

@@ -104,13 +104,6 @@ public class Swiftrift extends JFrame implements IClientCallback, ILoginCallback
                 "cookies",
                 leagueClient.getVirtualRiotClientInstance().getCookieSupplier().getCurrentCookieState()
         );
-        this.dispose();
-        this.loginUI.getAnimationVisualizer().stop();
-        this.setUndecorated(true);
-        this.setVisible(true);
-        this.initialize();
-        this.buildUI(leagueClient);
-        this.wrap();
     }
 
     private void bootstrap(LeagueClient client) {
@@ -119,8 +112,14 @@ public class Swiftrift extends JFrame implements IClientCallback, ILoginCallback
         this.presence = new PresenceManager(this);
         this.configure(loginUI == null || loginUI.getRememberMe().isSelected());
         this.liveGameClient.register("GameStart", new GameStartHandler(this));
+        this.dispose();
+        this.loginUI.getAnimationVisualizer().stop();
+        this.setUndecorated(true);
+        this.setVisible(true);
+        this.initialize();
+        this.buildUI(leagueClient);
+        this.wrap();
     }
-
 
 
     private void wrap() {
