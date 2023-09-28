@@ -58,6 +58,7 @@ import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 
 /**
  * Created: 11/08/2023 18:10
@@ -363,6 +364,17 @@ public class Swiftrift extends JFrame implements IClientCallback, ILoginCallback
         }
         swiftrift.loginUI.toggle(true);
         swiftrift.setVisible(true);
+    }
+
+    private long lastFocusRequest;
+
+    public void focus() {
+        if (System.currentTimeMillis() - lastFocusRequest <= TimeUnit.MINUTES.toMillis(1)) return;
+        if (isActive() && hasFocus()) return;
+        this.toFront();
+        this.setExtendedState(JFrame.ICONIFIED);
+        this.setExtendedState(JFrame.NORMAL);
+        this.lastFocusRequest = System.currentTimeMillis();
     }
 
     public static int showMessageDialog(String... lines) {

@@ -1,25 +1,18 @@
 package com.hawolt.ui.champselect.generic;
 
-import com.hawolt.Swiftrift;
-import com.hawolt.client.LeagueClient;
 import com.hawolt.client.resources.communitydragon.rune.BasicRune;
 import com.hawolt.client.resources.communitydragon.rune.RuneIndex;
 import com.hawolt.client.resources.communitydragon.rune.RuneSource;
 import com.hawolt.client.resources.communitydragon.rune.RuneType;
 import com.hawolt.ui.champselect.IncompleteRunePageException;
-import com.hawolt.ui.generic.component.LFlatButton;
 import com.hawolt.ui.generic.component.LTabbedPane;
-import com.hawolt.ui.generic.component.LTextAlign;
-import com.hawolt.ui.generic.themes.ColorPalette;
 import com.hawolt.ui.generic.utility.ChildUIComponent;
-import com.hawolt.ui.generic.utility.HighlightType;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 import java.awt.*;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.LinkedList;
@@ -33,21 +26,10 @@ import java.util.List;
 public class ChampSelectRuneSelection extends ChampSelectUIComponent {
     private final ChampSelectionRuneTree extra;
     private final LTabbedPane main, secondary;
-    private final LFlatButton close, save;
     private int selected = -1;
 
     public ChampSelectRuneSelection(String patch) {
         this.setLayout(new BorderLayout());
-        //this.setBorder(BorderFactory.createLineBorder(Color.BLACK));
-        ChildUIComponent header;
-        this.add(header = new ChildUIComponent(new BorderLayout()), BorderLayout.NORTH);
-        header.add(close = new LFlatButton("×", LTextAlign.CENTER, HighlightType.COMPONENT), BorderLayout.EAST);
-        close.setRoundingCorners(true, false, true, false);
-        close.setRounding(ColorPalette.CARD_ROUNDING);
-        header.add(save = new LFlatButton("Save", LTextAlign.CENTER, HighlightType.COMPONENT), BorderLayout.WEST);
-        save.setRoundingCorners(false, true, false, true);
-        save.setRounding(ColorPalette.CARD_ROUNDING);
-        save.addActionListener(listener -> setRuneSelection());
         ChildUIComponent panel = new ChildUIComponent(new GridLayout(0, 2, 5, 0));
         this.add(panel, BorderLayout.CENTER);
         this.main = new LTabbedPane(new Font("Dialog", Font.PLAIN, 10));
@@ -68,22 +50,6 @@ public class ChampSelectRuneSelection extends ChampSelectUIComponent {
         }
         disableTabAndSelectNextAvailable(secondary, 0);
         main.addChangeListener(listener -> disableTabAndSelectNextAvailable(secondary, main.getSelectedIndex()));
-    }
-
-
-    private void setRuneSelection() {
-        Swiftrift.service.execute(() -> {
-            try {
-                JSONObject runes = getSelectedRunes();
-                LeagueClient client = context.getChampSelectDataContext().getLeagueClient();
-                client.getLedge().getPerks().setRunesForCurrentRegistration(runes);
-                Swiftrift.showMessageDialog("Rune Page set");
-            } catch (IncompleteRunePageException e) {
-                Swiftrift.showMessageDialog("Rune Page incomplete");
-            } catch (IOException e) {
-                Swiftrift.showMessageDialog("Failed to save Rune Page");
-            }
-        });
     }
 
     public JSONObject getSelectedRunes() throws IncompleteRunePageException {
@@ -117,13 +83,5 @@ public class ChampSelectRuneSelection extends ChampSelectUIComponent {
             runes.addAll(Arrays.asList(panel.getSelectedRunes()));
         }
         return runes.toArray(BasicRune[]::new);
-    }
-
-    public LFlatButton getCloseButton() {
-        return close;
-    }
-
-    public LFlatButton getSaveButton() {
-        return save;
     }
 }

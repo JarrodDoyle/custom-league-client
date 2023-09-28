@@ -13,7 +13,9 @@ import com.hawolt.rms.data.subject.service.MessageService;
 import com.hawolt.rms.data.subject.service.RiotMessageServiceMessage;
 import com.hawolt.ui.champselect.context.ChampSelectContext;
 import com.hawolt.ui.champselect.context.ChampSelectSettingsContext;
+import com.hawolt.ui.champselect.context.ChampSelectUtilityContext;
 import com.hawolt.ui.champselect.context.impl.ChampSelect;
+import com.hawolt.ui.champselect.data.ChampSelectTeamMember;
 import com.hawolt.ui.champselect.impl.aram.ARAMChampSelectUI;
 import com.hawolt.ui.champselect.impl.blank.BlankChampSelectUI;
 import com.hawolt.ui.champselect.impl.blind.BlindChampSelectUI;
@@ -111,8 +113,19 @@ public class ChampSelectUI extends ChildUIComponent implements IServiceMessageLi
                 swiftrift.getHeader().selectAndShowComponent(LayoutComponent.CHAMPSELECT);
             }
         }
+        this.configureSwiftriftFocus(context);
         this.instances.get(settingsContext.getQueueId()).delegate(context, initialCounter);
         this.repaint();
+    }
+
+    private void configureSwiftriftFocus(ChampSelectContext champSelectContext) {
+        Swiftrift swiftrift = champSelectContext.getChampSelectInterfaceContext().getLeagueClientUI();
+        if (swiftrift == null) return;
+        ChampSelectUtilityContext utilityContext = champSelectContext.getChampSelectUtilityContext();
+        ChampSelectTeamMember member = utilityContext.getSelf();
+        if (member != null && (!utilityContext.isLockedIn(member) && utilityContext.isPicking(member))) {
+            swiftrift.focus();
+        }
     }
 
     public ChampSelect getChampSelect() {

@@ -95,6 +95,7 @@ public class AudioEngine {
                     });
                     clip.open(audioInputStream);
                     FloatControl gainControl = (FloatControl) clip.getControl(FloatControl.Type.MASTER_GAIN);
+                    if (gain == null) return;
                     gainControl.setValue(gain);
                     clip.start();
                 }

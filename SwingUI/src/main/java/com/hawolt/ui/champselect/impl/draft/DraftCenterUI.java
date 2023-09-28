@@ -1,5 +1,6 @@
 package com.hawolt.ui.champselect.impl.draft;
 
+import com.hawolt.ui.champselect.AbstractRenderInstance;
 import com.hawolt.ui.champselect.data.ActionObject;
 import com.hawolt.ui.champselect.data.ChampSelectPhase;
 import com.hawolt.ui.champselect.data.ChampSelectType;
@@ -15,8 +16,8 @@ import java.util.Optional;
 
 public class DraftCenterUI extends ChampSelectCenterUI {
 
-    public DraftCenterUI(ChampSelectChoice callback, ChampSelectType... supportedTypes) {
-        super(callback, supportedTypes);
+    public DraftCenterUI(AbstractRenderInstance instance, ChampSelectType... supportedTypes) {
+        super(instance, supportedTypes);
     }
 
     @Override

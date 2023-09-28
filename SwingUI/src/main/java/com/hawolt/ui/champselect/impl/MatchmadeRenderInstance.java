@@ -16,7 +16,7 @@ import com.hawolt.ui.champselect.data.ActionObject;
 import com.hawolt.ui.champselect.data.ChampSelectTeam;
 import com.hawolt.ui.champselect.data.ChampSelectType;
 import com.hawolt.ui.champselect.data.GameType;
-import com.hawolt.ui.champselect.generic.ChampSelectRuneSelection;
+import com.hawolt.ui.champselect.generic.ChampSelectRuneComponent;
 import com.hawolt.ui.champselect.generic.impl.*;
 import com.hawolt.ui.generic.utility.ChildUIComponent;
 import com.hawolt.xmpp.core.VirtualRiotXMPPClient;
@@ -178,7 +178,7 @@ public abstract class MatchmadeRenderInstance extends AbstractRenderInstance imp
     }
 
     @Override
-    public void setGlobalRunePanel(ChampSelectRuneSelection selection) {
+    public void setGlobalRunePanel(ChampSelectRuneComponent selection) {
         this.centerUI.setRuneSelection("runes", selection);
     }
 

@@ -5,7 +5,7 @@ import com.hawolt.client.resources.communitydragon.spell.Spell;
 import com.hawolt.client.resources.ledge.teambuilder.objects.MatchContext;
 import com.hawolt.ui.champselect.AbstractRenderInstance;
 import com.hawolt.ui.champselect.data.ChampSelectType;
-import com.hawolt.ui.champselect.generic.ChampSelectRuneSelection;
+import com.hawolt.ui.champselect.generic.ChampSelectRuneComponent;
 import com.hawolt.ui.champselect.generic.impl.ChampSelectBenchElement;
 import com.hawolt.xmpp.event.objects.conversation.history.impl.IncomingMessage;
 import com.hawolt.xmpp.event.objects.presence.impl.JoinMucPresence;
@@ -37,7 +37,7 @@ public class CustomChampSelectUI extends AbstractRenderInstance {
     }
 
     @Override
-    public void setGlobalRunePanel(ChampSelectRuneSelection selection) {
+    public void setGlobalRunePanel(ChampSelectRuneComponent selection) {
 
     }
 
