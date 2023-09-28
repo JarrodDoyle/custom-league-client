@@ -108,7 +108,6 @@ public class Github {
         }
         String version = props.getProperty("version");
         version = version.replace("-", "-release-");
-        System.out.println(version);
         for (int i = 0; i < versions.length(); i++) {
             if (version.equals(versions.getJSONObject(i).get("name")))
                 currentVersion = versions.getJSONObject(i);

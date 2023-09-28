@@ -7,15 +7,13 @@ import com.hawolt.client.cache.CachedValueLoader;
 import com.hawolt.client.resources.ledge.store.objects.StoreItem;
 import com.hawolt.client.resources.purchasewidget.CurrencyType;
 import com.hawolt.client.resources.purchasewidget.PurchaseWidget;
-import com.hawolt.ui.generic.component.LLabel;
-import com.hawolt.ui.generic.component.LTextAlign;
+import com.hawolt.ui.generic.component.LTextPane;
 import com.hawolt.ui.generic.themes.ColorPalette;
 import com.hawolt.ui.generic.utility.ChildUIComponent;
 import com.hawolt.util.audio.AudioEngine;
 import com.hawolt.util.audio.Sound;
 import org.json.JSONObject;
 
-import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 import java.awt.*;
 import java.util.ArrayList;
@@ -29,18 +27,19 @@ import java.util.List;
 public class StoreElement extends ChildUIComponent implements IStoreElement {
     private final List<StoreButton> buttons = new ArrayList<>();
     private final LeagueClient client;
-    //private final JPanel imageContainer;
     private final StoreImage image;
-    private final StoreItem item;
     private final IStorePage page;
+    private final StoreItem item;
+    private final boolean owned;
 
-    public StoreElement(LeagueClient client, IStorePage page, StoreItem item) {
+    public StoreElement(LeagueClient client, IStorePage page, StoreItem item, boolean owned) {
         super(new BorderLayout());
         this.setBorder(new EmptyBorder(15, 15, 15, 15));
         this.add(image = new StoreImage(item), BorderLayout.CENTER);
-        this.setBackground(ColorPalette.cardColor);
         this.setPreferredSize(new Dimension(150, 300));
+        this.setBackground(ColorPalette.cardColor);
         this.client = client;
+        this.owned = owned;
         this.item = item;
         this.page = page;
         this.build();
@@ -49,31 +48,46 @@ public class StoreElement extends ChildUIComponent implements IStoreElement {
     private void build() {
         if (item.isBlueEssencePurchaseAvailable() && item.getCorrectBlueEssenceCost() > 0) {
             StoreButton button = new StoreButton(this, CurrencyType.IP, item.getCorrectBlueEssenceCost());
-            button.setRounding(ColorPalette.BUTTON_SMALL_ROUNDING);
-            button.setBackground(ColorPalette.buttonSelectionColor);
             button.setHighlightColor(ColorPalette.buttonSelectionAltColor);
+            button.setBackground(ColorPalette.buttonSelectionColor);
+            button.setRounding(ColorPalette.BUTTON_SMALL_ROUNDING);
             buttons.add(button);
         }
         if (item.isRiotPointPurchaseAvailable() && item.getCorrectRiotPointCost() > 0) {
             StoreButton button = new StoreButton(this, CurrencyType.RP, item.getCorrectRiotPointCost());
-            button.setRounding(ColorPalette.BUTTON_SMALL_ROUNDING);
-            button.setBackground(ColorPalette.buttonSelectionColor);
             button.setHighlightColor(ColorPalette.buttonSelectionAltColor);
+            button.setBackground(ColorPalette.buttonSelectionColor);
+            button.setRounding(ColorPalette.BUTTON_SMALL_ROUNDING);
             buttons.add(button);
         }
-        ChildUIComponent mainComponent = new ChildUIComponent(new GridLayout(0, 1, 0, 0));
-        ChildUIComponent nameComponent = new ChildUIComponent(new GridLayout(0, 1, 0, 0));
-        LLabel name = new LLabel(this.item.getName(), LTextAlign.CENTER);
-        name.setBackground(ColorPalette.cardColor);
-        nameComponent.add(name);
-        mainComponent.add(nameComponent);
+        ChildUIComponent mainComponent = new ChildUIComponent(new GridBagLayout());
         mainComponent.setBackground(ColorPalette.cardColor);
-        ChildUIComponent buttonComponent = new ChildUIComponent(new GridLayout(0, buttons.isEmpty() ? 1 : buttons.size(), 5, 0));
-        for (StoreButton button : buttons) {
-            buttonComponent.add(button);
-        }
+        GridBagConstraints gbc = new GridBagConstraints();
+        ChildUIComponent nameComponent = new ChildUIComponent(new GridLayout(1, 0, 0 , 0));
+        LTextPane name = new LTextPane(this.item.getName());
+        nameComponent.add(name);
+        gbc.insets = new Insets(0,0,0,0);
+        gbc.anchor = GridBagConstraints.PAGE_START;
+        gbc.fill = GridBagConstraints.HORIZONTAL;
+        gbc.gridwidth = 2;
+        gbc.weightx = 1.0;
+        gbc.weighty = 0.0;
+        gbc.gridx = 0;
+        gbc.gridy = 0;
+        mainComponent.add(nameComponent, gbc);
+        ChildUIComponent buttonComponent = new ChildUIComponent(new GridBagLayout());
         buttonComponent.setBackground(ColorPalette.cardColor);
-        mainComponent.add(buttonComponent);
+        gbc.insets = new Insets(0, 2, 0, 2);
+        gbc.gridwidth = 1;
+        if (!owned) {
+            for (StoreButton button : buttons) {
+                gbc.gridx = buttons.indexOf(button);
+                buttonComponent.add(button, gbc);
+            }
+        }
+        gbc.gridwidth = 2;
+        gbc.gridy = 1;
+        mainComponent.add(buttonComponent, gbc);
         add(mainComponent, BorderLayout.SOUTH);
         revalidate();
     }

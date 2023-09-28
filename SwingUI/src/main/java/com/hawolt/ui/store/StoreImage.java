@@ -44,7 +44,7 @@ public class StoreImage extends JComponent implements IStoreImage, ResourceConsu
                     map.put(requirement.getString("inventoryType"), requirement.getLong("itemId"));
                 }
                 long skinId = map.getOrDefault(InventoryType.CHAMPION_SKIN.name(), itemId);
-                if (item.hasSubInventoryType()) {
+                if (item.isChroma()) {
                     skinId = item.getItemId();
                     return String.format(
                             "https://raw.communitydragon.org/pbe/plugins/rcp-be-lol-game-data/global/default/v1/champion-chroma-images/%s/%s.png",
@@ -57,6 +57,25 @@ public class StoreImage extends JComponent implements IStoreImage, ResourceConsu
                         map.get(InventoryType.CHAMPION.name()),
                         skinId
                 );
+            }
+            //TODO find ways to display correct images for items of these types
+            case COMPANION -> {
+                return "https://raw.communitydragon.org/pbe/plugins/rcp-be-lol-game-data/global/default/assets/loadouts/companions/tooltip_tft_avatar_blue.png";
+            }
+            case TFT_MAP_SKIN -> {
+                return "https://raw.communitydragon.org/pbe/plugins/rcp-be-lol-game-data/global/default/assets/loadouts/tftmapskins/square_battlefield_lg_base.png";
+            }
+            case EVENT_PASS -> {
+                return "https://raw.communitydragon.org/latest/plugins/rcp-be-lol-game-data/global/default/assets/loot/sett_card_490x490.png";
+            }
+            case BUNDLES -> {
+                if (item.isChibiCompanion(item.asJSON())) {
+                    return "https://raw.communitydragon.org/pbe/plugins/rcp-be-lol-game-data/global/default/assets/loadouts/companions/tooltip_tft_avatar_blue.png";
+                }
+                return "https://raw.communitydragon.org/latest/plugins/rcp-fe-lol-loot/global/default/assets/bundle_images/event_3.png";
+            }
+            case BOOST -> {
+                return "https://raw.communitydragon.org/latest/plugins/rcp-fe-lol-loot/global/default/assets/loot_item_icons/boost_xp_win.png";
             }
             default -> {
                 return String.format(

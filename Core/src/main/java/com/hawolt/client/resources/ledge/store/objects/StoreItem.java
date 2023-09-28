@@ -18,9 +18,9 @@ import java.util.List;
 
 public class StoreItem {
     private final List<Price> prices = new ArrayList<>();
-    private String offerId, name, description;
-    private SubInventoryType subInventoryType;
     private int discountCostBE, discountCostRP;
+    private SubInventoryType subInventoryType;
+    private String offerId, name, description;
     private float discountBE, discountRP;
     private InventoryType inventoryType;
     private boolean active, valid;
@@ -165,8 +165,59 @@ public class StoreItem {
         return inventoryType;
     }
 
-    public boolean hasSubInventoryType() {
-        return subInventoryType != null;
+    public boolean isBundle() {
+        return inventoryType.equals(InventoryType.BUNDLES);
+    }
+
+    public boolean isSkinBundle() {
+        if (subInventoryType != null)
+            return subInventoryType.equals(SubInventoryType.SKIN_BUNDLE);
+        return false;
+    }
+
+    public boolean isSkinVariantBundle() {
+        if (subInventoryType != null)
+            return subInventoryType.equals(SubInventoryType.SKIN_VARIANT_BUNDLE);
+        return false;
+    }
+
+    public boolean isChroma() {
+        if (subInventoryType != null) {
+            return subInventoryType.equals(SubInventoryType.RECOLOR);
+        }
+        return false;
+    }
+
+    public boolean isChromaBundle() {
+        if (subInventoryType != null) {
+            return subInventoryType.equals(SubInventoryType.CHROMA_BUNDLE);
+        }
+        return false;
+    }
+
+    public boolean isTFTMapSkin() {
+        if (inventoryType != null) {
+            return inventoryType.equals(InventoryType.TFT_MAP_SKIN);
+        }
+        return false;
+    }
+
+    public boolean isChibiCompanion(JSONObject item) {
+        if (item.has("bundled")) {
+            JSONObject bundled = item.getJSONObject("bundled");
+            if (bundled.has("items")) {
+                JSONArray items = bundled.getJSONArray("items");
+                for (int i = 0; i < items.length(); i++) {
+                    JSONObject bundledItem = items.getJSONObject(i);
+                    if (bundledItem.has("inventoryType")) {
+                        if (bundledItem.get("inventoryType").equals(InventoryType.COMPANION.name())) {
+                            return true;
+                        }
+                    }
+                }
+            }
+        }
+        return false;
     }
 
     public SubInventoryType getSubInventoryType() {

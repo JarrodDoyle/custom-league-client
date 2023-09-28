@@ -123,35 +123,6 @@ public class SettingUIComponent extends ChildUIComponent {
         return result;
     }
 
-    public static SettingUIComponent createCheckBoxComponent(String name, SettingService settingService, String key, boolean defaultValue) {
-        DynamicObject settings = settingService.getClientSettings();
-
-        SettingUIComponent result = new SettingUIComponent(new BorderLayout());
-        result.setPreferredSize(new Dimension(10, 64));
-
-        ChildUIComponent labelContainer = createDefaultFlowLayout();
-        result.add(labelContainer, BorderLayout.WEST);
-
-        JLabel label = createLabel(name);
-        labelContainer.add(label);
-
-        JCheckBox checkBox = new JCheckBox();
-        labelContainer.add(checkBox);
-
-        checkBox.setSelected(settings.getByKeyOrDefault(key, defaultValue));
-
-        checkBox.addActionListener(e -> {
-            boolean isSelected = checkBox.isSelected();
-            settingService.write(SettingType.CLIENT, key, isSelected);
-        });
-
-        result.addOnQuitActionListener(listener -> {
-            checkBox.setSelected(settings.getByKeyOrDefault(key, defaultValue));
-        });
-
-        return result;
-    }
-
     public static SettingUIComponent createAutoFriendComponent(String name, SettingService settingService, String key) {
         DynamicObject settings = settingService.getClientSettings();
         SettingUIComponent result = new SettingUIComponent(new BorderLayout());
@@ -176,6 +147,39 @@ public class SettingUIComponent extends ChildUIComponent {
 
         result.addOnQuitActionListener(listener -> {
             autoFriend.setSelectedItem(settings.getByKeyOrDefault(key, "User choice"));
+        });
+
+        return result;
+    }
+
+    public static SettingUIComponent createThemeSelectorComponent(String name, SettingService settingService, String key, LComboBox comboBox) {
+        DynamicObject settings = settingService.getClientSettings();
+
+        SettingUIComponent result = new SettingUIComponent(new BorderLayout());
+        result.setPreferredSize(new Dimension(10, 64));
+
+        ChildUIComponent comboBoxContainer = new ChildUIComponent(new FlowLayout());
+        result.add(comboBoxContainer, BorderLayout.SOUTH);
+
+        ChildUIComponent labelContainer = createDefaultFlowLayout();
+        result.add(labelContainer, BorderLayout.WEST);
+
+        JLabel label = createLabel(name);
+        labelContainer.add(label);
+
+        comboBoxContainer.add(comboBox, BorderLayout.SOUTH);
+
+        result.addOnSaveActionListener(listener -> {
+            int value = comboBox.getSelectedIndex();
+            try {
+                settingService.write(SettingType.CLIENT, key, value);
+            } catch (InvalidPathException | NullPointerException e) {
+                Logger.warn(e.getMessage());
+            }
+        });
+
+        result.addOnQuitActionListener(listener -> {
+            comboBox.setSelectedIndex(settings.getByKeyOrDefault(key, 0));
         });
 
         return result;
@@ -351,37 +355,30 @@ public class SettingUIComponent extends ChildUIComponent {
         return result;
     }
 
-    public static SettingUIComponent createComboBoxComponent(String name, SettingService settingService, String key, LComboBox comboBox) {
+    public static SettingUIComponent createCheckBoxComponent(String name, SettingService settingService, String key, boolean defaultValue) {
         DynamicObject settings = settingService.getClientSettings();
 
         SettingUIComponent result = new SettingUIComponent(new BorderLayout());
         result.setPreferredSize(new Dimension(10, 64));
 
-        ChildUIComponent comboBoxContainer = new ChildUIComponent(new FlowLayout());
-        result.add(comboBoxContainer, BorderLayout.SOUTH);
-
-        ChildUIComponent labelContainer = new ChildUIComponent(new FlowLayout());
-        labelContainer.setBorder(new EmptyBorder(0, 16, 0, 0));
+        ChildUIComponent labelContainer = createDefaultFlowLayout();
         result.add(labelContainer, BorderLayout.WEST);
 
-        JLabel label = new JLabel(name);
-        label.setFont(textFont);
-        label.setForeground(Color.WHITE);
+        JLabel label = createLabel(name);
         labelContainer.add(label);
 
-        comboBoxContainer.add(comboBox, BorderLayout.SOUTH);
+        JCheckBox checkBox = new JCheckBox();
+        labelContainer.add(checkBox);
 
-        result.addOnSaveActionListener(listener -> {
-            int value = comboBox.getSelectedIndex();
-            try {
-                settingService.write(SettingType.CLIENT, key, value);
-            } catch (InvalidPathException | NullPointerException e) {
-                Logger.warn(e.getMessage());
-            }
+        checkBox.setSelected(settings.getByKeyOrDefault(key, defaultValue));
+
+        checkBox.addActionListener(e -> {
+            boolean isSelected = checkBox.isSelected();
+            settingService.write(SettingType.CLIENT, key, isSelected);
         });
 
         result.addOnQuitActionListener(listener -> {
-            comboBox.setSelectedIndex(settings.getByKeyOrDefault(key, 0));
+            checkBox.setSelected(settings.getByKeyOrDefault(key, defaultValue));
         });
 
         return result;

@@ -13,10 +13,13 @@ import java.awt.*;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseMotionAdapter;
 import java.awt.geom.Area;
+import java.util.ArrayList;
 import java.util.HashMap;
 
 public class LTabbedPane extends JTabbedPane {
     private static final Font regular = new Font("Dialog", Font.BOLD, 18);
+    private final ArrayList<String> types = new ArrayList<>();
+
     HashMap<Integer, Boolean> tabHoverMap = new HashMap<Integer, Boolean>();
 
     public LTabbedPane() {
@@ -55,6 +58,15 @@ public class LTabbedPane extends JTabbedPane {
                 }
             }
         });
+    }
+
+    public void addTab(String type, String title, Component component) {
+        types.add(type);
+        addTab(title, component);
+    }
+
+    public String getType(int pos) {
+        return types.get(pos);
     }
 
     public class LTabbedUI extends MetalTabbedPaneUI {

@@ -16,7 +16,7 @@ public class SettingsSidebar extends JPanel {
     private static final Font headerFont = new Font("Arial", Font.BOLD, 20);
     private static final Dimension sidebarDimension = new Dimension(200, 0);
     private static final Dimension headerDimension = new Dimension(190, 40);
-    private static final Dimension sectionDimension = new Dimension(190, 40);
+    private static final Dimension sectionDimension = new Dimension(190, 50);
     ChildUIComponent panel;
 
     public SettingsSidebar() {
@@ -29,7 +29,7 @@ public class SettingsSidebar extends JPanel {
         panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
         panel.setBorder(
                 BorderFactory.createCompoundBorder(
-                        new MatteBorder(2, 2, 2, 2, Color.DARK_GRAY),
+                        new MatteBorder(2, 0, 2, 2, Color.DARK_GRAY),
                         new EmptyBorder(5, 5, 5, 5)
                 )
         );
@@ -57,11 +57,15 @@ public class SettingsSidebar extends JPanel {
     }
 
     protected class GroupTab extends ChildUIComponent {
-        private JPanel container;
+        private final JPanel container;
 
         private GroupTab(String name) {
             super();
             this.setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
+            LLabel header = new LLabel(name, LTextAlign.LEFT);
+            header.setFont(headerFont);
+            header.setMaximumSize(headerDimension);
+            this.add(header);
 
             container = new ChildUIComponent();
             container.setBackground(ColorPalette.accentColor);
@@ -72,18 +76,11 @@ public class SettingsSidebar extends JPanel {
                             new MatteBorder(2, 2, 2, 2, Color.DARK_GRAY)
                     )
             );
-
-            LLabel header = new LLabel(name, LTextAlign.LEFT);
-            header.setFont(headerFont);
-            header.setMaximumSize(headerDimension);
-
-            this.add(header);
             this.add(container);
         }
 
-        protected Component addToContainer(Component component) {
+        protected void addToContainer(Component component) {
             container.add(component);
-            return component;
         }
     }
 }

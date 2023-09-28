@@ -3,10 +3,10 @@ package com.hawolt.ui.store;
 import com.hawolt.async.Debouncer;
 import com.hawolt.client.LeagueClient;
 import com.hawolt.client.misc.SortOrder;
-import com.hawolt.client.resources.ledge.store.objects.InventoryType;
 import com.hawolt.client.resources.ledge.store.objects.StoreItem;
 import com.hawolt.client.resources.ledge.store.objects.StoreSortProperty;
 import com.hawolt.logger.Logger;
+import com.hawolt.ui.generic.component.LCheckBox;
 import com.hawolt.ui.generic.component.LComboBox;
 import com.hawolt.ui.generic.component.LHintTextField;
 import com.hawolt.ui.generic.component.LScrollPane;
@@ -17,6 +17,7 @@ import org.json.JSONObject;
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
+import javax.swing.border.MatteBorder;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 import java.awt.*;
@@ -33,28 +34,32 @@ import java.util.concurrent.TimeUnit;
 
 public class StorePage extends ChildUIComponent implements IStorePage {
 
-    private final Map<Long, StoreElement> map = new HashMap<>();
-    private final LeagueClient client;
-    private final ChildUIComponent grid;
-    private final List<Long> owned;
-    private final String name;
-    private final String[] options = {"SKINS", "CHROMAS"};
     private final StoreElementComparator alphabeticalComparator = new StoreElementComparator(StoreSortProperty.NAME, SortOrder.ASCENDING);
-    private final StoreElementComparator comparator;
+    private boolean chromaFilter, tftFilter, ownedFilter, saleFilter = false;
+    private final String[] tft_options = {"TACTICIANS", "ARENA SKINS"};
+    private final String[] skins_options = {"SKINS", "CHROMAS"};
+    private final Map<Long, StoreElement> map = new HashMap<>();
     private final Debouncer debouncer = new Debouncer();
+    private final StoreElementComparator comparator;
     private final ChildUIComponent inputPanel;
     private final LScrollPane scrollPane;
+    private final ChildUIComponent grid;
+    private final LeagueClient client;
+    private final List<Long> owned;
     private String filter = "";
-    private boolean chromaFilter = false;
-
+    private final String name;
+  
     public StorePage(LeagueClient client, String name, List<Long> owned, StoreSortProperty... properties) {
         super(new BorderLayout(0, 5));
         this.client = client;
         this.owned = owned;
         this.name = name;
         ChildUIComponent component = new ChildUIComponent(new BorderLayout());
-        grid = new ChildUIComponent(new GridLayout(0, 5, 15, 15));
+        grid = new ChildUIComponent(new GridLayout(0, 4, 15, 15));
         add(component, BorderLayout.NORTH);
+        comparator = new StoreElementComparator(properties.length > 0 ? properties[0] : null, SortOrder.DESCENDING);
+        inputPanel = createInputPanel(properties);
+        this.add(inputPanel, BorderLayout.WEST);
         component.add(grid, BorderLayout.NORTH);
         scrollPane = new LScrollPane(component);
         scrollPane.setBackground(ColorPalette.backgroundColor);
@@ -68,10 +73,6 @@ public class StorePage extends ChildUIComponent implements IStorePage {
         scrollPane.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS);
         add(scrollPane, BorderLayout.CENTER);
         setBorder(new EmptyBorder(5, 5, 5, 0));
-
-        comparator = new StoreElementComparator(properties.length > 0 ? properties[0] : null, SortOrder.DESCENDING);
-        inputPanel = createInputPanel(properties);
-        this.add(inputPanel, BorderLayout.NORTH);
     }
 
     private void loadViewport() {
@@ -96,18 +97,32 @@ public class StorePage extends ChildUIComponent implements IStorePage {
 
         ChildUIComponent inputPanel = new ChildUIComponent();
         inputPanel.setBackground(ColorPalette.backgroundColor);
-        inputPanel.setLayout(new GridLayout(1, 2, 5, 0));
-        inputPanel.add(sortBox);
-        if (this.name.equals(InventoryType.CHAMPION_SKIN.name())) {
-            LComboBox<String> options = new LComboBox<>(this.options);
+        inputPanel.setBorder(
+                BorderFactory.createCompoundBorder(
+                        new MatteBorder(0, 0, 0, 2, Color.DARK_GRAY),
+                        new EmptyBorder(5, 5, 5, 5)
+                )
+        );
+        inputPanel.setLayout(new GridLayout(10, 1, 0, 5));
+
+        if (this.name.equals("SKINS")) {
+            LComboBox<String> options = new LComboBox<>(this.skins_options);
             options.addItemListener(listener -> {
-                chromaFilter = !Objects.equals(options.getSelectedItem(), this.options[0]);
-                updateElements();
+                chromaFilter = Objects.equals(options.getSelectedItem(), this.skins_options[1]);
+                debouncer.debounce("chromaFilter", this::updateElements, 150, TimeUnit.MILLISECONDS);
             });
             inputPanel.add(options);
         }
-        LHintTextField search = new LHintTextField("Search...");
+        if (this.name.equals("TFT")) {
+            LComboBox<String> options = new LComboBox<>(this.tft_options);
+            options.addItemListener(listener -> {
+                tftFilter = Objects.equals(options.getSelectedItem(), this.tft_options[1]);
+                debouncer.debounce("tftFilter", this::updateElements, 150, TimeUnit.MILLISECONDS);
+            });
+            inputPanel.add(options);
+        }
 
+        LHintTextField search = new LHintTextField("Search...");
         search.addKeyListener(new KeyAdapter() {
             @Override
             public void keyReleased(KeyEvent e) {
@@ -115,8 +130,24 @@ public class StorePage extends ChildUIComponent implements IStorePage {
                 debouncer.debounce("searchField", () -> updateElements(), 200, TimeUnit.MILLISECONDS);
             }
         });
-
         inputPanel.add(search);
+
+        LCheckBox ownedCheck = new LCheckBox("Show Owned");
+        ownedCheck.addActionListener(listener -> {
+            ownedFilter = !ownedFilter;
+            debouncer.debounce("ownedFilter", this::updateElements, 200, TimeUnit.MILLISECONDS);
+        });
+        inputPanel.add(ownedCheck);
+
+        inputPanel.add(sortBox);
+
+        LCheckBox saleCheck = new LCheckBox("On Sale");
+        saleCheck.addActionListener(listener -> {
+            saleFilter = !saleFilter;
+            debouncer.debounce("saleFilter", this::updateElements, 200, TimeUnit.MILLISECONDS);
+        });
+        inputPanel.add(saleCheck);
+
         return inputPanel;
     }
 
@@ -140,6 +171,10 @@ public class StorePage extends ChildUIComponent implements IStorePage {
         return grid;
     }
 
+    private boolean isOwned(StoreItem item) {
+        return owned.contains(item.getItemId());
+    }
+
     public void append(StoreItem item) {
         append(Collections.singletonList(item));
     }
@@ -147,11 +182,10 @@ public class StorePage extends ChildUIComponent implements IStorePage {
     public void append(List<StoreItem> items) {
         try {
             for (StoreItem item : items) {
-                if (owned.contains(item.getItemId())) continue;
-                if (item.getRiotPointCost() == 0 && !item.isBlueEssencePurchaseAvailable()) continue;
+                if (item.getCorrectRiotPointCost() == 0 && !item.isBlueEssencePurchaseAvailable()) continue;
                 JSONObject object = item.asJSON();
                 long itemId = object.getLong("itemId");
-                StoreElement element = new StoreElement(client, this, item);
+                StoreElement element = new StoreElement(client, this, item, isOwned(item));
                 map.put(itemId, element);
                 grid.add(element);
             }
@@ -175,7 +209,10 @@ public class StorePage extends ChildUIComponent implements IStorePage {
                 .sorted(this.alphabeticalComparator)
                 .sorted(this.comparator)
                 .filter(champion -> champion.getItem().getName().toLowerCase().contains(filter))
-                .filter(skin -> skin.getItem().hasSubInventoryType() == chromaFilter)
+                .filter(skin -> skin.getItem().isChroma() == chromaFilter)
+                .filter(skin -> skin.getItem().isTFTMapSkin() == tftFilter)
+                .filter(item -> owned.contains(item.getItem().getItemId()) == ownedFilter || !owned.contains(item.getItem().getItemId()))
+                .filter(item -> item.getItem().hasDiscount() == saleFilter)
                 .forEach(this.grid::add);
         revalidate();
         repaint();
