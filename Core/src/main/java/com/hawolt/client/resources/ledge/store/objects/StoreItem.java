@@ -17,8 +17,8 @@ import java.util.List;
  **/
 
 public class StoreItem {
-    private int discountCostBE, discountCostRP, bundleDiscountMinCost;
     private final List<Price> prices = new ArrayList<>();
+    private int discountCostBE, discountCostRP, bundleDiscountMinCost;
     private String offerId, name, description, tags;
     private long itemId, variantId, variantBundleId;
     private SubInventoryType subInventoryType;
@@ -86,6 +86,10 @@ public class StoreItem {
 
     public String getTags() {
         return tags;
+    }
+
+    public void setTags(String tags) {
+        this.tags = tags;
     }
 
     public boolean isRiotPointPurchaseAvailable() {
@@ -222,18 +226,6 @@ public class StoreItem {
         return false;
     }
 
-    public void setTags(String tags) {
-        this.tags = tags;
-    }
-
-    public void setVariantId(long variantId) {
-        this.variantId = variantId;
-    }
-
-    public void setVariantBundleId(long variantBundleId) {
-        this.variantBundleId = variantBundleId;
-    }
-
     public void setBundleDiscountMinCost(int bundleDiscountMinCost) {
         this.bundleDiscountMinCost = bundleDiscountMinCost;
     }
@@ -258,8 +250,16 @@ public class StoreItem {
         return variantId;
     }
 
+    public void setVariantId(long variantId) {
+        this.variantId = variantId;
+    }
+
     public long getVariantBundleId() {
         return variantBundleId;
+    }
+
+    public void setVariantBundleId(long variantBundleId) {
+        this.variantBundleId = variantBundleId;
     }
 
     public boolean hasVariantId() {

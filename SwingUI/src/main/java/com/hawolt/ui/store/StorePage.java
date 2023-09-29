@@ -35,7 +35,6 @@ import java.util.concurrent.TimeUnit;
 public class StorePage extends ChildUIComponent implements IStorePage {
 
     private final StoreElementComparator alphabeticalComparator = new StoreElementComparator(StoreSortProperty.NAME, SortOrder.ASCENDING);
-    private boolean chromaFilter, tftFilter, ownedFilter, saleFilter = false;
     private final String[] tft_options = {"TACTICIANS", "ARENA SKINS"};
     private final String[] skins_options = {"SKINS", "CHROMAS"};
     private final Map<Long, StoreElement> map = new HashMap<>();
@@ -46,9 +45,10 @@ public class StorePage extends ChildUIComponent implements IStorePage {
     private final ChildUIComponent grid;
     private final LeagueClient client;
     private final List<Long> owned;
-    private String filter = "";
     private final String name;
-  
+    private boolean chromaFilter, tftFilter, ownedFilter, saleFilter = false;
+    private String filter = "";
+
     public StorePage(LeagueClient client, String name, List<Long> owned, StoreSortProperty... properties) {
         super(new BorderLayout(0, 5));
         this.client = client;

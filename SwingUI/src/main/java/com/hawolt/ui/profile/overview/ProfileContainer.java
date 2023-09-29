@@ -28,11 +28,10 @@ import java.util.concurrent.TimeUnit;
 
 public class ProfileContainer extends ChildUIComponent implements ResourceConsumer<BufferedImage, byte[]> {
 
+    private static final String SPRITE_PATH = "https://raw.communitydragon.org/pbe/plugins/rcp-be-lol-game-data/global/default/v1/champion-splashes/%s/%s.jpg";
     private final CardLayout layout = new CardLayout();
     private final ChildUIComponent component = new ChildUIComponent(layout);
     private BufferedImage original, reference, mask;
-    private SummonerProfile profile;
-
     private final ComponentAdapter adapter = new ComponentAdapter() {
         private final Debouncer debouncer = new Debouncer();
 
@@ -44,6 +43,7 @@ public class ProfileContainer extends ChildUIComponent implements ResourceConsum
             }, 100, TimeUnit.MILLISECONDS);
         }
     };
+    private SummonerProfile profile;
 
     public ProfileContainer(BufferedImage mask, Summoner summoner, SummonerProfile profile, RankedStatistic rankedStatistic) {
         super(new BorderLayout());
@@ -103,6 +103,4 @@ public class ProfileContainer extends ChildUIComponent implements ResourceConsum
     public BufferedImage transform(byte[] bytes) throws Exception {
         return ImageIO.read(new ByteArrayInputStream(bytes));
     }
-
-    private static final String SPRITE_PATH = "https://raw.communitydragon.org/pbe/plugins/rcp-be-lol-game-data/global/default/v1/champion-splashes/%s/%s.jpg";
 }

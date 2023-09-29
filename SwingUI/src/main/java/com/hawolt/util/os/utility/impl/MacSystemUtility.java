@@ -1,6 +1,5 @@
 package com.hawolt.util.os.utility.impl;
 
-import com.hawolt.logger.Logger;
 import com.hawolt.util.os.process.ProcessReference;
 import com.hawolt.util.os.process.impl.UnixProcess;
 import com.hawolt.util.os.utility.BasicSystemUtility;

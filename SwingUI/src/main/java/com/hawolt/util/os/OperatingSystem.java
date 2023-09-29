@@ -3,12 +3,9 @@ package com.hawolt.util.os;
 import java.util.Locale;
 
 public class OperatingSystem {
-    public enum OSType {
-        WINDOWS, MAC, LINUX, UNKNOWN
-    }
+    protected static OSType detectedOS;
 
     ;
-    protected static OSType detectedOS;
 
     public static OSType getOperatingSystemType() {
         if (detectedOS == null) {
@@ -24,5 +21,9 @@ public class OperatingSystem {
             }
         }
         return detectedOS;
+    }
+
+    public enum OSType {
+        WINDOWS, MAC, LINUX, UNKNOWN
     }
 }

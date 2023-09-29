@@ -14,8 +14,8 @@ import java.awt.*;
  **/
 
 public class TranslucentLabel extends TranslucentComponent {
-    private final LTextAlign textAlign;
     protected final String text;
+    private final LTextAlign textAlign;
 
     public TranslucentLabel(String text) {
         this(text, LTextAlign.CENTER);

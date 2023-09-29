@@ -41,6 +41,7 @@ public abstract class MatchmadeRenderInstance extends AbstractRenderInstance imp
     protected final ChampSelectCenterUI centerUI;
     protected final ChampSelectChatUI chatUI;
     protected int selectedChampionId, bannedChampionId;
+    private MatchContext matchContext;
 
     public MatchmadeRenderInstance(ChampSelectType... supportedTypes) {
         this.component.add(centerUI = getCenterUI(this, supportedTypes), BorderLayout.CENTER);
@@ -215,8 +216,6 @@ public abstract class MatchmadeRenderInstance extends AbstractRenderInstance imp
             }
         }
     }
-
-    private MatchContext matchContext;
 
     @Override
     public void onCacheUpdate(CacheElement element, MatchContext matchContext) {

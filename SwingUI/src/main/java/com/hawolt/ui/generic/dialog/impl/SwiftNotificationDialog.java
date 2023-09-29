@@ -5,9 +5,7 @@ import com.hawolt.ui.generic.dialog.DialogOption;
 import com.hawolt.ui.generic.dialog.SwiftDialog;
 import com.hawolt.ui.generic.utility.ChildUIComponent;
 
-import javax.swing.*;
 import java.awt.*;
-import java.awt.event.ActionEvent;
 
 /**
  * Created: 27/09/2023 00:25

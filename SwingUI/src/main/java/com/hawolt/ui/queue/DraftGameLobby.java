@@ -3,7 +3,6 @@ package com.hawolt.ui.queue;
 import com.hawolt.Swiftrift;
 import com.hawolt.async.Debouncer;
 import com.hawolt.client.cache.CacheElement;
-import com.hawolt.client.resources.ledge.parties.PartiesLedge;
 import com.hawolt.client.resources.ledge.parties.objects.data.PositionPreference;
 import com.hawolt.client.resources.ledge.preferences.PlayerPreferencesLedge;
 import com.hawolt.client.resources.ledge.preferences.objects.PreferenceType;
@@ -11,8 +10,6 @@ import com.hawolt.client.resources.ledge.preferences.objects.lcupreferences.LCUP
 import com.hawolt.logger.Logger;
 import com.hawolt.ui.generic.component.LComboBox;
 import com.hawolt.ui.generic.utility.ChildUIComponent;
-import com.hawolt.util.settings.SettingType;
-import org.json.JSONObject;
 
 import javax.swing.border.EmptyBorder;
 import java.awt.*;
@@ -100,6 +97,6 @@ public class DraftGameLobby extends GameLobby implements ActionListener {
         lcuPreferences.getPartiesPositionPreference().get().setFirstPreference(main.getItemAt(main.getSelectedIndex()).toString());
         lcuPreferences.getPartiesPositionPreference().get().setSecondPreference(other.getItemAt(other.getSelectedIndex()).toString());
         playerPreferencesLedge.setPreferences(PreferenceType.LCU_PREFERENCES, lcuPreferences);
-        
+
     }
 }
