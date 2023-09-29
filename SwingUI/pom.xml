@@ -10,7 +10,7 @@
     <modelVersion>4.0.0</modelVersion>
 
     <artifactId>SwingUI</artifactId>
-    <version>alpha-1.13</version>
+    <version>alpha-1.14</version>
 
     <build>
         <plugins>
