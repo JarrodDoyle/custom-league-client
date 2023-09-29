@@ -9,8 +9,13 @@ import java.nio.file.Paths;
  **/
 
 public class StaticConstant {
+    // DYNAMIC CONSTANTS
+    public static String VERSION;
+
+    // PREDEFINED CONSTANTS
 
     public static final String PROJECT = "Swift-Rift";
+    public static final String PROJECT_DATA = "project.json";
     public static final Path APPLICATION_CACHE = Paths.get(System.getProperty("java.io.tmpdir")).resolve("swift-rift");
     public static final Path APPLICATION_SETTINGS = Paths.get(System.getProperty("user.home")).resolve(PROJECT);
     public static final String CLIENT_SETTING_fILE = ".swift-rift-client";

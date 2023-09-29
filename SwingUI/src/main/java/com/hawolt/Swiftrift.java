@@ -7,11 +7,17 @@ import com.hawolt.async.presence.PresenceManager;
 import com.hawolt.async.rms.GameStartListener;
 import com.hawolt.async.shutdown.ShutdownManager;
 import com.hawolt.authentication.LocalCookieSupplier;
+import com.hawolt.cli.Argument;
+import com.hawolt.cli.CLI;
+import com.hawolt.cli.Parser;
+import com.hawolt.cli.ParserException;
 import com.hawolt.client.IClientCallback;
 import com.hawolt.client.LeagueClient;
 import com.hawolt.client.RiotClient;
 import com.hawolt.client.misc.ClientConfiguration;
 import com.hawolt.generic.token.impl.StringTokenSupplier;
+import com.hawolt.http.integrity.Diffuser;
+import com.hawolt.io.JsonSource;
 import com.hawolt.io.RunLevel;
 import com.hawolt.logger.Logger;
 import com.hawolt.manifest.RMANCache;
@@ -305,8 +311,35 @@ public class Swiftrift extends JFrame implements IClientCallback, ILoginCallback
         this.riotClient = new RiotClient(configuration, this);
     }
 
+    private static void printLaunchDetail(String[] args) {
+        for (int i = 0; i < args.length; i++) {
+            Logger.info("{}: {}", i, args[i]);
+        }
+        try {
+            JsonSource source = JsonSource.of(RunLevel.get(StaticConstant.PROJECT_DATA));
+            StaticConstant.VERSION = source.get("version");
+            Logger.info("Running Swiftrift-{}", StaticConstant.VERSION);
+        } catch (IOException e) {
+            Logger.error(e);
+        }
+    }
+
+    private static void handleCommandLine(String[] args) {
+        Parser parser = new Parser();
+        parser.add(Argument.create("p", "privacy", "disable privacy enhancement", false, true, true));
+        try {
+            CLI cli = parser.check(args);
+            if (cli.has("privacy")) {
+                Diffuser.PRIVACY_ENHANCEMENT = false;
+            }
+        } catch (ParserException e) {
+            System.err.println(parser.getHelp());
+        }
+    }
 
     public static void main(String[] args) {
+        printLaunchDetail(args);
+        handleCommandLine(args);
         RMANCache.preload();
         AudioEngine.install();
         Swiftrift.service.execute(() -> {
