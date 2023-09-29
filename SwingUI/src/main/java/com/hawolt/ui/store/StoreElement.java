@@ -4,6 +4,7 @@ import com.hawolt.Swiftrift;
 import com.hawolt.client.LeagueClient;
 import com.hawolt.client.cache.CacheElement;
 import com.hawolt.client.cache.CachedValueLoader;
+import com.hawolt.client.resources.ledge.store.objects.InventoryType;
 import com.hawolt.client.resources.ledge.store.objects.StoreItem;
 import com.hawolt.client.resources.purchasewidget.CurrencyType;
 import com.hawolt.client.resources.purchasewidget.PurchaseWidget;
@@ -63,10 +64,10 @@ public class StoreElement extends ChildUIComponent implements IStoreElement {
         ChildUIComponent mainComponent = new ChildUIComponent(new GridBagLayout());
         mainComponent.setBackground(ColorPalette.cardColor);
         GridBagConstraints gbc = new GridBagConstraints();
-        ChildUIComponent nameComponent = new ChildUIComponent(new GridLayout(1, 0, 0 , 0));
+        ChildUIComponent nameComponent = new ChildUIComponent(new GridLayout(1, 0, 0, 0));
         LTextPane name = new LTextPane(this.item.getName());
         nameComponent.add(name);
-        gbc.insets = new Insets(0,0,0,0);
+        gbc.insets = new Insets(0, 0, 0, 0);
         gbc.anchor = GridBagConstraints.PAGE_START;
         gbc.fill = GridBagConstraints.HORIZONTAL;
         gbc.gridwidth = 2;
@@ -122,7 +123,12 @@ public class StoreElement extends ChildUIComponent implements IStoreElement {
                 );
                 int result = Swiftrift.showOptionDialog(message, "YES", "NO");
                 if (result != 0) return;
-                JSONObject response = new JSONObject(widget.purchase(currencyType, item.getInventoryType(), item.getItemId(), price));
+                JSONObject response;
+                if (item.ownVariantId()) {
+                    response = new JSONObject(widget.purchase(currencyType, InventoryType.BUNDLES, item.getVariantBundleId(), price));
+                } else {
+                    response = new JSONObject(widget.purchase(currencyType, item.getInventoryType(), item.getItemId(), price));
+                }
                 if (response.has("errorCode")) {
                     AudioEngine.play(Sound.ERROR);
                 } else {

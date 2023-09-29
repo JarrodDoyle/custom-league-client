@@ -25,7 +25,8 @@ public enum CacheElement {
     F2P_VETERAN_PLAYER(CachedDataType.VALUE),
     PARTY_REGISTRATION(CachedDataType.VALUE),
     LCU_PREFERENCES(CachedDataType.VALUE),
-    LCU_SOCIAL_PREFERENCES(CachedDataType.VALUE);
+    LCU_SOCIAL_PREFERENCES(CachedDataType.VALUE),
+    STORE_CATALOG(CachedDataType.VALUE);
     private final CachedDataType cachedDataType;
 
     CacheElement(CachedDataType cachedDataType) {

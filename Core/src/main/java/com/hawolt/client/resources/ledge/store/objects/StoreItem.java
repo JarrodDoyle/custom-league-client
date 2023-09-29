@@ -17,32 +17,31 @@ import java.util.List;
  **/
 
 public class StoreItem {
+    private int discountCostBE, discountCostRP, bundleDiscountMinCost;
     private final List<Price> prices = new ArrayList<>();
-    private int discountCostBE, discountCostRP;
+    private String offerId, name, description, tags;
+    private long itemId, variantId, variantBundleId;
     private SubInventoryType subInventoryType;
-    private String offerId, name, description;
     private float discountBE, discountRP;
+    private boolean active, variantOwned;
     private InventoryType inventoryType;
-    private boolean active, valid;
     private JSONObject object;
     private Date releaseDate;
-    private long itemId;
 
     public StoreItem(JSONArray array) {
-        this.valid = !array.isEmpty();
-        if (!valid) return;
         JSONObject item = array.getJSONObject(0);
+        this.itemId = item.getLong("itemId");
         if (item.has("offerId")) this.offerId = item.getString("offerId");
         this.inventoryType = InventoryType.valueOf(item.getString("inventoryType"));
         if (item.has("subInventoryType")) {
             this.subInventoryType = SubInventoryType.valueOf(item.getString("subInventoryType").toUpperCase());
         }
         this.active = item.getBoolean("active");
-        this.itemId = item.getLong("itemId");
         JSONArray prices = item.getJSONArray("prices");
         for (int i = 0; i < prices.length(); i++) {
             this.prices.add(new Price(prices.getJSONObject(i)));
         }
+        if (item.has("bundleDiscountMinCost")) this.bundleDiscountMinCost = item.getInt("bundleDiscountMinCost");
         if (item.has("sale")) {
             JSONObject sale = item.getJSONObject("sale");
             if (sale.has("prices")) {
@@ -85,8 +84,8 @@ public class StoreItem {
         return object;
     }
 
-    public boolean isValid() {
-        return valid;
+    public String getTags() {
+        return tags;
     }
 
     public boolean isRiotPointPurchaseAvailable() {
@@ -126,6 +125,9 @@ public class StoreItem {
     }
 
     public int getCorrectRiotPointCost() {
+        if (ownVariantId()) {
+            return bundleDiscountMinCost;
+        }
         if (hasDiscountRP()) {
             return discountCostRP;
         } else {
@@ -220,6 +222,22 @@ public class StoreItem {
         return false;
     }
 
+    public void setTags(String tags) {
+        this.tags = tags;
+    }
+
+    public void setVariantId(long variantId) {
+        this.variantId = variantId;
+    }
+
+    public void setVariantBundleId(long variantBundleId) {
+        this.variantBundleId = variantBundleId;
+    }
+
+    public void setBundleDiscountMinCost(int bundleDiscountMinCost) {
+        this.bundleDiscountMinCost = bundleDiscountMinCost;
+    }
+
     public SubInventoryType getSubInventoryType() {
         return subInventoryType;
     }
@@ -230,6 +248,26 @@ public class StoreItem {
 
     public long getItemId() {
         return itemId;
+    }
+
+    public void setVariantOwned(boolean value) {
+        this.variantOwned = value;
+    }
+
+    public long getVariantId() {
+        return variantId;
+    }
+
+    public long getVariantBundleId() {
+        return variantBundleId;
+    }
+
+    public boolean hasVariantId() {
+        return variantId != 0;
+    }
+
+    public boolean ownVariantId() {
+        return variantOwned;
     }
 
     public Date getReleaseDate() {
@@ -246,7 +284,6 @@ public class StoreItem {
                 ", inventoryType=" + inventoryType +
                 ", subInventoryType=" + subInventoryType +
                 ", active=" + active +
-                ", valid=" + valid +
                 ", object=" + object +
                 ", itemId=" + itemId +
                 ", releaseDate=" + releaseDate +

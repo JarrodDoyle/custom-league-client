@@ -183,6 +183,8 @@ public class StorePage extends ChildUIComponent implements IStorePage {
         try {
             for (StoreItem item : items) {
                 if (item.getCorrectRiotPointCost() == 0 && !item.isBlueEssencePurchaseAvailable()) continue;
+                if (item.hasVariantId())
+                    if (owned.contains(item.getVariantId())) item.setVariantOwned(true);
                 JSONObject object = item.asJSON();
                 long itemId = object.getLong("itemId");
                 StoreElement element = new StoreElement(client, this, item, isOwned(item));

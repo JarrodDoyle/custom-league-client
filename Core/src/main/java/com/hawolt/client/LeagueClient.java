@@ -13,6 +13,7 @@ import com.hawolt.client.resources.ledge.leagues.objects.RankedStatistic;
 import com.hawolt.client.resources.ledge.preferences.objects.PreferenceType;
 import com.hawolt.client.resources.ledge.preferences.objects.lcupreferences.LCUPreferences;
 import com.hawolt.client.resources.ledge.preferences.objects.lcusocialpreferences.LCUSocialPreferences;
+import com.hawolt.client.resources.ledge.store.objects.StoreCatalog;
 import com.hawolt.client.resources.ledge.summoner.objects.Summoner;
 import com.hawolt.client.resources.ledge.summoner.objects.SummonerProfile;
 import com.hawolt.client.resources.platform.PlatformEndpoint;
@@ -76,6 +77,7 @@ public class LeagueClient extends ClientCache implements PacketCallback {
         cache(CacheElement.PUUID, getVirtualRiotClient().getRiotClientUser().getPUUID());
         cache(CacheElement.ACCOUNT_ID, getVirtualLeagueClientInstance().getUserInformation().getUserInformationLeague().getCUID());
         cache(CacheElement.SUMMONER_ID, getVirtualLeagueClientInstance().getUserInformation().getUserInformationLeagueAccount().getSummonerId());
+        setElementSource(CacheElement.STORE_CATALOG, (ExceptionalFunction<LeagueClient, StoreCatalog>) client -> ledge.getStore().catalogV1());
         setElementSource(CacheElement.INVENTORY_TOKEN, (ExceptionalFunction<LeagueClient, String>) client -> ledge.getInventoryService().getInventoryToken());
         setElementSource(CacheElement.RANKED_STATISTIC, (ExceptionalFunction<LeagueClient, RankedStatistic>) client -> ledge.getLeague().getRankedStats(getVirtualRiotClient().getRiotClientUser().getPUUID()));
         setElementSource(CacheElement.PROFILE, (ExceptionalFunction<LeagueClient, SummonerProfile>) client -> ledge.getSummoner().resolveSummonerProfile(getVirtualRiotClient().getRiotClientUser().getPUUID()));
