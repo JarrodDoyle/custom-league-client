@@ -28,7 +28,9 @@ public class Launcher {
     public static void launch(SettingService service, String ip, String port, String encryptionKey, String playerId, String gameId, Platform platform, String gameMode) {
         String defaultGameBase = OperatingSystem.getOperatingSystemType() == OperatingSystem.OSType.WINDOWS ?
                 String.join(File.separator, "C:", "Riot Games", "League of Legends") :
-                "";
+                OperatingSystem.getOperatingSystemType() == OperatingSystem.OSType.MAC ?
+                        "/Applications/League of Legends.app/Contents/LoL/" :
+                        "";
         String leagueDirectory = service.getClientSettings().getByKeyOrDefault(
                 "GameBaseDir",
                 defaultGameBase
@@ -63,7 +65,9 @@ public class Launcher {
 
                 command.addAll(
                         Arrays.asList(
-                                String.join(File.separator, leagueDirectory, "Game", "League of Legends.exe"),
+                                OperatingSystem.getOperatingSystemType() == OperatingSystem.OSType.MAC
+                                        ? String.join(File.separator, leagueDirectory, "Game", "LeagueOfLegends.app", "Contents", "MacOS", "LeagueofLegends")
+                                        : String.join(File.separator, leagueDirectory, "Game", "League of Legends.exe"),
                                 String.format("%s %s %s %s", ip, port, encryptionKey, playerId),
                                 "-Product=" + ("TFT".equals(gameMode) ? gameMode : "LoL"),
                                 "-PlayerID=" + playerId,

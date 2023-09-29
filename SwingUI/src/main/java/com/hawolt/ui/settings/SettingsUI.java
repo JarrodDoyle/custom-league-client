@@ -120,7 +120,8 @@ public class SettingsUI extends ChildUIComponent {
         result.add(SettingUIComponent.createTagComponent("Path"));
         String defaultGameBase = OperatingSystem.getOperatingSystemType() == OperatingSystem.OSType.WINDOWS ?
                 String.join(File.separator, "C:", "Riot Games", "League of Legends") :
-                "";
+                OperatingSystem.getOperatingSystemType() == OperatingSystem.OSType.MAC ? "/Applications/League of Legends.app/Contents/LoL/"
+                        : "";
         result.add(SettingUIComponent.createPathComponent("League Base Directory Path", service, "GameBaseDir", defaultGameBase));
         if (OperatingSystem.getOperatingSystemType() == OperatingSystem.OSType.LINUX) {
             result.add(SettingUIComponent.createPathComponent("Wine Prefix Path", service, "WinePrefixDir", ""));

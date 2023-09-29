@@ -108,11 +108,12 @@ public class LayoutHeader extends ChildUIComponent {
             String gameBaseDir = service.getClientSettings().getByKeyOrDefault("GameBaseDir", null);
             String winePrefixDirectory = service.getClientSettings().getByKeyOrDefault("WinePrefixDir", null);
             String wineBinaryDirectory = service.getClientSettings().getByKeyOrDefault("WineBinaryDir", null);
-            if (gameBaseDir == null || winePrefixDirectory == null || wineBinaryDirectory == null) {
+            boolean isLinux = OperatingSystem.getOperatingSystemType() == OperatingSystem.OSType.LINUX;
+            if (gameBaseDir == null || (isLinux && (winePrefixDirectory == null || wineBinaryDirectory == null))) {
                 Swiftrift.showMessageDialog("Please configure your Settings first");
-            } else {
-                selectAndShow(component);
+                return;
             }
+            selectAndShow(component);
         }
     }
 

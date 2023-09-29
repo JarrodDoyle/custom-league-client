@@ -37,7 +37,8 @@ import com.hawolt.ui.login.LoginUI;
 import com.hawolt.ui.settings.SettingsUI;
 import com.hawolt.util.audio.AudioEngine;
 import com.hawolt.util.discord.RichPresence;
-import com.hawolt.util.os.WMIC;
+import com.hawolt.util.os.OperatingSystem;
+import com.hawolt.util.os.SystemManager;
 import com.hawolt.util.other.StaticConstant;
 import com.hawolt.util.paint.animation.AnimationVisualizer;
 import com.hawolt.util.paint.animation.impl.impl.SpinningAnimation;
@@ -343,7 +344,18 @@ public class Swiftrift extends JFrame implements IClientCallback, ILoginCallback
         RMANCache.preload();
         AudioEngine.install();
         Swiftrift.service.execute(() -> {
-            if (WMIC.isProcessRunning("Discord.exe")) RichPresence.show();
+            String processName = switch (OperatingSystem.getOperatingSystemType()) {
+                case MAC -> "Discord.app";
+                case LINUX -> "Discord";
+                case WINDOWS -> "Discord.exe";
+                default -> null;
+            };
+            try {
+                if (processName == null || !SystemManager.getInstance().isProcessRunning(processName)) return;
+                RichPresence.show();
+            } catch (IOException e) {
+                Logger.error(e);
+            }
         });
         Swiftrift swiftrift = new Swiftrift(StaticConstant.PROJECT);
         swiftrift.setIconImage(logo);
