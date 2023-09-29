@@ -125,7 +125,6 @@ public class ChampSelectChatUI extends ChampSelectUIComponent {
     }
 
     public void setMatchContext(MatchContext context) {
-        this.document.setText("");
         this.matchContext = context;
     }
 
@@ -133,5 +132,11 @@ public class ChampSelectChatUI extends ChampSelectUIComponent {
     public void propertyChange(PropertyChangeEvent evt) {
         super.propertyChange(evt);
         document.setBackground(ColorPalette.getNewColor(document.getBackground(), (LThemeChoice) evt.getOldValue()));
+    }
+
+    @Override
+    public void init() {
+        super.init();
+        this.document.setText("");
     }
 }

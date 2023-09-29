@@ -96,7 +96,9 @@ public abstract class MatchmadeRenderInstance extends AbstractRenderInstance imp
     public void onSummonerSubmission(Spell selectedSpellOne, Spell selectedSpellTwo) {
         try {
             if (context == null) return;
-            LeagueRtmpClient rtmpClient = context.getChampSelectDataContext().getLeagueClient().getRTMPClient();
+            LeagueClient client = context.getChampSelectDataContext().getLeagueClient();
+            if (client == null) return;
+            LeagueRtmpClient rtmpClient = client.getRTMPClient();
             TeamBuilderService teamBuilderService = rtmpClient.getTeamBuilderService();
             teamBuilderService.selectSpellsBlocking(selectedSpellOne.getId(), selectedSpellTwo.getId());
         } catch (Exception e) {

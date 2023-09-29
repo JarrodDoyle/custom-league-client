@@ -150,9 +150,16 @@ public class ChampSelectGameSettingUI extends ChampSelectUIComponent {
         for (int supportedQueueId : supportedQueueIds) {
             if (supportedQueueId == targetQueueId) {
                 Swiftrift.service.execute(() -> {
+                    LCUPreferences lcuPreferences = null;
                     Swiftrift swiftrift = context.getChampSelectInterfaceContext().getLeagueClientUI();
-                    if (swiftrift == null) return;
-                    LCUPreferences lcuPreferences = swiftrift.getLeagueClient().getCachedValue(CacheElement.LCU_PREFERENCES);
+                    if (swiftrift == null) {
+                        // TODO
+                        // simulate preferences
+                        //lcuPreferences =
+                    } else {
+                        lcuPreferences = swiftrift.getLeagueClient().getCachedValue(CacheElement.LCU_PREFERENCES);
+                    }
+                    if (lcuPreferences == null) return;
                     lcuPreferences.getChampSelectPreference().ifPresent(champSelectPreference -> {
                         JSONArray preference = champSelectPreference.getSummonerSpells(targetQueueId);
                         Logger.error(preference);
