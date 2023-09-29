@@ -1,8 +1,8 @@
 package com.hawolt.client.resources.ledge.championmastery;
 
 import com.hawolt.client.LeagueClient;
-import com.hawolt.client.resources.ledge.AbstractLedgeEndpoint;
 import com.hawolt.client.cache.CacheElement;
+import com.hawolt.client.resources.ledge.AbstractLedgeEndpoint;
 import com.hawolt.generic.Constant;
 import com.hawolt.http.OkHttp3Client;
 import com.hawolt.http.layer.IResponse;

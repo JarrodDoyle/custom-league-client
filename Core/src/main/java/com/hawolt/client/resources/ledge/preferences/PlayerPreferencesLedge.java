@@ -3,6 +3,7 @@ package com.hawolt.client.resources.ledge.preferences;
 import com.hawolt.client.LeagueClient;
 import com.hawolt.client.misc.Base64RawInflate;
 import com.hawolt.client.resources.ledge.AbstractLedgeEndpoint;
+import com.hawolt.client.resources.ledge.preferences.objects.PreferenceDataType;
 import com.hawolt.client.resources.ledge.preferences.objects.PreferenceNotFoundException;
 import com.hawolt.client.resources.ledge.preferences.objects.PreferenceType;
 import com.hawolt.generic.Constant;
@@ -40,19 +41,26 @@ public class PlayerPreferencesLedge extends AbstractLedgeEndpoint {
         String data = jsonObject.getString("data");
         byte[] base64Decoded = Base64RawInflate.decode(data);
         String inflated = Base64RawInflate.inflate(base64Decoded);
-        return convertYamlToJson(inflated);
+        return preferenceType.getDataType() == PreferenceDataType.YAML ? convertYamlToJson(inflated) : new JSONObject(inflated);
     }
 
-    public int setPreferences(PreferenceType preferenceType, String content) throws IOException {
+    public int setPreferences(PreferenceType preferenceType, JSONObject o) throws IOException {
+        return setPreferences(preferenceType, o.toString());
+    }
+
+    public int setPreferences(PreferenceType preferenceType, String reference) throws IOException {
         String uri = String.format("https://playerpreferences.riotgames.com/%s/v%s/savePreference/%s/%s",
                 name(),
                 version(),
                 userInformation.getPvpnetAccountId(),
                 client.getVirtualLeagueClientInstance().getPlatform()
         );
-        String s = Base64RawInflate.encode(Base64RawInflate.deflate(convertJsonToYaml(new JSONObject(content)).getBytes()));
+        String plain = preferenceType.getDataType() == PreferenceDataType.YAML ?
+                convertJsonToYaml(new JSONObject(reference)) :
+                reference;
+        String source = Base64RawInflate.encode(Base64RawInflate.deflate(plain.getBytes()));
         JSONObject sendData = new JSONObject();
-        sendData.put("data", s);
+        sendData.put("data", source);
         sendData.put("type", preferenceType.getName());
         sendData.put("version", "1.0");
         Request request = jsonRequest(uri)
@@ -60,7 +68,7 @@ public class PlayerPreferencesLedge extends AbstractLedgeEndpoint {
                 .build();
         IResponse response = OkHttp3Client.execute(request, gateway);
         int code = response.code();
-        Logger.debug("[settings] call to store preference:{} with code {}", code);
+        Logger.debug("[settings] call to store preference:{} with code {}", preferenceType, code);
         return code;
     }
 

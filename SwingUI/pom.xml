@@ -10,7 +10,7 @@
     <modelVersion>4.0.0</modelVersion>
 
     <artifactId>SwingUI</artifactId>
-    <version>alpha-1.13</version>
+    <version>alpha-1.14</version>
 
     <build>
         <plugins>
@@ -120,6 +120,11 @@
             <groupId>com.github.hawolt.hawolt-core</groupId>
             <artifactId>SQL</artifactId>
             <version>e05000531a</version>
+        </dependency>
+        <dependency>
+            <groupId>com.github.hawolt.hawolt-core</groupId>
+            <artifactId>CLI</artifactId>
+            <version>f4462e37e5</version>
         </dependency>
         <dependency>
             <groupId>com.github.hawolt</groupId>

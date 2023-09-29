@@ -1,9 +1,9 @@
 package com.hawolt.client.resources.ledge.teambuilder;
 
 import com.hawolt.client.LeagueClient;
+import com.hawolt.client.cache.CacheElement;
 import com.hawolt.client.resources.ledge.AbstractLedgeEndpoint;
 import com.hawolt.client.resources.ledge.teambuilder.objects.MatchContext;
-import com.hawolt.client.cache.CacheElement;
 import com.hawolt.generic.Constant;
 import com.hawolt.http.OkHttp3Client;
 import com.hawolt.http.layer.IResponse;

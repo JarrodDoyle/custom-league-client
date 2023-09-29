@@ -46,8 +46,8 @@ public abstract class GameLobby extends ChildUIComponent implements IServiceMess
     public int queueId;
 
     public ChildUIComponent component = new ChildUIComponent(new BorderLayout());
-    private LFlatButton stop, start;
     public ChildUIComponent grid;
+    private LFlatButton stop, start;
     private CurrentParty party;
     private String puuid;
 

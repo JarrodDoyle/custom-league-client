@@ -12,7 +12,6 @@ public enum CacheElement {
     SUMMONER(CachedDataType.VALUE),
     RANKED_STATISTIC(CachedDataType.VALUE),
     INVENTORY_TOKEN(CachedDataType.JWT),
-    CHAT_STATUS(CachedDataType.VALUE),
     MATCH_CONTEXT(CachedDataType.VALUE),
     LEAGUE_LEDGE_NOTIFICATION(CachedDataType.VALUE),
     PLAYER_PREFERENCE(CachedDataType.VALUE),
@@ -25,7 +24,9 @@ public enum CacheElement {
     F2P_NEW_PLAYER(CachedDataType.VALUE),
     F2P_VETERAN_PLAYER(CachedDataType.VALUE),
     PARTY_REGISTRATION(CachedDataType.VALUE),
-    LCU_PREFERENCES(CachedDataType.VALUE);
+    LCU_PREFERENCES(CachedDataType.VALUE),
+    LCU_SOCIAL_PREFERENCES(CachedDataType.VALUE),
+    STORE_CATALOG(CachedDataType.VALUE);
     private final CachedDataType cachedDataType;
 
     CacheElement(CachedDataType cachedDataType) {

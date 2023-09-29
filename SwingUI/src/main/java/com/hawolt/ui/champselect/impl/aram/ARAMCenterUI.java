@@ -1,9 +1,9 @@
 package com.hawolt.ui.champselect.impl.aram;
 
+import com.hawolt.ui.champselect.AbstractRenderInstance;
 import com.hawolt.ui.champselect.data.ChampSelectPhase;
 import com.hawolt.ui.champselect.data.ChampSelectType;
 import com.hawolt.ui.champselect.generic.impl.ChampSelectCenterUI;
-import com.hawolt.ui.champselect.generic.impl.ChampSelectChoice;
 
 /**
  * Created: 29/08/2023 18:57
@@ -12,8 +12,8 @@ import com.hawolt.ui.champselect.generic.impl.ChampSelectChoice;
 
 public class ARAMCenterUI extends ChampSelectCenterUI {
 
-    public ARAMCenterUI(ChampSelectChoice callback, ChampSelectType... supportedTypes) {
-        super(callback, supportedTypes);
+    public ARAMCenterUI(AbstractRenderInstance renderInstance, ChampSelectType... supportedTypes) {
+        super(renderInstance, supportedTypes);
     }
 
     @Override

@@ -1,8 +1,10 @@
 package com.hawolt.client.resources.ledge.store;
 
 import com.hawolt.client.LeagueClient;
+import com.hawolt.client.cache.CacheElement;
 import com.hawolt.client.resources.ledge.AbstractLedgeEndpoint;
 import com.hawolt.client.resources.ledge.store.objects.InventoryType;
+import com.hawolt.client.resources.ledge.store.objects.StoreCatalog;
 import com.hawolt.client.resources.ledge.store.objects.StoreItem;
 import com.hawolt.client.resources.ledge.store.objects.Wallet;
 import com.hawolt.generic.Constant;
@@ -15,8 +17,7 @@ import org.json.JSONArray;
 import org.json.JSONObject;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.HashMap;
 
 /**
  * Created: 28/07/2023 00:21
@@ -28,7 +29,8 @@ public class StoreLedge extends AbstractLedgeEndpoint {
         super(client);
     }
 
-    public List<StoreItem> catalogV1() throws IOException {
+    public StoreCatalog catalogV1() throws IOException {
+        if (client.isCached(CacheElement.STORE_CATALOG)) return client.getCachedValue(CacheElement.STORE_CATALOG);
         String uri = String.format("%s/%s/v%s/catalog?region=%s&language=en_GB",
                 base,
                 name(),
@@ -40,11 +42,14 @@ public class StoreLedge extends AbstractLedgeEndpoint {
                 .build();
         IResponse response = OkHttpResponse.from(request, gateway);
         JSONArray array = new JSONArray(response.asString());
-        List<StoreItem> list = new ArrayList<>();
+        StoreCatalog catalog = new StoreCatalog();
         for (int i = 0; i < array.length(); i++) {
-            list.add(new StoreItem(new JSONArray().put(array.getJSONObject(i))));
+            StoreItem item = new StoreItem(new JSONArray().put(array.getJSONObject(i)));
+            if (!catalog.containsKey(item.getInventoryType())) catalog.put(item.getInventoryType(), new HashMap<>());
+            catalog.get(item.getInventoryType()).put(item.getItemId(), item);
         }
-        return list;
+        catalog.bundle();
+        return catalog;
     }
 
     public StoreItem lookupV1(InventoryType type, long itemId) throws IOException {

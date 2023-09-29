@@ -14,7 +14,6 @@ import java.beans.PropertyChangeListener;
 
 public class TranslucentComponent extends JComponent implements PropertyChangeListener {
     protected static final Font DEFAULT_FONT = new Font(Font.DIALOG, Font.BOLD, 24);
-    protected boolean mouseHover;
     public final MouseAdapter adapter = new MouseAdapter() {
         @Override
         public void mouseEntered(MouseEvent e) {
@@ -28,6 +27,7 @@ public class TranslucentComponent extends JComponent implements PropertyChangeLi
             TranslucentComponent.this.firePropertyChange("mouseHover", true, false);
         }
     };
+    protected boolean mouseHover;
 
     public TranslucentComponent() {
         this.addPropertyChangeListener(this);

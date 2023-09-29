@@ -1,6 +1,5 @@
 package com.hawolt.client.resources.ledge.parties.objects;
 
-import com.hawolt.logger.Logger;
 import org.json.JSONObject;
 
 /**

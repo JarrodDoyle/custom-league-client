@@ -6,7 +6,7 @@ import com.hawolt.ui.champselect.ChampSelectUI;
 import com.hawolt.ui.champselect.context.ChampSelectContext;
 import com.hawolt.ui.champselect.context.ChampSelectContextProvider;
 import com.hawolt.ui.champselect.context.ChampSelectInterfaceContext;
-import com.hawolt.ui.champselect.generic.ChampSelectRuneSelection;
+import com.hawolt.ui.champselect.generic.ChampSelectRuneComponent;
 import com.hawolt.version.local.LocalLeagueFileVersion;
 
 /**
@@ -15,21 +15,22 @@ import com.hawolt.version.local.LocalLeagueFileVersion;
  **/
 
 public class ChampSelectInterface extends ChampSelectContextProvider implements ChampSelectInterfaceContext {
+
     public ChampSelectInterface(ChampSelectUI champSelectUI, ChampSelectContext context) {
         super(champSelectUI, context);
     }
 
     @Override
-    public ChampSelectRuneSelection getRuneSelectionPanel() {
+    public ChampSelectRuneComponent getRuneSelectionPanel() {
         LeagueClient client = champSelectUI.getLeagueClient();
         if (client != null) {
             LocalLeagueFileVersion leagueFileVersion = client.getVirtualLeagueClientInstance().getLocalLeagueFileVersion();
             String value = leagueFileVersion.getVersionValue(client.getPlayerPlatform(), "LeagueClientUxRender.exe");
             String[] versions = value.split("\\.");
             String patch = String.format("%s.%s.1", versions[0], versions[1]);
-            return new ChampSelectRuneSelection(patch);
+            return new ChampSelectRuneComponent(patch);
         } else {
-            return new ChampSelectRuneSelection("13.17.1");
+            return new ChampSelectRuneComponent("13.17.1");
         }
     }
 

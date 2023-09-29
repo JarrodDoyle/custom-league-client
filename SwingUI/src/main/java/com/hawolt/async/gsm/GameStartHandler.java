@@ -1,15 +1,17 @@
 package com.hawolt.async.gsm;
 
 import com.hawolt.Swiftrift;
+import com.hawolt.client.cache.CacheElement;
 import com.hawolt.client.resources.ledge.preferences.objects.PreferenceType;
+import com.hawolt.client.resources.ledge.preferences.objects.lcupreferences.LCUPreferences;
 import com.hawolt.event.EventListener;
 import com.hawolt.event.impl.GameStartEvent;
 import com.hawolt.logger.Logger;
 import com.hawolt.ui.champselect.context.impl.ChampSelect;
 import com.hawolt.ui.champselect.data.ChampSelectTeamMember;
-import com.hawolt.util.settings.SettingType;
 import org.json.JSONArray;
-import org.json.JSONObject;
+
+import java.io.IOException;
 
 /**
  * Created: 26/09/2023 18:15
@@ -32,11 +34,18 @@ public class GameStartHandler implements EventListener<GameStartEvent> {
         }
         ChampSelect champSelect = swiftrift.getLayoutManager().getChampSelectUI().getChampSelect();
         ChampSelectTeamMember member = champSelect.getChampSelectUtilityContext().getSelf();
-        JSONArray selection = new JSONArray().put(member.getSpell1Id(), member.getSpell2Id());
+        JSONArray selection = new JSONArray().put(member.getSpell1Id()).put(member.getSpell2Id());
         int queueId = champSelect.getChampSelectSettingsContext().getQueueId();
-        JSONObject preference = swiftrift.getSettingService().getUserSettings().setSummonerSpellPreference(queueId, selection);
-        if (preference == null) return;
-        swiftrift.getLeagueClient().getLedge().getPlayerPreferences().setPreferences(PreferenceType.LCU_PREFERENCES, preference.toString());
-        swiftrift.getSettingService().write(SettingType.PLAYER, "preferences", preference);
+        LCUPreferences lcuPreferences = swiftrift.getLeagueClient().getCachedValue(CacheElement.LCU_PREFERENCES);
+        lcuPreferences.getChampSelectPreference().ifPresent(champSelectPreference -> {
+            champSelectPreference.setSummonerSpells(queueId, selection);
+            try {
+                swiftrift.getLeagueClient().getLedge().getPlayerPreferences().setPreferences(
+                        PreferenceType.LCU_PREFERENCES, lcuPreferences.toString()
+                );
+            } catch (IOException e) {
+                Logger.error(e);
+            }
+        });
     }
 }

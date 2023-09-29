@@ -43,10 +43,7 @@ public class LComboBox<E> extends JComboBox<E> implements PropertyChangeListener
     private void init() {
         ColorPalette.addThemeListener(this);
         setBackground(ColorPalette.backgroundColor);
-        setBorder(new CompoundBorder(
-                new MatteBorder(0, 0, 1, 0, ColorPalette.inputUnderline),
-                new EmptyBorder(labelText.isEmpty() ? 5 : getHeight() * 10, 3, 5, 3)
-        ));
+        setBorder(new MatteBorder(0, 0, 1, 0, ColorPalette.inputUnderline));
         setUI(new LComboUI(this));
 
         setForeground(ColorPalette.textColor); //Set text to white
@@ -214,7 +211,10 @@ public class LComboBox<E> extends JComboBox<E> implements PropertyChangeListener
             }
 
             //Selected element text
-            PaintHelper.drawShadowText(g2, getSelectedItem().toString(), 5, y, getForeground());
+            Object item = getSelectedItem();
+            if (item != null) {
+                PaintHelper.drawShadowText(g2, getSelectedItem().toString(), 5, y, getForeground());
+            }
 
             g2.dispose();
         }

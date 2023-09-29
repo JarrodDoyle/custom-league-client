@@ -15,14 +15,6 @@ public class ArrogantConsumer<T> {
         this.original = consumer;
     }
 
-    public ExceptionalConsumer<T> getOriginal() {
-        return original;
-    }
-
-    public void consume(T t) {
-        ArrogantConsumer.consume(this, t);
-    }
-
     public static <T> void consume(ArrogantConsumer<T> consumer, T t) {
         ArrogantConsumer.consume(consumer.getOriginal(), t);
     }
@@ -33,5 +25,13 @@ public class ArrogantConsumer<T> {
         } catch (Exception e) {
             Logger.error(e);
         }
+    }
+
+    public ExceptionalConsumer<T> getOriginal() {
+        return original;
+    }
+
+    public void consume(T t) {
+        ArrogantConsumer.consume(this, t);
     }
 }

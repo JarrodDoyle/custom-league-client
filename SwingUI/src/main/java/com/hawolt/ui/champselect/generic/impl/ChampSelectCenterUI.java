@@ -1,9 +1,11 @@
 package com.hawolt.ui.champselect.generic.impl;
 
+import com.hawolt.Swiftrift;
 import com.hawolt.logger.Logger;
+import com.hawolt.ui.champselect.AbstractRenderInstance;
 import com.hawolt.ui.champselect.data.ChampSelectPhase;
 import com.hawolt.ui.champselect.data.ChampSelectType;
-import com.hawolt.ui.champselect.generic.ChampSelectRuneSelection;
+import com.hawolt.ui.champselect.generic.ChampSelectRuneComponent;
 import com.hawolt.ui.champselect.generic.ChampSelectUIComponent;
 import com.hawolt.ui.generic.utility.ChildUIComponent;
 
@@ -20,20 +22,34 @@ public abstract class ChampSelectCenterUI extends ChampSelectUIComponent {
     protected final Map<String, ChampSelectSelectionUI> map = new HashMap<>();
     protected final CardLayout layout = new CardLayout();
     protected final ChildUIComponent main, northernChild, southernChild, cards;
-    protected ChampSelectRuneSelection runeSelection;
+    private final AbstractRenderInstance renderInstance;
+    protected ChampSelectRuneComponent runeSelection;
     protected ChampSelectPhase current;
     protected String name;
 
-    public ChampSelectCenterUI(ChampSelectChoice callback, ChampSelectType... supportedTypes) {
+    public ChampSelectCenterUI(AbstractRenderInstance renderInstance, ChampSelectType... supportedTypes) {
         this.setLayout(new BorderLayout());
+        this.renderInstance = renderInstance;
         this.add(main = new ChildUIComponent(new BorderLayout()), BorderLayout.CENTER);
         this.main.add(northernChild = new ChildUIComponent(new BorderLayout()), BorderLayout.NORTH);
         this.main.add(cards = new ChildUIComponent(layout), BorderLayout.CENTER);
         this.main.add(southernChild = new ChildUIComponent(new BorderLayout()), BorderLayout.SOUTH);
         for (ChampSelectType type : supportedTypes) {
-            ChampSelectSelectionUI selectionUI = new ChampSelectSelectionUI(type, callback);
+            ChampSelectSelectionUI selectionUI = new ChampSelectSelectionUI(type, renderInstance);
             this.cards.add(type.getName(), selectionUI);
             this.map.put(type.getName(), selectionUI);
+        }
+    }
+
+    @Override
+    public void init() {
+        super.init();
+        int targetQueueId = context.getChampSelectSettingsContext().getQueueId();
+        int[] supportedQueueIds = renderInstance.getSupportedQueueIds();
+        for (int supportedQueueId : supportedQueueIds) {
+            if (supportedQueueId == targetQueueId) {
+                Swiftrift.service.execute(() -> runeSelection.setRuneSelection());
+            }
         }
     }
 
@@ -73,7 +89,7 @@ public abstract class ChampSelectCenterUI extends ChampSelectUIComponent {
         toggleCard(current.getName());
     }
 
-    public void setRuneSelection(String name, ChampSelectRuneSelection runeSelection) {
+    public void setRuneSelection(String name, ChampSelectRuneComponent runeSelection) {
         Logger.info("{} setting up rune panel", getClass().getSimpleName());
         this.runeSelection = runeSelection;
         this.runeSelection.getCloseButton().addActionListener(listener -> toggleCurrentPhase());

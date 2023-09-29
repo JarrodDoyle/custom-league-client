@@ -63,9 +63,9 @@ public class QueueWindow extends ChildUIComponent implements Runnable, PacketCal
         put(850, "INTERMEDIATE");
 
         //NORMAL
-        put(400, "BLIND PICK");
+        put(430, "BLIND PICK");
         put(420, "RANKED SOLO/DUO");
-        put(430, "DRAFT PICK");
+        put(400, "DRAFT PICK");
         put(440, "RANKED FLEX");
     }};
 

@@ -1,10 +1,10 @@
 package com.hawolt.client.resources.ledge.leagues;
 
 import com.hawolt.client.LeagueClient;
+import com.hawolt.client.cache.CacheElement;
 import com.hawolt.client.resources.ledge.AbstractLedgeEndpoint;
 import com.hawolt.client.resources.ledge.leagues.objects.LeagueLedgeNotifications;
 import com.hawolt.client.resources.ledge.leagues.objects.RankedStatistic;
-import com.hawolt.client.cache.CacheElement;
 import com.hawolt.http.OkHttp3Client;
 import com.hawolt.http.layer.IResponse;
 import okhttp3.Request;

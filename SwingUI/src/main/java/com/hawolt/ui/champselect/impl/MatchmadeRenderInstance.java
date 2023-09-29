@@ -16,7 +16,7 @@ import com.hawolt.ui.champselect.data.ActionObject;
 import com.hawolt.ui.champselect.data.ChampSelectTeam;
 import com.hawolt.ui.champselect.data.ChampSelectType;
 import com.hawolt.ui.champselect.data.GameType;
-import com.hawolt.ui.champselect.generic.ChampSelectRuneSelection;
+import com.hawolt.ui.champselect.generic.ChampSelectRuneComponent;
 import com.hawolt.ui.champselect.generic.impl.*;
 import com.hawolt.ui.generic.utility.ChildUIComponent;
 import com.hawolt.xmpp.core.VirtualRiotXMPPClient;
@@ -41,6 +41,7 @@ public abstract class MatchmadeRenderInstance extends AbstractRenderInstance imp
     protected final ChampSelectCenterUI centerUI;
     protected final ChampSelectChatUI chatUI;
     protected int selectedChampionId, bannedChampionId;
+    private MatchContext matchContext;
 
     public MatchmadeRenderInstance(ChampSelectType... supportedTypes) {
         this.component.add(centerUI = getCenterUI(this, supportedTypes), BorderLayout.CENTER);
@@ -95,7 +96,9 @@ public abstract class MatchmadeRenderInstance extends AbstractRenderInstance imp
     public void onSummonerSubmission(Spell selectedSpellOne, Spell selectedSpellTwo) {
         try {
             if (context == null) return;
-            LeagueRtmpClient rtmpClient = context.getChampSelectDataContext().getLeagueClient().getRTMPClient();
+            LeagueClient client = context.getChampSelectDataContext().getLeagueClient();
+            if (client == null) return;
+            LeagueRtmpClient rtmpClient = client.getRTMPClient();
             TeamBuilderService teamBuilderService = rtmpClient.getTeamBuilderService();
             teamBuilderService.selectSpellsBlocking(selectedSpellOne.getId(), selectedSpellTwo.getId());
         } catch (Exception e) {
@@ -178,7 +181,7 @@ public abstract class MatchmadeRenderInstance extends AbstractRenderInstance imp
     }
 
     @Override
-    public void setGlobalRunePanel(ChampSelectRuneSelection selection) {
+    public void setGlobalRunePanel(ChampSelectRuneComponent selection) {
         this.centerUI.setRuneSelection("runes", selection);
     }
 
@@ -215,8 +218,6 @@ public abstract class MatchmadeRenderInstance extends AbstractRenderInstance imp
             }
         }
     }
-
-    private MatchContext matchContext;
 
     @Override
     public void onCacheUpdate(CacheElement element, MatchContext matchContext) {

@@ -2,6 +2,8 @@ package com.hawolt.ui.store;
 
 import com.hawolt.async.loader.ResourceConsumer;
 import com.hawolt.async.loader.ResourceLoader;
+import com.hawolt.client.resources.communitydragon.companion.CompanionSource;
+import com.hawolt.client.resources.communitydragon.tftmapskin.TFTMapSkinSource;
 import com.hawolt.client.resources.ledge.store.objects.InventoryType;
 import com.hawolt.client.resources.ledge.store.objects.StoreItem;
 import com.hawolt.logger.Logger;
@@ -34,36 +36,63 @@ public class StoreImage extends JComponent implements IStoreImage, ResourceConsu
 
     @Override
     public String getImageURL(InventoryType type, long itemId) {
-        switch (type) {
-            case CHAMPION_SKIN -> {
-                JSONObject raw = item.asJSON();
-                JSONArray requirements = raw.getJSONArray("itemRequirements");
-                Map<String, Long> map = new HashMap<>();
-                for (int i = 0; i < requirements.length(); i++) {
-                    JSONObject requirement = requirements.getJSONObject(i);
-                    map.put(requirement.getString("inventoryType"), requirement.getLong("itemId"));
-                }
-                long skinId = map.getOrDefault(InventoryType.CHAMPION_SKIN.name(), itemId);
-                if (item.hasSubInventoryType()) {
-                    skinId = item.getItemId();
+        String url = item.asJSON().getString("iconUrl");
+        if (url.startsWith("http")) {
+            return url;
+        } else if (url.startsWith("//")) {
+            return "https:" + url;
+        } else {
+            switch (type) {
+                case CHAMPION_SKIN -> {
+                    JSONObject raw = item.asJSON();
+                    JSONArray requirements = raw.getJSONArray("itemRequirements");
+                    Map<String, Long> map = new HashMap<>();
+                    for (int i = 0; i < requirements.length(); i++) {
+                        JSONObject requirement = requirements.getJSONObject(i);
+                        map.put(requirement.getString("inventoryType"), requirement.getLong("itemId"));
+                    }
+                    long skinId = map.getOrDefault(InventoryType.CHAMPION_SKIN.name(), itemId);
+                    if (item.isChroma()) {
+                        skinId = item.getItemId();
+                        return String.format(
+                                "https://raw.communitydragon.org/pbe/plugins/rcp-be-lol-game-data/global/default/v1/champion-chroma-images/%s/%s.png",
+                                map.get(InventoryType.CHAMPION.name()),
+                                skinId
+                        );
+                    }
                     return String.format(
-                            "https://raw.communitydragon.org/pbe/plugins/rcp-be-lol-game-data/global/default/v1/champion-chroma-images/%s/%s.png",
+                            "https://raw.communitydragon.org/pbe/plugins/rcp-be-lol-game-data/global/default/v1/champion-splashes/%s/%s.jpg",
                             map.get(InventoryType.CHAMPION.name()),
                             skinId
                     );
                 }
-                return String.format(
-                        "https://raw.communitydragon.org/pbe/plugins/rcp-be-lol-game-data/global/default/v1/champion-splashes/%s/%s.jpg",
-                        map.get(InventoryType.CHAMPION.name()),
-                        skinId
-                );
-            }
-            default -> {
-                return String.format(
-                        "https://raw.communitydragon.org/pbe/plugins/rcp-be-lol-game-data/global/default/v1/champion-splashes/%s/%s.jpg",
-                        item.getItemId(),
-                        item.getItemId() * 1000
-                );
+                //TODO find ways to display correct images for items of these types
+                case COMPANION -> {
+                    return CompanionSource.COMPANION_SOURCE.get().getCompanion(itemId).getLoadoutsIcon();
+                }
+                case TFT_MAP_SKIN -> {
+                    return TFTMapSkinSource.TFT_MAP_SKIN_SOURCE.get().getTFTMapSkin(itemId).getLoadoutsIcon();
+                }
+                case EVENT_PASS -> {
+                    return "https://raw.communitydragon.org/latest/plugins/rcp-be-lol-game-data/global/default/assets/loot/sett_card_490x490.png";
+                }
+                case BUNDLES -> {
+                    if (item.isChibiCompanion(item.asJSON())) {
+                        //HANDLED AT METHOD HEAD
+                        return item.asJSON().getString("iconUrl");
+                    }
+                    return "https://raw.communitydragon.org/pbe/plugins/rcp-be-lol-game-data/global/default/assets/loadouts/companions/tooltip_tft_avatar_blue.png";
+                }
+                case BOOST -> {
+                    return "https://raw.communitydragon.org/latest/plugins/rcp-fe-lol-loot/global/default/assets/loot_item_icons/boost_xp_win.png";
+                }
+                default -> {
+                    return String.format(
+                            "https://raw.communitydragon.org/pbe/plugins/rcp-be-lol-game-data/global/default/v1/champion-splashes/%s/%s.jpg",
+                            item.getItemId(),
+                            item.getItemId() * 1000
+                    );
+                }
             }
         }
     }

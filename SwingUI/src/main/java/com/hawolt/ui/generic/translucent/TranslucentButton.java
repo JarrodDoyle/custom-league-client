@@ -20,9 +20,6 @@ import java.beans.PropertyChangeListener;
  **/
 
 public class TranslucentButton extends TranslucentComponent implements PropertyChangeListener {
-    private final LTextAlign textAlign;
-    protected final String text;
-    protected boolean mousePressed;
     public final MouseAdapter adapter = new MouseAdapter() {
         @Override
         public void mousePressed(MouseEvent e) {
@@ -34,6 +31,9 @@ public class TranslucentButton extends TranslucentComponent implements PropertyC
             TranslucentButton.this.firePropertyChange("buttonPressed", true, false);
         }
     };
+    protected final String text;
+    private final LTextAlign textAlign;
+    protected boolean mousePressed;
 
     public TranslucentButton(String text) {
         this(text, LTextAlign.CENTER);

@@ -1,6 +1,7 @@
 package com.hawolt.ui.champselect.generic.impl;
 
 import com.hawolt.async.ExecutorManager;
+import com.hawolt.logger.Logger;
 import com.hawolt.ui.champselect.context.ChampSelectSettingsContext;
 import com.hawolt.ui.champselect.data.*;
 import com.hawolt.ui.champselect.generic.ChampSelectUIComponent;
@@ -55,6 +56,7 @@ public class ChampSelectSidebarUI extends ChampSelectUIComponent {
     }
 
     protected void populate(ChampSelectMember... members) {
+        Logger.debug("POPULATE CHAMP SELECT");
         this.display.setLayout(new GridLayout(Math.max(1, members.length), 0, 0, 5));
         for (ChampSelectMember member : members) {
             ExecutorService loader = ExecutorManager.getService("name-loader");
@@ -65,14 +67,20 @@ public class ChampSelectSidebarUI extends ChampSelectUIComponent {
             loader.execute(element);
             this.display.add(element);
         }
+        Logger.debug("CHAMP SELECT POPULATED");
     }
 
     @Override
     public void update() {
         if (context == null || type == null) return;
+        Logger.debug("UPDATE CHAMP SELECT");
         for (ChampSelectMember member : get(type)) {
-            map.get(member.getCellId()).update(member);
+            if (!map.containsKey(member.getCellId())) continue;
+            ChampSelectMemberElement element = map.get(member.getCellId());
+            if (element == null) continue;
+            element.update(member);
         }
+        Logger.debug("CHAMP SELECT UPDATED");
     }
 
     protected ChampSelectMember[] get(ChampSelectTeamType type) {

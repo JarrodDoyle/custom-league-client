@@ -19,6 +19,7 @@ public class LTextArea extends JTextArea implements PropertyChangeListener {
         setFont(new Font("Dialog", Font.BOLD, 14));
         setBackground(ColorPalette.backgroundColor);
         setForeground(ColorPalette.textColor);
+        setEditable(false);
     }
 
     @Override

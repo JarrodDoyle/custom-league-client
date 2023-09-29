@@ -298,15 +298,14 @@ public class ChatSidebarFriend extends LFlatButton {
                             public void actionPerformed(ActionEvent e) {
                                 LeagueClient client = swiftrift.getLeagueClient();
                                 try {
+                                    int queueId = pty.getQueueId();
                                     client.getLedge().getParties().role(pty.getPartyId(), PartyRole.MEMBER);
                                     swiftrift.getLayoutManager().showClientComponent("play");
-                                    game.getPresenceInfo().ifPresent(info -> {
-                                        if (info.getGameMode().toLowerCase().contains("tft")) {
-                                            swiftrift.getLayoutManager().getQueue().showMatchMadeLobby("tft");
-                                        } else {
-                                            swiftrift.getLayoutManager().getQueue().showMatchMadeLobby("draft");
-                                        }
-                                    });
+                                    if (queueId == 1100 || queueId == 1090 || queueId == 1130 || queueId == 1160) {
+                                        swiftrift.getLayoutManager().getQueue().showMatchMadeLobby("tft");
+                                    } else {
+                                        swiftrift.getLayoutManager().getQueue().showMatchMadeLobby("draft");
+                                    }
                                 } catch (IOException ex) {
                                     Logger.error(ex);
                                 }

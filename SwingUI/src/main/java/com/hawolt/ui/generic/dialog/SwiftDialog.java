@@ -23,9 +23,9 @@ import java.util.Arrays;
 
 public abstract class SwiftDialog extends JDialog implements ActionListener {
     protected final ChildUIComponent container;
-    protected int selection = -1;
     private final ChildUIComponent main = new ChildUIComponent(new BorderLayout());
     private final Frame reference;
+    protected int selection = -1;
 
 
     public SwiftDialog(DialogOption... options) {
@@ -62,6 +62,23 @@ public abstract class SwiftDialog extends JDialog implements ActionListener {
         this.setResizable(false);
     }
 
+    public static int showMessageDialog(Frame frame, String... lines) {
+        return new SwiftNotificationDialog(frame, lines).configureAndShow().getSelection();
+    }
+
+    public static int showOptionDialog(Frame frame, String message, String... options) {
+        return new SwiftOptionDialog(frame, message, options).configureAndShow().getSelection();
+    }
+
+    public static int showOptionDialog(Frame frame, String[] messages, String... options) {
+        return new SwiftOptionDialog(frame, messages, options).configureAndShow().getSelection();
+    }
+
+    public static String showInputDialog(Frame frame, String message) {
+        SwiftInputDialog dialog = (SwiftInputDialog) new SwiftInputDialog(frame, message).configureAndShow();
+        if (dialog.getSelection() != 0) return null;
+        return dialog.getInput();
+    }
 
     public SwiftDialog configureAndShow() {
         this.pack();
@@ -82,22 +99,4 @@ public abstract class SwiftDialog extends JDialog implements ActionListener {
     }
 
     protected abstract ChildUIComponent getContainer();
-
-    public static int showMessageDialog(Frame frame, String... lines) {
-        return new SwiftNotificationDialog(frame, lines).configureAndShow().getSelection();
-    }
-
-    public static int showOptionDialog(Frame frame, String message, String... options) {
-        return new SwiftOptionDialog(frame, message, options).configureAndShow().getSelection();
-    }
-
-    public static int showOptionDialog(Frame frame, String[] messages, String... options) {
-        return new SwiftOptionDialog(frame, messages, options).configureAndShow().getSelection();
-    }
-
-    public static String showInputDialog(Frame frame, String message) {
-        SwiftInputDialog dialog = (SwiftInputDialog) new SwiftInputDialog(frame, message).configureAndShow();
-        if (dialog.getSelection() != 0) return null;
-        return dialog.getInput();
-    }
 }

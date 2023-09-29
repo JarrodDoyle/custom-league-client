@@ -43,12 +43,12 @@ public class SettingsUI extends ChildUIComponent {
         CardLayout cl = new CardLayout();
         JPanel mainPanel = new JPanel(cl);
         SettingsPage clientGeneralPage = newClientGeneralPage();
-        SettingsPage themePage = newThemePage();
+        SettingsPage clientThemePage = newClientThemePage();
         SettingsPage clientAudioPage = newClientAudioPage();
         SettingsPage clientAboutPage = newClientAboutPage();
         SettingsPage clientHelpPage = newClientHelpPage();
         mainPanel.add("General", clientGeneralPage);
-        mainPanel.add("Client Theme", themePage);
+        mainPanel.add("Client Theme", clientThemePage);
         mainPanel.add("Audio", clientAudioPage);
         mainPanel.add("About", clientAboutPage);
         mainPanel.add("Help", clientHelpPage);
@@ -68,8 +68,8 @@ public class SettingsUI extends ChildUIComponent {
 
         LFlatButton clientGeneralButton = SettingsSidebar.newSectionButton("General", cl, mainPanel);
         clientGroup.addToContainer(clientGeneralButton);
-        LFlatButton themeButton = SettingsSidebar.newSectionButton("Client Theme", cl, mainPanel);
-        clientGroup.addToContainer(themeButton);
+        LFlatButton clientThemeButton = SettingsSidebar.newSectionButton("Client Theme", cl, mainPanel);
+        clientGroup.addToContainer(clientThemeButton);
         LFlatButton clientAudioButton = SettingsSidebar.newSectionButton("Audio", cl, mainPanel);
         clientGroup.addToContainer(clientAudioButton);
         LFlatButton clientAboutButton = SettingsSidebar.newSectionButton("About", cl, mainPanel);
@@ -120,7 +120,8 @@ public class SettingsUI extends ChildUIComponent {
         result.add(SettingUIComponent.createTagComponent("Path"));
         String defaultGameBase = OperatingSystem.getOperatingSystemType() == OperatingSystem.OSType.WINDOWS ?
                 String.join(File.separator, "C:", "Riot Games", "League of Legends") :
-                "";
+                OperatingSystem.getOperatingSystemType() == OperatingSystem.OSType.MAC ? "/Applications/League of Legends.app/Contents/LoL/"
+                        : "";
         result.add(SettingUIComponent.createPathComponent("League Base Directory Path", service, "GameBaseDir", defaultGameBase));
         if (OperatingSystem.getOperatingSystemType() == OperatingSystem.OSType.LINUX) {
             result.add(SettingUIComponent.createPathComponent("Wine Prefix Path", service, "WinePrefixDir", ""));
@@ -128,10 +129,15 @@ public class SettingsUI extends ChildUIComponent {
         }
         result.add(SettingUIComponent.createTagComponent("Friend requests"));
         result.add(SettingUIComponent.createAutoFriendComponent("Auto friend request handling", service, "autoFriends"));
+        if (OperatingSystem.getOperatingSystemType() == OperatingSystem.OSType.LINUX) {
+            result.add(SettingUIComponent.createTagComponent("Linux Launch Options"));
+            result.add(SettingUIComponent.createCheckBoxComponent("MangoHUD", service, "mangoHud", false));
+            result.add(SettingUIComponent.createCheckBoxComponent("GameMode", service, "gameModeRun", false));
+        }
         return result;
     }
 
-    private SettingsPage newThemePage() {
+    private SettingsPage newClientThemePage() {
         SettingService service = swiftrift.getSettingService();
         SettingsPage result = new SettingsPage();
 
@@ -145,7 +151,7 @@ public class SettingsUI extends ChildUIComponent {
         result.add(SettingUIComponent.createTagComponent("Theme"));
 
 
-        SettingUIComponent themeCombo = SettingUIComponent.createComboBoxComponent("Client Theme", service, "Theme", comboBox);
+        SettingUIComponent themeCombo = SettingUIComponent.createThemeSelectorComponent("Client Theme", service, "Theme", comboBox);
 
         result.add(themeCombo);
         return result;

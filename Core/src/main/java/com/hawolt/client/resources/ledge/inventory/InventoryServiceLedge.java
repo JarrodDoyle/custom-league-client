@@ -34,6 +34,10 @@ public class InventoryServiceLedge extends AbstractLedgeEndpoint {
                 .addQueryParameter("location", String.format("lolriot.ams1.%s", platform.name().toLowerCase()))
                 .addQueryParameter("inventoryTypes", "CHAMPION")
                 .addQueryParameter("inventoryTypes", "CHAMPION_SKIN")
+                .addQueryParameter("inventoryTypes", "COMPANION")
+                .addQueryParameter("inventoryTypes", "TFT_MAP_SKIN")
+                .addQueryParameter("inventoryTypes", "EVENT_PASS")
+                .addQueryParameter("inventoryTypes", "BOOST")
                 .addQueryParameter("accountId", String.valueOf(client.getVirtualLeagueClientInstance().getUserInformation().getUserInformationLeague().getCUID()))
                 .build();
         Request request = new Request.Builder()

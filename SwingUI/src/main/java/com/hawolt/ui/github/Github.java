@@ -4,6 +4,7 @@ import com.hawolt.generic.util.Network;
 import com.hawolt.http.NativeHttpClient;
 import com.hawolt.http.layer.IResponse;
 import com.hawolt.logger.Logger;
+import com.hawolt.util.other.StaticConstant;
 import com.hawolt.virtual.misc.DynamicObject;
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -14,7 +15,6 @@ import java.net.http.HttpRequest;
 import java.time.Instant;
 import java.time.format.DateTimeFormatter;
 import java.util.Date;
-import java.util.Properties;
 
 public class Github {
 
@@ -100,15 +100,8 @@ public class Github {
     private static DynamicObject getVersion() {
         JSONObject currentVersion = new JSONObject();
         JSONArray versions = getReleases();
-        Properties props = new Properties();
-        try {
-            props.load(Github.class.getClassLoader().getResourceAsStream("project.properties"));
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
-        String version = props.getProperty("version");
+        String version = StaticConstant.VERSION;
         version = version.replace("-", "-release-");
-        System.out.println(version);
         for (int i = 0; i < versions.length(); i++) {
             if (version.equals(versions.getJSONObject(i).get("name")))
                 currentVersion = versions.getJSONObject(i);

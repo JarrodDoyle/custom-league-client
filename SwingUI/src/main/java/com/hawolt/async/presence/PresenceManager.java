@@ -9,6 +9,7 @@ import com.hawolt.client.resources.ledge.parties.PartiesLedge;
 import com.hawolt.client.resources.ledge.parties.objects.CurrentParty;
 import com.hawolt.client.resources.ledge.parties.objects.PartiesRegistration;
 import com.hawolt.client.resources.ledge.parties.objects.PartyGameMode;
+import com.hawolt.client.resources.ledge.preferences.objects.lcusocialpreferences.LCUSocialPreferences;
 import com.hawolt.client.resources.ledge.summoner.objects.Summoner;
 import com.hawolt.logger.Logger;
 import com.hawolt.rms.data.impl.payload.RiotMessageMessagePayload;
@@ -188,14 +189,20 @@ public class PresenceManager implements PacketCallback, IServiceMessageListener<
 
     private void set(String status, Presence presence) {
         Logger.debug("setting presence");
-        swiftrift.getLeagueClient().getXMPPClient().setCustomPresence(
-                status, swiftrift.getLeagueClient().getCachedValue(CacheElement.CHAT_STATUS), presence
-        );
+        Object reference = swiftrift.getLeagueClient().getCachedValue(CacheElement.LCU_SOCIAL_PREFERENCES);
+        if (reference instanceof LCUSocialPreferences lcuSocialPreferences) {
+            lcuSocialPreferences.getChatStatusMessage().ifPresent(
+                    x -> swiftrift.getLeagueClient().getXMPPClient().setCustomPresence(status, x, presence)
+            );
+        } else {
+            swiftrift.getLeagueClient().getXMPPClient().setCustomPresence(status, "", presence);
+        }
     }
 
     public void setIdlePresence() {
         leagueClient.getCachedValueOrElse(CacheElement.PRESENCE, this::configure, Logger::error).ifPresent(base -> {
             Presence.Builder builder = new Presence.Builder().setGameStatus("outOfGame");
+            builder.setPTY("");
             String status = swiftrift.getHeader().getSelectedStatus();
             currentDefaultStatus = "chat";
             set("default".equals(status) ? "chat" : status, builder.merge(base));

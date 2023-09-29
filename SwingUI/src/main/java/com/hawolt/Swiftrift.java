@@ -3,19 +3,21 @@ package com.hawolt;
 import com.hawolt.async.ExecutorManager;
 import com.hawolt.async.gsm.ActiveGameInformation;
 import com.hawolt.async.gsm.GameStartHandler;
-import com.hawolt.async.loader.PreferenceLoader;
-import com.hawolt.async.loader.ResourceConsumer;
-import com.hawolt.async.loader.ResourceLoader;
 import com.hawolt.async.presence.PresenceManager;
 import com.hawolt.async.rms.GameStartListener;
 import com.hawolt.async.shutdown.ShutdownManager;
 import com.hawolt.authentication.LocalCookieSupplier;
+import com.hawolt.cli.Argument;
+import com.hawolt.cli.CLI;
+import com.hawolt.cli.Parser;
+import com.hawolt.cli.ParserException;
 import com.hawolt.client.IClientCallback;
 import com.hawolt.client.LeagueClient;
 import com.hawolt.client.RiotClient;
-import com.hawolt.client.cache.CacheElement;
 import com.hawolt.client.misc.ClientConfiguration;
 import com.hawolt.generic.token.impl.StringTokenSupplier;
+import com.hawolt.http.integrity.Diffuser;
+import com.hawolt.io.JsonSource;
 import com.hawolt.io.RunLevel;
 import com.hawolt.logger.Logger;
 import com.hawolt.manifest.RMANCache;
@@ -35,7 +37,8 @@ import com.hawolt.ui.login.LoginUI;
 import com.hawolt.ui.settings.SettingsUI;
 import com.hawolt.util.audio.AudioEngine;
 import com.hawolt.util.discord.RichPresence;
-import com.hawolt.util.os.WMIC;
+import com.hawolt.util.os.OperatingSystem;
+import com.hawolt.util.os.SystemManager;
 import com.hawolt.util.other.StaticConstant;
 import com.hawolt.util.paint.animation.AnimationVisualizer;
 import com.hawolt.util.paint.animation.impl.impl.SpinningAnimation;
@@ -47,7 +50,6 @@ import com.hawolt.xmpp.core.VirtualRiotXMPPClient;
 import com.hawolt.xmpp.event.EventListener;
 import com.hawolt.xmpp.event.EventType;
 import com.hawolt.xmpp.event.objects.other.PlainData;
-import org.json.JSONObject;
 
 import javax.imageio.ImageIO;
 import javax.swing.*;
@@ -58,15 +60,15 @@ import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 
 /**
  * Created: 11/08/2023 18:10
  * Author: Twitter @hawolt
  **/
 
-public class Swiftrift extends JFrame implements IClientCallback, ILoginCallback, WindowStateListener, ResourceConsumer<JSONObject, byte[]> {
+public class Swiftrift extends JFrame implements IClientCallback, ILoginCallback, WindowStateListener {
     public static final ExecutorService service = ExecutorManager.registerService("pool", Executors.newCachedThreadPool());
-    private final LiveGameClient liveGameClient = new LiveGameClient(1000);
     private static BufferedImage logo;
 
     static {
@@ -80,6 +82,7 @@ public class Swiftrift extends JFrame implements IClientCallback, ILoginCallback
         }
     }
 
+    private final LiveGameClient liveGameClient = new LiveGameClient(1000);
     private SettingService settingService;
     private ShutdownManager shutdownManager;
     private ChildUIComponent deck, main;
@@ -93,6 +96,10 @@ public class Swiftrift extends JFrame implements IClientCallback, ILoginCallback
     private LoginUI loginUI;
     private ChatUI chatUI;
     private MainUI mainUI;
+    private CardLayout layout = new CardLayout();
+    private AnimationVisualizer animationVisualizer;
+    private long lastFocusRequest;
+
 
     public Swiftrift(String title) {
         super(title);
@@ -101,8 +108,88 @@ public class Swiftrift extends JFrame implements IClientCallback, ILoginCallback
         this.setDefaultCloseOperation(WindowConstants.DO_NOTHING_ON_CLOSE);
     }
 
+    private static void printLaunchDetail(String[] args) {
+        for (int i = 0; i < args.length; i++) {
+            Logger.info("{}: {}", i, args[i]);
+        }
+        try {
+            JsonSource source = JsonSource.of(RunLevel.get(StaticConstant.PROJECT_DATA));
+            StaticConstant.VERSION = source.get("version");
+            Logger.info("Running Swiftrift-{}", StaticConstant.VERSION);
+        } catch (IOException e) {
+            Logger.error(e);
+        }
+    }
+
+    private static void handleCommandLine(String[] args) {
+        Parser parser = new Parser();
+        parser.add(Argument.create("p", "privacy", "disable privacy enhancement", false, true, true));
+        try {
+            CLI cli = parser.check(args);
+            if (cli.has("privacy")) {
+                Diffuser.PRIVACY_ENHANCEMENT = false;
+            }
+        } catch (ParserException e) {
+            System.err.println(parser.getHelp());
+        }
+    }
+
+    public static void main(String[] args) {
+        printLaunchDetail(args);
+        handleCommandLine(args);
+        RMANCache.preload();
+        AudioEngine.install();
+        Swiftrift.service.execute(() -> {
+            String processName = switch (OperatingSystem.getOperatingSystemType()) {
+                case MAC -> "Discord.app";
+                case LINUX -> "Discord";
+                case WINDOWS -> "Discord.exe";
+                default -> null;
+            };
+            try {
+                if (processName == null || !SystemManager.getInstance().isProcessRunning(processName)) return;
+                RichPresence.show();
+            } catch (IOException e) {
+                Logger.error(e);
+            }
+        });
+        Swiftrift swiftrift = new Swiftrift(StaticConstant.PROJECT);
+        swiftrift.setIconImage(logo);
+        swiftrift.settingService = new SettingManager();
+        swiftrift.loginUI = LoginUI.create(swiftrift);
+        ClientSettings clientSettings = swiftrift.settingService.getClientSettings();
+        swiftrift.loginUI.getRememberMe().setSelected(clientSettings.isRememberMe());
+        swiftrift.loginUI.toggle(false);
+        LocalCookieSupplier localCookieSupplier = new LocalCookieSupplier();
+        if (clientSettings.isRememberMe()) {
+            UserSettings userSettings = swiftrift.settingService.set(clientSettings.getRememberMeUsername());
+            localCookieSupplier.loadCookieState(userSettings.getCookies());
+            if (localCookieSupplier.isInCompletedState()) {
+                ClientConfiguration configuration = ClientConfiguration.getDefault(localCookieSupplier);
+                swiftrift.createRiotClient(configuration);
+            }
+        }
+        swiftrift.loginUI.toggle(true);
+        swiftrift.setVisible(true);
+    }
+
+    public static int showMessageDialog(String... lines) {
+        return SwiftDialog.showMessageDialog(Frame.getFrames()[0], lines);
+    }
+
+    public static int showOptionDialog(String message, String... options) {
+        return SwiftDialog.showOptionDialog(Frame.getFrames()[0], message, options);
+    }
+
+    public static int showOptionDialog(String[] messages, String... options) {
+        return SwiftDialog.showOptionDialog(Frame.getFrames()[0], messages, options);
+    }
+
+    public static String showInputDialog(String message) {
+        return SwiftDialog.showInputDialog(Frame.getFrames()[0], message);
+    }
+
     private void configure(boolean remember) {
-        ResourceLoader.forceLoadResource("local", new PreferenceLoader(leagueClient), this);
         if (!remember) return;
         this.settingService.write(
                 SettingType.PLAYER,
@@ -117,26 +204,6 @@ public class Swiftrift extends JFrame implements IClientCallback, ILoginCallback
         this.presence = new PresenceManager(this);
         this.configure(loginUI == null || loginUI.getRememberMe().isSelected());
         this.liveGameClient.register("GameStart", new GameStartHandler(this));
-    }
-
-    private void handlePlayerPartyPreference(JSONObject object) {
-        if (!object.has("partiesPositionPreferences") || object.isNull("partiesPositionPreferences")) {
-            JSONObject partiesPositionPreferences = new JSONObject();
-            JSONObject data = new JSONObject();
-            String firstPreference = "UNSELECTED";
-            String secondPreference = "UNSELECTED";
-            data.put("firstPreference", firstPreference);
-            data.put("secondPreference", secondPreference);
-            partiesPositionPreferences.put("data", data);
-            object.put("partiesPositionPreferences", partiesPositionPreferences);
-        }
-    }
-
-    @Override
-    public void consume(Object o, JSONObject object) {
-        this.handlePlayerPartyPreference(object);
-        this.leagueClient.cache(CacheElement.PLAYER_PREFERENCE, object);
-        this.settingService.write(SettingType.PLAYER, "preferences", object);
         this.dispose();
         this.loginUI.getAnimationVisualizer().stop();
         this.setUndecorated(true);
@@ -175,9 +242,6 @@ public class Swiftrift extends JFrame implements IClientCallback, ILoginCallback
     public void onClient(LeagueClient client) {
         this.bootstrap(client);
     }
-
-    private CardLayout layout = new CardLayout();
-    private AnimationVisualizer animationVisualizer;
 
     private void initialize() {
         this.mainUI = new MainUI(this);
@@ -329,55 +393,12 @@ public class Swiftrift extends JFrame implements IClientCallback, ILoginCallback
         this.riotClient = new RiotClient(configuration, this);
     }
 
-    @Override
-    public void onException(Object o, Exception e) {
-        this.onLoginFlowException(new IOException("PREFERENCE_FAILURE"));
-    }
-
-    @Override
-    public JSONObject transform(byte[] bytes) throws Exception {
-        return new JSONObject(new String(bytes));
-    }
-
-    public static void main(String[] args) {
-        RMANCache.preload();
-        AudioEngine.install();
-        Swiftrift.service.execute(() -> {
-            if (WMIC.isProcessRunning("Discord.exe")) RichPresence.show();
-        });
-        Swiftrift swiftrift = new Swiftrift(StaticConstant.PROJECT);
-        swiftrift.setIconImage(logo);
-        swiftrift.settingService = new SettingManager();
-        swiftrift.loginUI = LoginUI.create(swiftrift);
-        ClientSettings clientSettings = swiftrift.settingService.getClientSettings();
-        swiftrift.loginUI.getRememberMe().setSelected(clientSettings.isRememberMe());
-        swiftrift.loginUI.toggle(false);
-        LocalCookieSupplier localCookieSupplier = new LocalCookieSupplier();
-        if (clientSettings.isRememberMe()) {
-            UserSettings userSettings = swiftrift.settingService.set(clientSettings.getRememberMeUsername());
-            localCookieSupplier.loadCookieState(userSettings.getCookies());
-            if (localCookieSupplier.isInCompletedState()) {
-                ClientConfiguration configuration = ClientConfiguration.getDefault(localCookieSupplier);
-                swiftrift.createRiotClient(configuration);
-            }
-        }
-        swiftrift.loginUI.toggle(true);
-        swiftrift.setVisible(true);
-    }
-
-    public static int showMessageDialog(String... lines) {
-        return SwiftDialog.showMessageDialog(Frame.getFrames()[0], lines);
-    }
-
-    public static int showOptionDialog(String message, String... options) {
-        return SwiftDialog.showOptionDialog(Frame.getFrames()[0], message, options);
-    }
-
-    public static int showOptionDialog(String[] messages, String... options) {
-        return SwiftDialog.showOptionDialog(Frame.getFrames()[0], messages, options);
-    }
-
-    public static String showInputDialog(String message) {
-        return SwiftDialog.showInputDialog(Frame.getFrames()[0], message);
+    public void focus() {
+        if (System.currentTimeMillis() - lastFocusRequest <= TimeUnit.MINUTES.toMillis(1)) return;
+        if (isActive() && hasFocus()) return;
+        this.toFront();
+        this.setExtendedState(JFrame.ICONIFIED);
+        this.setExtendedState(JFrame.NORMAL);
+        this.lastFocusRequest = System.currentTimeMillis();
     }
 }
