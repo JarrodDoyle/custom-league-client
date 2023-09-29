@@ -100,8 +100,12 @@ public class ResourceLoader {
                     pending.get(hash).add(consumer);
                 } else {
                     pending.put(hash, new ArrayList<>());
-                    pending.get(hash).add(consumer);
-                    service.execute(runnable);
+                    List<ResourceConsumer<?, byte[]>> list = pending.get(hash);
+                    if (list != null) {
+                        service.execute(runnable);
+                    } else {
+                        load(path, consumer, runnable);
+                    }
                 }
             }
         }
