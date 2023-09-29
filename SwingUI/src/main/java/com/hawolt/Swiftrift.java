@@ -209,8 +209,6 @@ public class Swiftrift extends JFrame implements IClientCallback, ILoginCallback
         this.setUndecorated(true);
         this.setVisible(true);
         this.initialize();
-        this.buildUI(leagueClient);
-        this.wrap();
     }
 
     private void wrap() {
@@ -241,6 +239,14 @@ public class Swiftrift extends JFrame implements IClientCallback, ILoginCallback
     @Override
     public void onClient(LeagueClient client) {
         this.bootstrap(client);
+        try {
+            this.buildUI(leagueClient);
+            this.wrap();
+        } catch (Exception e) {
+            Logger.error("Failed whilst creating UI");
+            Logger.error(e);
+            Swiftrift.showMessageDialog("Please report this issue with your log file");
+        }
     }
 
     private void initialize() {
