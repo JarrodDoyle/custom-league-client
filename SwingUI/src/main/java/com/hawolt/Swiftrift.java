@@ -109,6 +109,7 @@ public class Swiftrift extends JFrame implements IClientCallback, ILoginCallback
     }
 
     private static void printLaunchDetail(String[] args) {
+        Logger.info("OS: {}", OperatingSystem.getOperatingSystemType());
         for (int i = 0; i < args.length; i++) {
             Logger.info("{}: {}", i, args[i]);
         }
