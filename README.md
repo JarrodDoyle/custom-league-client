@@ -51,7 +51,7 @@ strongly recommended that you follow the instructions below to use the JAR file 
 
 ### 1. Download the JAR file
 
-Go to [releases](https://github.com/hawolt/custom-league-client/releases) and download the JAR file of the program.
+Go to [releases](https://github.com/hawolt/custom-league-client/releases/latest) and download the JAR file of the program.
 
 ### 2. Verify Java 17 installation
 

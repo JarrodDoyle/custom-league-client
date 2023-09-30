@@ -35,7 +35,6 @@ public class ChatSidebarProfileIcon extends ChildUIComponent implements Resource
     @Override
     protected void paintComponent(Graphics g) {
         super.paintComponent(g);
-
         int y = getHeight() - ICON_SIZE;
         g.setColor(ColorPalette.backgroundColor);
         PaintHelper.roundedSquare((Graphics2D) g, 0, y, ICON_SIZE, ICON_SIZE, ColorPalette.CARD_ROUNDING, true, true, true, true);

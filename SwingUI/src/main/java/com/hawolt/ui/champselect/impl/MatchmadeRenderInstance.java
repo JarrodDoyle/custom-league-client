@@ -187,6 +187,7 @@ public abstract class MatchmadeRenderInstance extends AbstractRenderInstance imp
 
     @Override
     public void actionPerformed(ActionEvent e) {
+        Logger.debug("[champ-select] invoke UI event ''", e.getActionCommand());
         switch (e.getActionCommand()) {
             case "Dodge" -> {
                 int result = Swiftrift.showOptionDialog(

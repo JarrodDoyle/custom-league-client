@@ -1,13 +1,9 @@
 package com.hawolt.ui.champselect.generic.impl;
 
-import com.hawolt.Swiftrift;
 import com.hawolt.async.Debouncer;
-import com.hawolt.client.cache.CacheElement;
 import com.hawolt.client.resources.communitydragon.spell.Spell;
 import com.hawolt.client.resources.communitydragon.spell.SpellIndex;
 import com.hawolt.client.resources.communitydragon.spell.SpellSource;
-import com.hawolt.client.resources.ledge.preferences.objects.lcupreferences.LCUPreferences;
-import com.hawolt.logger.Logger;
 import com.hawolt.ui.champselect.AbstractRenderInstance;
 import com.hawolt.ui.champselect.generic.ChampSelectUIComponent;
 import com.hawolt.ui.generic.component.LComboBox;
@@ -58,8 +54,16 @@ public class ChampSelectGameSettingUI extends ChampSelectUIComponent {
         this.setLayout(new BorderLayout());
         this.setBackground(ColorPalette.backgroundColor);
         ChildUIComponent spellUI = new ChildUIComponent(new GridLayout(0, 2, 5, 0));
-        spellUI.add(spellOne = new LComboBox<>(allowed));
-        spellUI.add(spellTwo = new LComboBox<>(allowed));
+        spellUI.add(spellOne = new LComboBox<>(allowed) {
+            protected void fireActionEvent() {
+                if (this.hasFocus()) super.fireActionEvent();
+            }
+        });
+        spellUI.add(spellTwo = new LComboBox<>(allowed) {
+            protected void fireActionEvent() {
+                if (this.hasFocus()) super.fireActionEvent();
+            }
+        });
         spellUI.setBorder(new EmptyBorder(5, 5, 5, 5));
         add(spellUI, BorderLayout.EAST);
         ChildUIComponent buttonUI = new ChildUIComponent(new GridLayout(0, 4, 5, 0));
@@ -144,29 +148,11 @@ public class ChampSelectGameSettingUI extends ChampSelectUIComponent {
 
     @Override
     public void init() {
-        super.init();
         int targetQueueId = context.getChampSelectSettingsContext().getQueueId();
         int[] supportedQueueIds = renderInstance.getSupportedQueueIds();
         for (int supportedQueueId : supportedQueueIds) {
             if (supportedQueueId == targetQueueId) {
-                Swiftrift.service.execute(() -> {
-                    LCUPreferences lcuPreferences = null;
-                    Swiftrift swiftrift = context.getChampSelectInterfaceContext().getLeagueClientUI();
-                    if (swiftrift == null) {
-                        // TODO
-                        // simulate preferences
-                        //lcuPreferences =
-                    } else {
-                        lcuPreferences = swiftrift.getLeagueClient().getCachedValue(CacheElement.LCU_PREFERENCES);
-                    }
-                    if (lcuPreferences == null) return;
-                    lcuPreferences.getChampSelectPreference().ifPresent(champSelectPreference -> {
-                        JSONArray preference = champSelectPreference.getSummonerSpells(targetQueueId);
-                        Logger.error(preference);
-                        if (preference == null) return;
-                        preselectSummonerSpells(preference);
-                    });
-                });
+                this.preselectSummonerSpells(context.getChampSelectSettingsContext().getInitialSpellIds());
             }
         }
     }

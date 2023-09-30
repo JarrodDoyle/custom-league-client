@@ -37,7 +37,7 @@ public class ARAMBenchUI extends ChampSelectUIComponent {
         this.setPreferredSize(new Dimension(0, 80));
         this.setBorder(
                 BorderFactory.createCompoundBorder(
-                        BorderFactory.createMatteBorder(0, 1, 1, 1, Color.BLACK),
+                        BorderFactory.createMatteBorder(0, 1, 1, 1, Color.DARK_GRAY),
                         new EmptyBorder(5, 5, 5, 5)
                 )
         );
