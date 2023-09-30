@@ -1,7 +1,6 @@
 package com.hawolt.ui.champselect.context;
 
 import com.hawolt.Swiftrift;
-import com.hawolt.ui.champselect.AbstractRenderInstance;
 import com.hawolt.ui.champselect.generic.ChampSelectRuneComponent;
 
 /**
@@ -10,7 +9,7 @@ import com.hawolt.ui.champselect.generic.ChampSelectRuneComponent;
  **/
 
 public interface ChampSelectInterfaceContext {
-    ChampSelectRuneComponent getRuneSelectionPanel(AbstractRenderInstance instance);
+    ChampSelectRuneComponent getRuneSelectionPanel();
 
     void filterChampion(String champion);
 

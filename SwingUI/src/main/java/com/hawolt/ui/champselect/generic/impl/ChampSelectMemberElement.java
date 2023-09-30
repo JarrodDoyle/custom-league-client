@@ -17,14 +17,12 @@ import com.hawolt.client.resources.ledge.summoner.SummonerLedge;
 import com.hawolt.client.resources.ledge.teambuilder.TeamBuilderLedge;
 import com.hawolt.logger.Logger;
 import com.hawolt.rtmp.service.impl.TeamBuilderService;
-import com.hawolt.ui.champselect.AbstractRenderInstance;
-import com.hawolt.ui.champselect.context.*;
+import com.hawolt.ui.champselect.context.ChampSelectContext;
 import com.hawolt.ui.champselect.data.*;
 import com.hawolt.ui.champselect.generic.ChampSelectUIComponent;
 import com.hawolt.ui.generic.themes.ColorPalette;
 import com.hawolt.util.paint.custom.GraphicalDrawableManager;
 import org.imgscalr.Scalr;
-import org.jetbrains.annotations.NotNull;
 
 import javax.imageio.ImageIO;
 import java.awt.*;
@@ -50,7 +48,6 @@ public class ChampSelectMemberElement extends ChampSelectUIComponent implements 
     private static final Color HIGHLIGHT_NOT_LOCKED = new Color(0xFF, 0xFF, 0xFF, 0x4F);
     private static final Color HIGHLIGHT_PICKING = new Color(155, 224, 155, 179);
     private final ResourceManager<BufferedImage> manager = new ResourceManager<>(this);
-    private final ChampSelectContext champSelectContext;
     private final ChampSelectTeamType teamType;
     private final ChampSelectTeam team;
     private final ScheduledExecutorService service = ExecutorManager.getScheduledService("trade-blocker");
@@ -61,12 +58,10 @@ public class ChampSelectMemberElement extends ChampSelectUIComponent implements 
     private GraphicalDrawableManager drawables;
     private ScheduledFuture<?> future;
 
-    public ChampSelectMemberElement(AbstractRenderInstance instance, ChampSelectTeamType teamType, ChampSelectTeam team, ChampSelectMember member) {
-        instance.register(this);
+    public ChampSelectMemberElement(ChampSelectTeamType teamType, ChampSelectTeam team, ChampSelectMember member) {
         ColorPalette.addThemeListener(this);
         this.addComponentListener(new ChampSelectSelectMemberResizeAdapter());
         this.setBackground(ColorPalette.backgroundColor);
-        this.champSelectContext = instance.getContext();
         this.teamType = teamType;
         this.member = member;
         this.team = team;
@@ -75,14 +70,13 @@ public class ChampSelectMemberElement extends ChampSelectUIComponent implements 
 
     @Override
     public void run() {
-        if (!(member instanceof ChampSelectTeamMember champSelectTeamMember)) return;
+        if (!(member instanceof ChampSelectTeamMember teamMember)) return;
         GraphicalIndicatorButton swapOrder = drawables.getGraphicalComponent("order");
         swapOrder.setVisible(true);
-        configure(champSelectTeamMember);
+        configure(teamMember);
     }
 
     private void configure(ChampSelectTeamMember teamMember) {
-        ChampSelectDataContext dataContext = champSelectContext.getChampSelectDataContext();
         LeagueClient client = dataContext.getLeagueClient();
         if (client == null) {
             Logger.warn("unable to fetch name for {}, client is null", puuid == null ? "N/A" : puuid);
@@ -120,8 +114,6 @@ public class ChampSelectMemberElement extends ChampSelectUIComponent implements 
         this.drawables = new GraphicalDrawableManager(this);
         GraphicalIndicatorButton swapOrder = new GraphicalIndicatorButton();
         ResourceLoader.loadLocalResource("assets/cs_swap_order.png", swapOrder);
-        ChampSelectDataContext dataContext = champSelectContext.getChampSelectDataContext();
-        ChampSelectInteractionContext interactionContext = champSelectContext.getChampSelectInteractionContext();
         swapOrder.addExecutionListener(event -> Swiftrift.service.execute(() -> {
             if (event.getInitiator() instanceof MouseEvent mouseEvent) {
                 TeamBuilderLedge ledge = dataContext.getLeagueClient().getLedge().getTeamBuilder();
@@ -189,7 +181,7 @@ public class ChampSelectMemberElement extends ChampSelectUIComponent implements 
         if (indicatorId != 0) {
             this.setClearChampion(indicatorId);
             this.updateSprite(indicatorId, indicatorId * 1000);
-        } else if (member.getChampionId() == 0 && !picking) {
+        } else if (member.getChampionId() == 0 && !utilityContext.isPicking(member)) {
             this.clearChampion = null;
             this.sprite = null;
         }
@@ -258,12 +250,9 @@ public class ChampSelectMemberElement extends ChampSelectUIComponent implements 
         }
     }
 
-    public void update(@NotNull ChampSelectContext context, ChampSelectMember member) {
+    public void update(ChampSelectMember member) {
         this.member = member;
         this.updateChamp(member);
-        ChampSelectUtilityContext utilityContext = context.getChampSelectUtilityContext();
-        ChampSelectSettingsContext settingsContext = context.getChampSelectSettingsContext();
-        ChampSelectInteractionContext interactionContext = context.getChampSelectInteractionContext();
         GraphicalIndicatorButton swapOrder = drawables.getGraphicalComponent("order");
         long remaining = settingsContext.getCurrentTimeRemainingMillis() - (System.currentTimeMillis() - settingsContext.getLastUpdate()) - 5000L;
         if (remaining > 0) {
@@ -307,7 +296,7 @@ public class ChampSelectMemberElement extends ChampSelectUIComponent implements 
                 swapChampion.setVisible(!"INVALID".equals(status.getState()));
             }
 
-            if (utilityContext.isPicking(member)) {
+            if (context != null && utilityContext.isPicking(member)) {
                 utilityContext.getCurrent()
                         .stream()
                         .filter(actionObject -> actionObject.getActorCellId() == member.getCellId())
@@ -323,23 +312,9 @@ public class ChampSelectMemberElement extends ChampSelectUIComponent implements 
     }
 
     @Override
-    public void update(ChampSelectContext context) {
-        this.self = context.getChampSelectUtilityContext().isSelf(member);
-        this.mode = context.getChampSelectSettingsContext().getDraftMode();
-        this.picking = context.getChampSelectUtilityContext().isPicking(member);
-        this.lockedIn = context.getChampSelectUtilityContext().isLockedIn(member);
-        this.teamMember = context.getChampSelectUtilityContext().isTeamMember(member);
-        this.getCurrentActionSetIndex = context.getChampSelectSettingsContext().getCurrentActionSetIndex();
-    }
-
-    private DraftMode mode;
-    private boolean lockedIn, picking, self, teamMember;
-    private int getCurrentActionSetIndex;
-
-    @Override
     protected void paintComponent(Graphics g) {
         super.paintComponent(g);
-
+        if (context == null) return;
         Dimension dimension = getSize();
 
         //DRAW CHAMPION/SKIN IMAGE
@@ -349,9 +324,9 @@ public class ChampSelectMemberElement extends ChampSelectUIComponent implements 
             g.drawImage(clearChampion, imageX, imageY, null);
         }
         //INDICATE PICKING OR STATUS NOT LOCKED IN
-
+        DraftMode mode = settingsContext.getDraftMode();
         if (member != null && mode != DraftMode.ARAM) {
-            if (!lockedIn || (mode == DraftMode.DRAFT && getCurrentActionSetIndex <= 0)) {
+            if (!utilityContext.isLockedIn(member) || (mode == DraftMode.DRAFT && settingsContext.getCurrentActionSetIndex() <= 0)) {
                 g.setColor(HIGHLIGHT_NOT_LOCKED);
                 g.fillRect(0, 0, dimension.width, dimension.height);
             }
@@ -420,7 +395,7 @@ public class ChampSelectMemberElement extends ChampSelectUIComponent implements 
         }
 
         //BORDER
-        if (member != null && (!lockedIn && picking)) {
+        if (member != null && (!utilityContext.isLockedIn(member) && utilityContext.isPicking(member))) {
             g.setColor(HIGHLIGHT_PICKING);
             g.drawRect(0, 0, dimension.width - 1, dimension.height - 1);
         } else {
@@ -430,10 +405,10 @@ public class ChampSelectMemberElement extends ChampSelectUIComponent implements 
 
         if (member == null) return;
 
-        if (self) {
+        if (utilityContext.isSelf(member)) {
             g.setColor(new Color(217, 160, 74, 255));
             g.drawRect(1, 1, dimension.width - 3, dimension.height - 3);
-        } else if (teamMember) {
+        } else if (utilityContext.isTeamMember(member)) {
             drawables.draw(graphics2D);
         }
     }
@@ -478,6 +453,10 @@ public class ChampSelectMemberElement extends ChampSelectUIComponent implements 
                 g.drawRect(baseX + SUMMONER_SPELL_DIMENSION.width + 5, 5, SUMMONER_SPELL_DIMENSION.width, SUMMONER_SPELL_DIMENSION.height);
             }
         }
+    }
+
+    public void setIndex(ChampSelectContext context) {
+        this.configure(context);
     }
 
     @Override

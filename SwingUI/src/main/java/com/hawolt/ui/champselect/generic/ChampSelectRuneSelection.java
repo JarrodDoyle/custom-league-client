@@ -4,7 +4,6 @@ import com.hawolt.client.resources.communitydragon.rune.BasicRune;
 import com.hawolt.client.resources.communitydragon.rune.RuneIndex;
 import com.hawolt.client.resources.communitydragon.rune.RuneSource;
 import com.hawolt.client.resources.communitydragon.rune.RuneType;
-import com.hawolt.ui.champselect.AbstractRenderInstance;
 import com.hawolt.ui.champselect.IncompleteRunePageException;
 import com.hawolt.ui.generic.component.LTabbedPane;
 import com.hawolt.ui.generic.utility.ChildUIComponent;
@@ -29,7 +28,7 @@ public class ChampSelectRuneSelection extends ChampSelectUIComponent {
     private final LTabbedPane main, secondary;
     private int selected = -1;
 
-    public ChampSelectRuneSelection(AbstractRenderInstance instance, String patch) {instance.register(this);
+    public ChampSelectRuneSelection(String patch) {
         this.setLayout(new BorderLayout());
         ChildUIComponent panel = new ChildUIComponent(new GridLayout(0, 2, 5, 0));
         this.add(panel, BorderLayout.CENTER);

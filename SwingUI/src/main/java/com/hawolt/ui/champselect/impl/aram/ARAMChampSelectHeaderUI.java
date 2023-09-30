@@ -1,6 +1,5 @@
 package com.hawolt.ui.champselect.impl.aram;
 
-import com.hawolt.ui.champselect.context.ChampSelectContext;
 import com.hawolt.ui.champselect.data.ChampSelectPhase;
 import com.hawolt.ui.champselect.generic.impl.ChampSelectHeaderUI;
 
@@ -21,7 +20,7 @@ public class ARAMChampSelectHeaderUI extends ChampSelectHeaderUI {
     }
 
     @Override
-    protected ChampSelectPhase getChampSelectPhase(ChampSelectContext context) {
+    protected ChampSelectPhase getChampSelectPhase() {
         return ChampSelectPhase.FINALIZE;
     }
 }

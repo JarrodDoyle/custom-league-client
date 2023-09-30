@@ -3,7 +3,6 @@ package com.hawolt.ui.champselect.generic.impl;
 import com.hawolt.Swiftrift;
 import com.hawolt.logger.Logger;
 import com.hawolt.ui.champselect.AbstractRenderInstance;
-import com.hawolt.ui.champselect.context.ChampSelectContext;
 import com.hawolt.ui.champselect.data.ChampSelectPhase;
 import com.hawolt.ui.champselect.data.ChampSelectType;
 import com.hawolt.ui.champselect.generic.ChampSelectRuneComponent;
@@ -43,7 +42,8 @@ public abstract class ChampSelectCenterUI extends ChampSelectUIComponent {
     }
 
     @Override
-    public void init(ChampSelectContext context) {
+    public void init() {
+        super.init();
         int targetQueueId = context.getChampSelectSettingsContext().getQueueId();
         int[] supportedQueueIds = renderInstance.getSupportedQueueIds();
         for (int supportedQueueId : supportedQueueIds) {
@@ -87,7 +87,6 @@ public abstract class ChampSelectCenterUI extends ChampSelectUIComponent {
 
     public void toggleCurrentPhase() {
         this.toggleCard(current.getName());
-        this.revalidate();
     }
 
     public void setRuneSelection(String name, ChampSelectRuneComponent runeSelection) {

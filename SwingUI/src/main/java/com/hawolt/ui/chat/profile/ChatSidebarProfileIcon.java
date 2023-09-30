@@ -43,21 +43,25 @@ public class ChatSidebarProfileIcon extends ChildUIComponent implements Resource
     @Override
     protected void paintComponent(Graphics g) {
         super.paintComponent(g);
-        //g.setColor(ColorPalette.cardColor);
-        //g.fillRect(0,0,getWidth(),getHeight());
-
-        Dimension dimension = getSize();
-        g.setColor(UNOBTAINED);
-        g.fillRect(0, ICON_SIZE, dimension.width, getHeight() - ICON_SIZE);
-        double progress = ((double) current / (double) total);
-        int width = (int) Math.floor(progress * (dimension.width - 1));
-        g.setColor(GAINED);
-        g.fillRect(0, ICON_SIZE, width, getHeight() - ICON_SIZE);
 
         Graphics2D graphics2D = (Graphics2D) g;
         graphics2D.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
         graphics2D.setFont(font);
         FontMetrics metrics = g.getFontMetrics();
+
+        Dimension dimension = getSize();
+        graphics2D.setColor(UNOBTAINED);
+        //graphics2D.fillRect(0, ICON_SIZE, dimension.width, getHeight() - ICON_SIZE);
+        PaintHelper.roundedSquare(graphics2D, 0, ICON_SIZE, dimension.width, getHeight(), 15, false, false, true, true);
+
+
+        double progress = ((double) current / (double) total);
+        int width = (int) Math.floor(progress * (dimension.width - 1));
+
+        graphics2D.setColor(GAINED);
+        //   PaintHelper.roundedSquare(graphics2D, 0, ICON_SIZE, width, getHeight(), ColorPalette.CARD_ROUNDING, false, false, true, true);
+        //g.fillRect(0, ICON_SIZE, width, getHeight() - ICON_SIZE);
+
 
         int y = (dimension.height >> 1) + (metrics.getAscent() >> 1);
 

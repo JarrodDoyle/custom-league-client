@@ -1,7 +1,6 @@
 package com.hawolt.ui.champselect.generic.impl;
 
 import com.hawolt.async.ExecutorManager;
-import com.hawolt.ui.champselect.context.ChampSelectContext;
 import com.hawolt.ui.champselect.context.ChampSelectSettingsContext;
 import com.hawolt.ui.champselect.data.ChampSelectPhase;
 import com.hawolt.ui.champselect.generic.ChampSelectUIComponent;
@@ -47,7 +46,7 @@ public abstract class ChampSelectHeaderUI extends ChampSelectUIComponent {
         super.paintComponent(g);
         Dimension dimension = getSize();
 
-        if (timestamp != 0L) {
+        if (context != null && timestamp != 0L) {
             double difference = currentTotalTimeMillis - currentTimeRemainingMillis + (System.currentTimeMillis() - timestamp);
             double percentage = difference / currentTotalTimeMillis;
             if (percentage < 0) percentage = 0;
@@ -70,13 +69,13 @@ public abstract class ChampSelectHeaderUI extends ChampSelectUIComponent {
     }
 
     @Override
-    public void update(ChampSelectContext context) {
+    public void update() {
         ChampSelectSettingsContext settingsContext = context.getChampSelectSettingsContext();
         this.currentTimeRemainingMillis = settingsContext.getCurrentTimeRemainingMillis();
         this.currentTotalTimeMillis = settingsContext.getCurrentTotalTimeMillis();
         this.timestamp = System.currentTimeMillis();
         ChampSelectPhase previous = this.phase;
-        this.phase = getChampSelectPhase(context);
+        this.phase = getChampSelectPhase();
         if (phase == ChampSelectPhase.PICK && previous != ChampSelectPhase.PICK) {
             AudioEngine.play(Sound.PICK);
         }
@@ -84,5 +83,5 @@ public abstract class ChampSelectHeaderUI extends ChampSelectUIComponent {
 
     protected abstract String getPhaseDescription(ChampSelectPhase phase);
 
-    protected abstract ChampSelectPhase getChampSelectPhase(ChampSelectContext context);
+    protected abstract ChampSelectPhase getChampSelectPhase();
 }

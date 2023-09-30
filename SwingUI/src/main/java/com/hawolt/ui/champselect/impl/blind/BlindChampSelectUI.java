@@ -1,7 +1,6 @@
 package com.hawolt.ui.champselect.impl.blind;
 
 import com.hawolt.ui.champselect.AbstractRenderInstance;
-import com.hawolt.ui.champselect.context.ChampSelectContext;
 import com.hawolt.ui.champselect.data.ChampSelectTeam;
 import com.hawolt.ui.champselect.data.ChampSelectType;
 import com.hawolt.ui.champselect.generic.impl.ChampSelectCenterUI;
@@ -14,8 +13,10 @@ import com.hawolt.ui.champselect.impl.MatchmadeRenderInstance;
  **/
 
 public class BlindChampSelectUI extends MatchmadeRenderInstance {
-    public BlindChampSelectUI(ChampSelectContext context, ChampSelectType... supportedTypes) {
-        super(context, supportedTypes);
+    public static BlindChampSelectUI INSTANCE = new BlindChampSelectUI(ChampSelectType.PICK);
+
+    public BlindChampSelectUI(ChampSelectType... supportedTypes) {
+        super(supportedTypes);
     }
 
     @Override
@@ -24,8 +25,8 @@ public class BlindChampSelectUI extends MatchmadeRenderInstance {
     }
 
     @Override
-    protected ChampSelectSidebarUI getSidebarUI(AbstractRenderInstance instance, ChampSelectTeam team) {
-        return new BlindSelectSidebarUI(instance, team);
+    protected ChampSelectSidebarUI getSidebarUI(ChampSelectTeam team) {
+        return new BlindSelectSidebarUI(team);
     }
 
     @Override

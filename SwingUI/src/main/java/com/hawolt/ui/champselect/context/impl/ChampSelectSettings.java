@@ -32,8 +32,8 @@ public class ChampSelectSettings extends ChampSelectContextProvider implements C
     private int localPlayerCellId, currentActionSetIndex, counter, recoveryCounter, queueId;
     private long currentTotalTimeMillis, currentTimeRemainingMillis, gameId, lastUpdate;
     private String teamId, subphase, teamChatRoomId, phaseName, contextId;
-    private JSONArray trades, swaps, bench;
-    private JSONObject cells;
+    private JSONArray trades, swaps, bench, initialSpellIds;
+    private JSONObject cells, inventoryDraft;
 
     public ChampSelectSettings(ChampSelectUI champSelectUI, ChampSelectContext context) {
         super(champSelectUI, context);
@@ -46,6 +46,7 @@ public class ChampSelectSettings extends ChampSelectContextProvider implements C
         this.phaseName = payload.getString("phaseName");
         this.contextId = payload.getString("contextId");
         this.recoveryCounter = payload.getInt("recoveryCounter");
+
         JSONObject championSelectState = payload.getJSONObject("championSelectState");
         JSONObject championBenchState = championSelectState.getJSONObject("championBenchState");
         this.currentTimeRemainingMillis = championSelectState.getLong("currentTimeRemainingMillis");
@@ -55,7 +56,9 @@ public class ChampSelectSettings extends ChampSelectContextProvider implements C
         this.allowDuplicatePicks = championSelectState.getBoolean("allowDuplicatePicks");
         this.allowSkinSelection = championSelectState.getBoolean("allowSkinSelection");
         this.skipChampionSelect = championSelectState.getBoolean("skipChampionSelect");
+        this.inventoryDraft = championSelectState.getJSONObject("inventoryDraft");
         this.localPlayerCellId = championSelectState.getInt("localPlayerCellId");
+        this.initialSpellIds = inventoryDraft.getJSONArray("initialSpellIds");
         this.teamChatRoomId = championSelectState.getString("teamChatRoomId");
         this.swaps = championSelectState.getJSONArray("pickOrderSwaps");
         this.bench = championBenchState.getJSONArray("championIds");
@@ -108,6 +111,16 @@ public class ChampSelectSettings extends ChampSelectContextProvider implements C
     @Override
     public JSONObject getCellData() {
         return cells;
+    }
+
+    @Override
+    public JSONArray getInitialSpellIds() {
+        return initialSpellIds;
+    }
+
+    @Override
+    public JSONObject getInventoryDraft() {
+        return inventoryDraft;
     }
 
     @Override

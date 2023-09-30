@@ -1,7 +1,6 @@
 package com.hawolt.ui.champselect.impl.aram;
 
 import com.hawolt.ui.champselect.AbstractRenderInstance;
-import com.hawolt.ui.champselect.context.ChampSelectContext;
 import com.hawolt.ui.champselect.data.ChampSelectTeam;
 import com.hawolt.ui.champselect.data.ChampSelectType;
 import com.hawolt.ui.champselect.generic.impl.ChampSelectCenterUI;
@@ -17,9 +16,10 @@ import java.awt.*;
  **/
 
 public class ARAMChampSelectUI extends MatchmadeRenderInstance {
+    public static ARAMChampSelectUI INSTANCE = new ARAMChampSelectUI(ChampSelectType.PICK);
 
-    public ARAMChampSelectUI(ChampSelectContext context, ChampSelectType... supportedTypes) {
-        super(context, supportedTypes);
+    public ARAMChampSelectUI(ChampSelectType... supportedTypes) {
+        super(supportedTypes);
         this.centerUI.getNorthernChild().add(new ARAMBenchUI(this), BorderLayout.NORTH);
     }
 
@@ -29,8 +29,8 @@ public class ARAMChampSelectUI extends MatchmadeRenderInstance {
     }
 
     @Override
-    protected ChampSelectSidebarUI getSidebarUI(AbstractRenderInstance instance, ChampSelectTeam team) {
-        return new ARAMSelectSidebarUI(instance, team);
+    protected ChampSelectSidebarUI getSidebarUI(ChampSelectTeam team) {
+        return new ARAMSelectSidebarUI(team);
     }
 
     @Override

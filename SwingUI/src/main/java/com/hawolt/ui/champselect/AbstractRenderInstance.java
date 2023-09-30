@@ -18,10 +18,9 @@ import com.hawolt.ui.generic.utility.ChildUIComponent;
 import com.hawolt.xmpp.event.objects.conversation.history.impl.IncomingMessage;
 import com.hawolt.xmpp.event.objects.presence.impl.JoinMucPresence;
 
+import javax.swing.*;
 import java.awt.*;
 import java.io.IOException;
-import java.util.LinkedList;
-import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -32,30 +31,13 @@ import java.util.concurrent.ConcurrentHashMap;
 
 public abstract class AbstractRenderInstance extends ChampSelectUIComponent implements ChampSelectRenderer, ChampSelectChoice, CacheListener<MatchContext> {
 
-    private final Map<ChampSelectType, ChampSelectSelectionElement> map = new ConcurrentHashMap<>();
-    private final List<ChampSelectListener> listeners = new LinkedList<>();
-
     protected final ChildUIComponent component = new ChildUIComponent(new BorderLayout());
-    protected final ChampSelectContext context;
+    private final Map<ChampSelectType, ChampSelectSelectionElement> map = new ConcurrentHashMap<>();
 
-    public AbstractRenderInstance(ChampSelectContext context) {
+    public AbstractRenderInstance() {
         this.setLayout(new BorderLayout());
         this.add(component, BorderLayout.CENTER);
-        this.register(this);
-        this.context = context;
     }
-
-    public ChampSelectContext getContext() {
-        return context;
-    }
-
-    public void register(ChampSelectListener listener) {
-        this.listeners.add(listener);
-    }
-
-    public abstract void setGlobalRunePanel(ChampSelectRuneComponent selection);
-
-    public abstract void invokeChampionFilter(String champion);
 
     public abstract void push(IncomingMessage incomingMessage);
 
@@ -63,8 +45,13 @@ public abstract class AbstractRenderInstance extends ChampSelectUIComponent impl
 
     protected abstract void stopChampSelect();
 
+    public abstract void invokeChampionFilter(String champion);
+
+    public abstract void setGlobalRunePanel(ChampSelectRuneComponent selection);
+
     @Override
-    public void init(ChampSelectContext context) {
+    public void init() {
+        if (context == null) return;
         for (ChampSelectType type : map.keySet()) {
             ChampSelectSelectionElement element = map.get(type);
             element.setSelected(false);
@@ -75,6 +62,7 @@ public abstract class AbstractRenderInstance extends ChampSelectUIComponent impl
 
     @Override
     public void onChoice(ChampSelectSelectionElement element) {
+        if (context == null || element == null) return;
         if (map.containsKey(element.getType())) {
             ChampSelectSelectionElement champSelectSelectionElement = map.get(element.getType());
             if (champSelectSelectionElement == null) return;
@@ -85,6 +73,7 @@ public abstract class AbstractRenderInstance extends ChampSelectUIComponent impl
     }
 
     public void dodge(GameType type) {
+        if (context == null) return;
         Swiftrift.service.execute(() -> {
             ChampSelectDataContext dataContext = context.getChampSelectDataContext();
             LeagueClient client = dataContext.getLeagueClient();
@@ -92,12 +81,9 @@ public abstract class AbstractRenderInstance extends ChampSelectUIComponent impl
             Swiftrift swiftrift = context.getChampSelectInterfaceContext().getLeagueClientUI();
             try {
                 switch (type) {
-                    case CLASSIC -> {
-                        rtmpClient.getTeamBuilderService().quitGameV2Asynchronous(dataContext.getPacketCallback());
-                    }
-                    case CUSTOM -> {
-                        Logger.debug("currently not supported");
-                    }
+                    case CLASSIC ->
+                            rtmpClient.getTeamBuilderService().quitGameV2Asynchronous(dataContext.getPacketCallback());
+                    case CUSTOM -> Logger.debug("currently not supported");
                 }
                 swiftrift.getLayoutManager().getQueue().getAvailableLobbies().forEach(
                         lobby -> lobby.toggleButtonState(false, true)
@@ -112,8 +98,31 @@ public abstract class AbstractRenderInstance extends ChampSelectUIComponent impl
     }
 
     public void delegate(ChampSelectContext context, int initialCounter) {
-        for (int i = 0; i < listeners.size(); i++) {
-            listeners.get(i).execute(context, initialCounter);
+        this.assign(this, context);
+        this.configure(context);
+        this.execute(initialCounter);
+        this.update(this, initialCounter);
+    }
+
+    private void assign(JComponent parent, ChampSelectContext context) {
+        Component[] components = parent.getComponents();
+        for (Component component : components) {
+            if (component == null) continue;
+            if ((component instanceof ChampSelectUIComponent champSelectUIComponent)) {
+                champSelectUIComponent.configure(context);
+            }
+            if (component instanceof JComponent child) assign(child, context);
+        }
+    }
+
+    private void update(JComponent parent, int initialCounter) {
+        Component[] components = parent.getComponents();
+        for (Component component : components) {
+            if (component == null) continue;
+            if (component instanceof JComponent child) update(child, initialCounter);
+            if ((component instanceof ChampSelectUIComponent champSelectUIComponent)) {
+                champSelectUIComponent.execute(initialCounter);
+            }
         }
     }
 }

@@ -1,6 +1,5 @@
 package com.hawolt.ui.champselect.impl.blind;
 
-import com.hawolt.ui.champselect.context.ChampSelectContext;
 import com.hawolt.ui.champselect.context.ChampSelectUtilityContext;
 import com.hawolt.ui.champselect.data.ActionObject;
 import com.hawolt.ui.champselect.data.ChampSelectPhase;
@@ -30,7 +29,7 @@ public class BlindChampSelectHeaderUI extends ChampSelectHeaderUI {
     }
 
     @Override
-    protected ChampSelectPhase getChampSelectPhase(ChampSelectContext context) {
+    protected ChampSelectPhase getChampSelectPhase() {
         ChampSelectUtilityContext utilityContext = context.getChampSelectUtilityContext();
         if (utilityContext.isFinalizing()) {
             return ChampSelectPhase.FINALIZE;

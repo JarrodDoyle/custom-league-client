@@ -1,7 +1,6 @@
 package com.hawolt.ui.champselect.impl.draft;
 
 import com.hawolt.ui.champselect.AbstractRenderInstance;
-import com.hawolt.ui.champselect.context.ChampSelectContext;
 import com.hawolt.ui.champselect.data.ActionObject;
 import com.hawolt.ui.champselect.data.ChampSelectPhase;
 import com.hawolt.ui.champselect.data.ChampSelectType;
@@ -21,7 +20,7 @@ public class DraftCenterUI extends ChampSelectCenterUI {
     }
 
     @Override
-    public void update(ChampSelectContext context) {
+    public void update() {
         int currentActionSetIndex = context.getChampSelectSettingsContext().getCurrentActionSetIndex();
         Optional<ActionObject> optional = context.getChampSelectUtilityContext().getOwnBanPhase();
         boolean isBanComplete = optional.isPresent() && optional.get().isCompleted();

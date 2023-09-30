@@ -2,8 +2,6 @@ package com.hawolt.ui.champselect.generic.impl;
 
 import com.hawolt.async.ExecutorManager;
 import com.hawolt.logger.Logger;
-import com.hawolt.ui.champselect.AbstractRenderInstance;
-import com.hawolt.ui.champselect.context.ChampSelectContext;
 import com.hawolt.ui.champselect.context.ChampSelectSettingsContext;
 import com.hawolt.ui.champselect.data.*;
 import com.hawolt.ui.champselect.generic.ChampSelectUIComponent;
@@ -23,7 +21,6 @@ import java.util.concurrent.ExecutorService;
  **/
 
 public class ChampSelectSidebarUI extends ChampSelectUIComponent {
-    private final AbstractRenderInstance instance;
     protected final Map<Integer, ChampSelectMemberElement> map = new HashMap<>();
     protected final ChildUIComponent display;
 
@@ -31,9 +28,7 @@ public class ChampSelectSidebarUI extends ChampSelectUIComponent {
     protected final ChampSelectTeam team;
     protected ChampSelectTeamType type;
 
-    public ChampSelectSidebarUI(AbstractRenderInstance instance, ChampSelectTeam team) {
-        instance.register(this);
-        this.instance = instance;
+    public ChampSelectSidebarUI(ChampSelectTeam team) {
         ColorPalette.addThemeListener(this);
         this.team = team;
         this.setLayout(new BorderLayout());
@@ -49,11 +44,12 @@ public class ChampSelectSidebarUI extends ChampSelectUIComponent {
     }
 
     @Override
-    public void init(ChampSelectContext context) {
+    public void init() {
+        if (context == null) return;
         this.map.clear();
         this.display.removeAll();
-        this.type = getChampSelectTeamType(context);
-        ChampSelectMember[] members = get(context, type);
+        this.type = getChampSelectTeamType();
+        ChampSelectMember[] members = get(type);
         this.display.setBackground(ColorPalette.backgroundColor);
         populate(members);
         revalidate();
@@ -64,9 +60,10 @@ public class ChampSelectSidebarUI extends ChampSelectUIComponent {
         this.display.setLayout(new GridLayout(Math.max(1, members.length), 0, 0, 5));
         for (ChampSelectMember member : members) {
             ExecutorService loader = ExecutorManager.getService("name-loader");
-            ChampSelectMemberElement element = new ChampSelectMemberElement(instance, type, team, member);
+            ChampSelectMemberElement element = new ChampSelectMemberElement(type, team, member);
             element.setBackground(ColorPalette.backgroundColor);
             map.put(member.getCellId(), element);
+            element.setIndex(context);
             loader.execute(element);
             this.display.add(element);
         }
@@ -74,16 +71,19 @@ public class ChampSelectSidebarUI extends ChampSelectUIComponent {
     }
 
     @Override
-    public void update(ChampSelectContext context) {
-        for (ChampSelectMember member : get(context, type)) {
+    public void update() {
+        if (context == null || type == null) return;
+        Logger.debug("UPDATE CHAMP SELECT");
+        for (ChampSelectMember member : get(type)) {
             if (!map.containsKey(member.getCellId())) continue;
             ChampSelectMemberElement element = map.get(member.getCellId());
             if (element == null) continue;
-            element.update(context, member);
+            element.update(member);
         }
+        Logger.debug("CHAMP SELECT UPDATED");
     }
 
-    protected ChampSelectMember[] get(ChampSelectContext context, ChampSelectTeamType type) {
+    protected ChampSelectMember[] get(ChampSelectTeamType type) {
         ChampSelectSettingsContext settingsContext = context.getChampSelectSettingsContext();
         switch (type) {
             case ALLIED -> {
@@ -98,7 +98,7 @@ public class ChampSelectSidebarUI extends ChampSelectUIComponent {
     }
 
     @NotNull
-    protected ChampSelectTeamType getChampSelectTeamType(ChampSelectContext context) {
+    protected ChampSelectTeamType getChampSelectTeamType() {
         ChampSelectTeamMember self = context.getChampSelectUtilityContext().getSelf();
         int alliedTeamId = self.getTeamId();
         ChampSelectTeamType type;
