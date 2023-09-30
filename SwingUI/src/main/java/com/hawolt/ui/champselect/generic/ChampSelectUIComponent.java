@@ -1,6 +1,10 @@
 package com.hawolt.ui.champselect.generic;
 
-import com.hawolt.ui.champselect.context.*;
+import com.hawolt.rtmp.LeagueRtmpClient;
+import com.hawolt.rtmp.RtmpClient;
+import com.hawolt.ui.champselect.AbstractRenderInstance;
+import com.hawolt.ui.champselect.ChampSelectListener;
+import com.hawolt.ui.champselect.context.ChampSelectContext;
 import com.hawolt.ui.generic.utility.ChildUIComponent;
 
 /**
@@ -8,36 +12,20 @@ import com.hawolt.ui.generic.utility.ChildUIComponent;
  * Author: Twitter @hawolt
  **/
 
-public abstract class ChampSelectUIComponent extends ChildUIComponent {
-    protected ChampSelectInteractionContext interactionContext;
-    protected ChampSelectInterfaceContext interfaceContext;
-    protected ChampSelectSettingsContext settingsContext;
-    protected ChampSelectUtilityContext utilityContext;
-    protected ChampSelectDataContext dataContext;
-    protected ChampSelectContext context;
+public abstract class ChampSelectUIComponent extends ChildUIComponent implements ChampSelectListener {
 
-    public void configure(ChampSelectContext context) {
-        this.interactionContext = context.getChampSelectInteractionContext();
-        this.interfaceContext = context.getChampSelectInterfaceContext();
-        this.settingsContext = context.getChampSelectSettingsContext();
-        this.utilityContext = context.getChampSelectUtilityContext();
-        this.dataContext = context.getChampSelectDataContext();
-        this.context = context;
-    }
-
-    public void execute(int initialCounter) {
+    @Override
+    public void execute(ChampSelectContext context, int initialCounter) {
         if (context == null) return;
         if (context.getChampSelectSettingsContext().getCounter() == initialCounter) {
-            this.init();
+            this.init(context);
         }
-        this.update();
+        this.update(context);
     }
 
-    public void update() {
-
+    public void update(ChampSelectContext context) {
     }
 
-    public void init() {
-
+    public void init(ChampSelectContext context) {
     }
 }

@@ -2,6 +2,7 @@ package com.hawolt.ui.champselect.context.impl;
 
 import com.hawolt.Swiftrift;
 import com.hawolt.client.LeagueClient;
+import com.hawolt.ui.champselect.AbstractRenderInstance;
 import com.hawolt.ui.champselect.ChampSelectUI;
 import com.hawolt.ui.champselect.context.ChampSelectContext;
 import com.hawolt.ui.champselect.context.ChampSelectContextProvider;
@@ -21,16 +22,16 @@ public class ChampSelectInterface extends ChampSelectContextProvider implements 
     }
 
     @Override
-    public ChampSelectRuneComponent getRuneSelectionPanel() {
+    public ChampSelectRuneComponent getRuneSelectionPanel(AbstractRenderInstance instance) {
         LeagueClient client = champSelectUI.getLeagueClient();
         if (client != null) {
             LocalLeagueFileVersion leagueFileVersion = client.getVirtualLeagueClientInstance().getLocalLeagueFileVersion();
             String value = leagueFileVersion.getVersionValue(client.getPlayerPlatform(), "LeagueClientUxRender.exe");
             String[] versions = value.split("\\.");
             String patch = String.format("%s.%s.1", versions[0], versions[1]);
-            return new ChampSelectRuneComponent(patch);
+            return new ChampSelectRuneComponent(instance, patch);
         } else {
-            return new ChampSelectRuneComponent("13.17.1");
+            return new ChampSelectRuneComponent(instance, "13.17.1");
         }
     }
 

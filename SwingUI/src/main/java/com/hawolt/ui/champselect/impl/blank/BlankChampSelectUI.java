@@ -4,6 +4,7 @@ import com.hawolt.client.cache.CacheElement;
 import com.hawolt.client.resources.communitydragon.spell.Spell;
 import com.hawolt.client.resources.ledge.teambuilder.objects.MatchContext;
 import com.hawolt.ui.champselect.AbstractRenderInstance;
+import com.hawolt.ui.champselect.context.ChampSelectContext;
 import com.hawolt.ui.champselect.data.ChampSelectType;
 import com.hawolt.ui.champselect.generic.ChampSelectRuneComponent;
 import com.hawolt.ui.champselect.generic.impl.ChampSelectBenchElement;
@@ -16,7 +17,9 @@ import com.hawolt.xmpp.event.objects.presence.impl.JoinMucPresence;
  **/
 
 public class BlankChampSelectUI extends AbstractRenderInstance {
-    public static final BlankChampSelectUI INSTANCE = new BlankChampSelectUI();
+    public BlankChampSelectUI(ChampSelectContext context) {
+        super(context);
+    }
 
     @Override
     public String getCardName() {

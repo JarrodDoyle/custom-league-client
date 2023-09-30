@@ -2,7 +2,9 @@ package com.hawolt.ui.champselect.generic;
 
 import com.hawolt.Swiftrift;
 import com.hawolt.client.LeagueClient;
+import com.hawolt.ui.champselect.AbstractRenderInstance;
 import com.hawolt.ui.champselect.IncompleteRunePageException;
+import com.hawolt.ui.champselect.context.ChampSelectContext;
 import com.hawolt.ui.generic.component.LComboBox;
 import com.hawolt.ui.generic.component.LFlatButton;
 import com.hawolt.ui.generic.component.LTextAlign;
@@ -30,13 +32,16 @@ public class ChampSelectRuneComponent extends ChampSelectUIComponent {
     private final Map<String, ChampSelectRuneSelection> map = new HashMap<>();
     private final CardLayout layout = new CardLayout();
     private final ChildUIComponent main = new ChildUIComponent(layout);
+    private final AbstractRenderInstance instance;
     private final LComboBox<String> selection;
     private final LFlatButton close, save;
     private final String patch;
 
-    public ChampSelectRuneComponent(String patch) {
+    public ChampSelectRuneComponent(AbstractRenderInstance instance, String patch) {
         this.patch = patch;
+        this.instance = instance;
         this.setLayout(new BorderLayout());
+        this.instance.register(this);
         this.setBorder(BorderFactory.createLineBorder(Color.DARK_GRAY));
 
         ChildUIComponent header;
@@ -68,12 +73,17 @@ public class ChampSelectRuneComponent extends ChampSelectUIComponent {
         bar.add(selection = new LComboBox<>());
         selection.setBorder(null);
         add(main, BorderLayout.CENTER);
+
+        addRunePage("DEFAULT");
+        /* TODO load runes from settings
+        ChampSelectContext context = instance.getContext();
         if (context == null) {
             addRunePage("DEFAULT");
         } else {
             Swiftrift swiftrift = context.getChampSelectInterfaceContext().getLeagueClientUI();
             UserSettings settings = swiftrift.getSettingService().getUserSettings();
-        }
+        }*/
+
         selection.addActionListener(listener -> {
             showRunePageByName(selection.getItemAt(selection.getSelectedIndex()));
             setRuneSelection();
@@ -114,7 +124,7 @@ public class ChampSelectRuneComponent extends ChampSelectUIComponent {
         if (map.containsKey(name)) {
             Swiftrift.showMessageDialog("You already have a page with this name");
         } else {
-            ChampSelectRuneSelection page = new ChampSelectRuneSelection(patch);
+            ChampSelectRuneSelection page = new ChampSelectRuneSelection(instance, patch);
             selection.addItem(name);
             selection.setSelectedItem(name);
             map.put(name, page);
@@ -142,6 +152,7 @@ public class ChampSelectRuneComponent extends ChampSelectUIComponent {
     public void setRuneSelection() {
         getCurrentRunePage().ifPresent(panel -> {
             Swiftrift.service.execute(() -> {
+                ChampSelectContext context = instance.getContext();
                 try {
                     LeagueClient client = context.getChampSelectDataContext().getLeagueClient();
                     JSONObject runes = panel.getSelectedRunes();

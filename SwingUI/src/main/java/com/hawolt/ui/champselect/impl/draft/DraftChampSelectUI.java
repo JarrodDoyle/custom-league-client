@@ -1,6 +1,7 @@
 package com.hawolt.ui.champselect.impl.draft;
 
 import com.hawolt.ui.champselect.AbstractRenderInstance;
+import com.hawolt.ui.champselect.context.ChampSelectContext;
 import com.hawolt.ui.champselect.data.ChampSelectTeam;
 import com.hawolt.ui.champselect.data.ChampSelectType;
 import com.hawolt.ui.champselect.generic.impl.ChampSelectCenterUI;
@@ -17,10 +18,8 @@ import java.awt.event.ActionListener;
 
 public class DraftChampSelectUI extends MatchmadeRenderInstance implements ActionListener {
 
-    public static DraftChampSelectUI INSTANCE = new DraftChampSelectUI(ChampSelectType.values());
-
-    public DraftChampSelectUI(ChampSelectType... supportedTypes) {
-        super(supportedTypes);
+    public DraftChampSelectUI(ChampSelectContext context, ChampSelectType... supportedTypes) {
+        super(context, supportedTypes);
     }
 
     @Override
@@ -29,8 +28,8 @@ public class DraftChampSelectUI extends MatchmadeRenderInstance implements Actio
     }
 
     @Override
-    protected ChampSelectSidebarUI getSidebarUI(ChampSelectTeam team) {
-        return new DraftSelectSidebarUI(team);
+    protected ChampSelectSidebarUI getSidebarUI(AbstractRenderInstance instance, ChampSelectTeam team) {
+        return new DraftSelectSidebarUI(instance, team);
     }
 
     @Override
