@@ -13,30 +13,55 @@ import java.awt.*;
  **/
 
 public class ChatSidebarProfile extends ChildUIComponent {
-    private final ChatSidebarSummoner summoner;
+    private final ChatSidebarExperience experience;
     private final ChatSidebarProfileIcon icon;
+    private final ChatSideBarUIControl control;
+    private final ChatSidebarName name;
+    private final ChatSidebarStatus status;
 
     public ChatSidebarProfile(UserInformation information, LayoutManager layout) {
         super(layout);
         this.setBackground(ColorPalette.accentColor);
-        this.setBorder(new EmptyBorder(0, 5, 5, 0));
         this.setPreferredSize(new Dimension(300, 90));
+
         //had to make a container 'cause to put the header buttons in the corner i had to change the border here, and then the icon wasn't in the proper
         //position, not even by setting a border on it, like this it looks like it did before
         ChildUIComponent iconContainer = new ChildUIComponent(new BorderLayout());
         iconContainer.setBackground(ColorPalette.accentColor);
-        iconContainer.setBorder(new EmptyBorder(5, 0, 0, 0));
+        iconContainer.setBorder(new EmptyBorder(8, 8, 8, 8));
         iconContainer.add(icon = new ChatSidebarProfileIcon(information, new BorderLayout()), BorderLayout.CENTER);
+
+        ChildUIComponent statusLevelContainer = new ChildUIComponent(new BorderLayout());
+        statusLevelContainer.setBackground(ColorPalette.accentColor);
+        statusLevelContainer.setPreferredSize(new Dimension(320, 32));
+        statusLevelContainer.add(status = new ChatSidebarStatus(), BorderLayout.CENTER);
+        statusLevelContainer.add(new ChatSidebarLevel(information, new BorderLayout()), BorderLayout.EAST);
+
+        ChildUIComponent center = new ChildUIComponent(new BorderLayout());
+        center.setBackground(ColorPalette.accentColor);
+        center.add(control = new ChatSideBarUIControl(), BorderLayout.NORTH);
+        center.add(name = new ChatSidebarName(), BorderLayout.CENTER);
+        center.add(statusLevelContainer, BorderLayout.SOUTH);
+
         this.add(iconContainer, BorderLayout.WEST);
-        this.add(summoner = new ChatSidebarSummoner(new GridLayout(3, 0, 0, 5)), BorderLayout.CENTER);
+        this.add(center, BorderLayout.CENTER);
+        this.add(experience = new ChatSidebarExperience(information, new BorderLayout()), BorderLayout.SOUTH);
     }
 
-    public ChatSidebarSummoner getSummoner() {
-        return summoner;
+    public ChatSidebarName getChatSidebarName() {
+        return name;
+    }
+
+    public ChatSidebarStatus getStatus() {
+        return status;
     }
 
     public ChatSidebarProfileIcon getIcon() {
         return icon;
+    }
+
+    public ChatSideBarUIControl getUIControl() {
+        return control;
     }
 
     @Override

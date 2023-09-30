@@ -127,11 +127,11 @@ public class LayoutHeader extends ChildUIComponent {
     public void configure(UserInformation userInformation) {
         if (userInformation.isLeagueAccountAssociated()) {
             String name = userInformation.getUserInformationLeagueAccount().getSummonerName();
-            getProfile().getSummoner().getChatSidebarName().setSummonerName(name);
+            getProfile().getChatSidebarName().setSummonerName(name);
             long iconId = userInformation.getUserInformationLeagueAccount().getProfileIcon();
             getProfile().getIcon().setIconId(iconId);
         } else {
-            getProfile().getSummoner().getChatSidebarName().setSummonerName("");
+            getProfile().getChatSidebarName().setSummonerName("");
             getProfile().getIcon().setIconId(29);
         }
     }
@@ -146,10 +146,10 @@ public class LayoutHeader extends ChildUIComponent {
     }
 
     public ChatSidebarStatus getChatSidebarStatus() {
-        return profile.getSummoner().getStatus();
+        return profile.getStatus();
     }
 
     public String getSelectedStatus() {
-        return profile.getSummoner().getStatus().getSelectedStatus();
+        return profile.getStatus().getSelectedStatus();
     }
 }
