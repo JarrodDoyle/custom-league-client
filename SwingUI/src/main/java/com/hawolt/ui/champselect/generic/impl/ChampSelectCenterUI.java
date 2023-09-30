@@ -86,7 +86,8 @@ public abstract class ChampSelectCenterUI extends ChampSelectUIComponent {
     }
 
     public void toggleCurrentPhase() {
-        toggleCard(current.getName());
+        this.toggleCard(current.getName());
+        this.revalidate();
     }
 
     public void setRuneSelection(String name, ChampSelectRuneComponent runeSelection) {
