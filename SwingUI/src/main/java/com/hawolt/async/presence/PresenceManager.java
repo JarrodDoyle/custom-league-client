@@ -133,8 +133,18 @@ public class PresenceManager implements PacketCallback, IServiceMessageListener<
         Object object = response.get("payload");
         if (object == null) return;
         JSONObject payload = new JSONObject(Base64GZIP.unzipBase64(object.toString()));
+        int reference = payload.getInt("counter");
         int queueId = payload.getInt("queueId");
 
+        int initialCounter;
+        if (leagueClient == null) return;
+        int counter = leagueClient.getCachedValue(CacheElement.CHAMP_SELECT_COUNTER);
+        initialCounter = counter + 1;
+
+        // IF THESE VALUES DO NOT MATCH ITS NOT THE FIRST CHAMP SELECT PACKET
+        if (reference != initialCounter) return;
+
+        // ONLY SEND ON FIRST CHAMP SELECT PACKET, OTHERWISE IT GETS TO SPAMMY
         leagueClient.getCachedValueOrElse(CacheElement.PRESENCE, this::configure, Logger::error).ifPresent(base -> {
             String status = swiftrift.getHeader().getSelectedStatus();
             Presence.Builder builder = new Presence.Builder()
