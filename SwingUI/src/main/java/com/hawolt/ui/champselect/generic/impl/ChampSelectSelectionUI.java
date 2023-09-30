@@ -5,7 +5,6 @@ import com.hawolt.async.loader.ResourceLoader;
 import com.hawolt.client.resources.communitydragon.champion.Champion;
 import com.hawolt.client.resources.communitydragon.champion.ChampionIndex;
 import com.hawolt.client.resources.communitydragon.champion.ChampionSource;
-import com.hawolt.ui.champselect.context.ChampSelectContext;
 import com.hawolt.ui.champselect.context.ChampSelectSettingsContext;
 import com.hawolt.ui.champselect.data.ChampSelectType;
 import com.hawolt.ui.champselect.generic.ChampSelectUIComponent;
@@ -76,13 +75,13 @@ public class ChampSelectSelectionUI extends ChampSelectUIComponent {
     }
 
     @Override
-    public void init(ChampSelectContext context) {
+    public void init() {
         List<ChampSelectSelectionElement> reference = new ArrayList<>(map.values());
         reference.forEach(element -> element.setDisabled(false));
     }
 
     @Override
-    public void update(ChampSelectContext context) {
+    public void update() {
         ChampSelectSettingsContext settingsContext = context.getChampSelectSettingsContext();
         int[] championsAvailableAsChoice = switch (type) {
             case PICK -> settingsContext.getChampionsAvailableForPick();
@@ -108,6 +107,7 @@ public class ChampSelectSelectionUI extends ChampSelectUIComponent {
     }
 
     public void filter(String champion) {
+        if (context == null) return;
         this.filter = champion.toLowerCase();
         this.configure();
     }

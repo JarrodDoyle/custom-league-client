@@ -4,6 +4,7 @@ import com.hawolt.async.Debouncer;
 import com.hawolt.client.resources.communitydragon.spell.Spell;
 import com.hawolt.client.resources.communitydragon.spell.SpellIndex;
 import com.hawolt.client.resources.communitydragon.spell.SpellSource;
+import com.hawolt.ui.champselect.AbstractRenderInstance;
 import com.hawolt.ui.champselect.generic.ChampSelectUIComponent;
 import com.hawolt.ui.generic.component.LComboBox;
 import com.hawolt.ui.generic.component.LFlatButton;
@@ -16,10 +17,13 @@ import org.json.JSONArray;
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
+import javax.swing.event.DocumentEvent;
+import javax.swing.event.DocumentListener;
 import java.awt.*;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 /**
  * Created: 31/08/2023 17:41
@@ -27,12 +31,14 @@ import java.util.List;
  **/
 
 public class ChampSelectGameSettingUI extends ChampSelectUIComponent {
+    private final Debouncer debouncer = new Debouncer();
+    private final AbstractRenderInstance renderInstance;
     private final LComboBox<Spell> spellOne, spellTwo;
     private final LFlatButton submit, runes, dodge;
-    private final LHintTextField filter;
 
-    public ChampSelectGameSettingUI(Integer... allowedSpellIds) {
+    public ChampSelectGameSettingUI(AbstractRenderInstance renderInstance, Integer... allowedSpellIds) {
         this.setLayout(new BorderLayout());
+        this.renderInstance = renderInstance;
         this.setBackground(ColorPalette.backgroundColor);
         this.setBorder(BorderFactory.createMatteBorder(0, 1, 0, 1, Color.DARK_GRAY));
         //TODO find a data source for this
@@ -48,8 +54,16 @@ public class ChampSelectGameSettingUI extends ChampSelectUIComponent {
         this.setLayout(new BorderLayout());
         this.setBackground(ColorPalette.backgroundColor);
         ChildUIComponent spellUI = new ChildUIComponent(new GridLayout(0, 2, 5, 0));
-        spellUI.add(spellOne = new LComboBox<>(allowed));
-        spellUI.add(spellTwo = new LComboBox<>(allowed));
+        spellUI.add(spellOne = new LComboBox<>(allowed) {
+            protected void fireActionEvent() {
+                if (this.hasFocus()) super.fireActionEvent();
+            }
+        });
+        spellUI.add(spellTwo = new LComboBox<>(allowed) {
+            protected void fireActionEvent() {
+                if (this.hasFocus()) super.fireActionEvent();
+            }
+        });
         spellUI.setBorder(new EmptyBorder(5, 5, 5, 5));
         add(spellUI, BorderLayout.EAST);
         ChildUIComponent buttonUI = new ChildUIComponent(new GridLayout(0, 4, 5, 0));
@@ -59,13 +73,34 @@ public class ChampSelectGameSettingUI extends ChampSelectUIComponent {
         dodge.setRounding(ColorPalette.CARD_ROUNDING);
         submit.setRounding(ColorPalette.CARD_ROUNDING);
         runes.setRounding(ColorPalette.CARD_ROUNDING);
-        filter = new LHintTextField("Search...");
+        LHintTextField filter = new LHintTextField("Search...");
+        filter.getDocument().addDocumentListener(new DocumentListener() {
+            private void forward(String text) {
+                debouncer.debounce(
+                        "filter",
+                        () -> context.getChampSelectInterfaceContext().filterChampion(text),
+                        200L,
+                        TimeUnit.MILLISECONDS
+                );
+            }
+
+            @Override
+            public void insertUpdate(DocumentEvent e) {
+                forward(filter.getText());
+            }
+
+            @Override
+            public void removeUpdate(DocumentEvent e) {
+                forward(filter.getText());
+            }
+
+            @Override
+            public void changedUpdate(DocumentEvent e) {
+                forward(filter.getText());
+            }
+        });
         buttonUI.add(filter);
         add(buttonUI, BorderLayout.WEST);
-    }
-
-    public LHintTextField getFilterField() {
-        return filter;
     }
 
     public JComboBox<Spell> getSpellOne() {
@@ -107,6 +142,17 @@ public class ChampSelectGameSettingUI extends ChampSelectUIComponent {
             if (spell.getId() == spellId) {
                 selection.setSelectedIndex(i);
                 break;
+            }
+        }
+    }
+
+    @Override
+    public void init() {
+        int targetQueueId = context.getChampSelectSettingsContext().getQueueId();
+        int[] supportedQueueIds = renderInstance.getSupportedQueueIds();
+        for (int supportedQueueId : supportedQueueIds) {
+            if (supportedQueueId == targetQueueId) {
+                this.preselectSummonerSpells(context.getChampSelectSettingsContext().getInitialSpellIds());
             }
         }
     }

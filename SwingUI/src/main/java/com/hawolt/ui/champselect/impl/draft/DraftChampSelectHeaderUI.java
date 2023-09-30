@@ -1,7 +1,5 @@
 package com.hawolt.ui.champselect.impl.draft;
 
-import com.hawolt.ui.champselect.context.ChampSelectContext;
-import com.hawolt.ui.champselect.context.ChampSelectSettingsContext;
 import com.hawolt.ui.champselect.context.ChampSelectUtilityContext;
 import com.hawolt.ui.champselect.data.ActionObject;
 import com.hawolt.ui.champselect.data.ChampSelectPhase;
@@ -34,8 +32,7 @@ public class DraftChampSelectHeaderUI extends ChampSelectHeaderUI {
     }
 
     @Override
-    protected ChampSelectPhase getChampSelectPhase(ChampSelectContext context) {
-        ChampSelectSettingsContext settingsContext = context.getChampSelectSettingsContext();
+    protected ChampSelectPhase getChampSelectPhase() {
         ChampSelectUtilityContext utilityContext = context.getChampSelectUtilityContext();
         if (utilityContext.isFinalizing()) {
             return ChampSelectPhase.FINALIZE;

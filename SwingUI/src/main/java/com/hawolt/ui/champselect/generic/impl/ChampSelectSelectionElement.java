@@ -70,7 +70,6 @@ public class ChampSelectSelectionElement extends ChildUIComponent implements Res
         }
         if (!disabled) return;
         graphics2D.setColor(new Color(80, 80, 80, 180));
-        if (image == null) return;
         PaintHelper.roundedSquare(
                 graphics2D,
                 imageX - 1, 0,

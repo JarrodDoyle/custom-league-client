@@ -2,8 +2,6 @@ package com.hawolt.ui.champselect.generic.impl;
 
 import com.hawolt.client.LeagueClient;
 import com.hawolt.client.resources.ledge.teambuilder.objects.MatchContext;
-import com.hawolt.ui.champselect.AbstractRenderInstance;
-import com.hawolt.ui.champselect.context.ChampSelectContext;
 import com.hawolt.ui.champselect.context.ChampSelectSettingsContext;
 import com.hawolt.ui.champselect.data.ChampSelectTeamMember;
 import com.hawolt.ui.champselect.data.ChampSelectTeamType;
@@ -37,12 +35,11 @@ public class ChampSelectChatUI extends ChampSelectUIComponent {
     private final List<String> cache = new ArrayList<>();
     private MatchContext matchContext;
 
-    public ChampSelectChatUI(AbstractRenderInstance instance) {
-        instance.register(this);
+    public ChampSelectChatUI() {
         ColorPalette.addThemeListener(this);
         this.setLayout(new BorderLayout());
         this.setBorder(BorderFactory.createLineBorder(Color.DARK_GRAY));
-        //TODO make custom JTextArea
+        //TODO make custon JTextArea
         LScrollPane scrollPane = new LScrollPane(document = new JTextArea());
         scrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
         SmartScroller.configure(scrollPane);
@@ -62,7 +59,6 @@ public class ChampSelectChatUI extends ChampSelectUIComponent {
             } else {
                 String domain = String.format("champ-select.%s.pvp.net", matchContext.getPayload().getTargetRegion());
                 String jid = String.format("%s@%s", matchContext.getPayload().getChatRoomName(), domain);
-                ChampSelectContext context = instance.getContext();
                 LeagueClient client = context.getChampSelectDataContext().getLeagueClient();
                 client.getXMPPClient().sendGroupMessage(jid, input.getText(), null);
                 this.input.setText("");
@@ -70,7 +66,7 @@ public class ChampSelectChatUI extends ChampSelectUIComponent {
         });
     }
 
-    public void push(ChampSelectContext context, IncomingMessage incomingMessage) {
+    public void push(IncomingMessage incomingMessage) {
         String source = incomingMessage.getFrom().split("@")[0];
         if (matchContext == null || !matchContext.getPayload().getChatRoomName().equals(source)) return;
         String puuid = incomingMessage.getRC();
@@ -79,10 +75,10 @@ public class ChampSelectChatUI extends ChampSelectUIComponent {
                 .map(o -> (ChampSelectTeamMember) o)
                 .filter(o -> puuid.equalsIgnoreCase(o.getPUUID()))
                 .findAny()
-                .ifPresent(member -> handle(context, member, incomingMessage));
+                .ifPresent(member -> handle(member, incomingMessage));
     }
 
-    public void push(ChampSelectContext context, JoinMucPresence presence) {
+    public void push(JoinMucPresence presence) {
         String puuid = presence.getParticipant().getJid().split("@")[0];
         if (context == null) cache.add(0, puuid + "has joined the chat");
         else {
@@ -96,7 +92,7 @@ public class ChampSelectChatUI extends ChampSelectUIComponent {
         }
     }
 
-    private void handle(ChampSelectContext context, ChampSelectTeamMember member, IncomingMessage incomingMessage) {
+    private void handle(ChampSelectTeamMember member, IncomingMessage incomingMessage) {
         Map<String, String> resolver = context.getChampSelectDataContext().getPUUIDResolver();
         if (!cache.isEmpty()) forward(resolver);
         if (!resolver.containsKey(member.getPUUID()) || !cache.isEmpty()) {
@@ -139,7 +135,8 @@ public class ChampSelectChatUI extends ChampSelectUIComponent {
     }
 
     @Override
-    public void init(ChampSelectContext context) {
+    public void init() {
+        super.init();
         this.document.setText("");
     }
 }

@@ -74,6 +74,10 @@ public interface ChampSelectSettingsContext {
 
     JSONObject getCellData();
 
+    JSONArray getInitialSpellIds();
+
+    JSONObject getInventoryDraft();
+
     JSONArray getChampionBench();
 
     DraftMode getDraftMode();
