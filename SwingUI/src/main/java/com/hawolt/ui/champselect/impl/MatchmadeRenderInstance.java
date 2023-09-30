@@ -4,6 +4,7 @@ import com.hawolt.Swiftrift;
 import com.hawolt.client.LeagueClient;
 import com.hawolt.client.cache.CacheElement;
 import com.hawolt.client.resources.communitydragon.spell.Spell;
+import com.hawolt.client.resources.ledge.preferences.objects.lcupreferences.LCUPreferences;
 import com.hawolt.client.resources.ledge.teambuilder.objects.MatchContext;
 import com.hawolt.logger.Logger;
 import com.hawolt.rtmp.LeagueRtmpClient;
@@ -12,6 +13,7 @@ import com.hawolt.rtmp.io.RtmpPacket;
 import com.hawolt.rtmp.service.impl.TeamBuilderService;
 import com.hawolt.rtmp.utility.PacketCallback;
 import com.hawolt.ui.champselect.AbstractRenderInstance;
+import com.hawolt.ui.champselect.context.ChampSelectContext;
 import com.hawolt.ui.champselect.data.ActionObject;
 import com.hawolt.ui.champselect.data.ChampSelectTeam;
 import com.hawolt.ui.champselect.data.ChampSelectType;
@@ -22,6 +24,7 @@ import com.hawolt.ui.generic.utility.ChildUIComponent;
 import com.hawolt.xmpp.core.VirtualRiotXMPPClient;
 import com.hawolt.xmpp.event.objects.conversation.history.impl.IncomingMessage;
 import com.hawolt.xmpp.event.objects.presence.impl.JoinMucPresence;
+import org.json.JSONArray;
 
 import java.awt.*;
 import java.awt.event.ActionEvent;
@@ -43,22 +46,23 @@ public abstract class MatchmadeRenderInstance extends AbstractRenderInstance imp
     protected int selectedChampionId, bannedChampionId;
     private MatchContext matchContext;
 
-    public MatchmadeRenderInstance(ChampSelectType... supportedTypes) {
+    public MatchmadeRenderInstance(ChampSelectContext context, ChampSelectType... supportedTypes) {
+        super(context);
         this.component.add(centerUI = getCenterUI(this, supportedTypes), BorderLayout.CENTER);
-        this.centerUI.add(teamTwo = getSidebarUI(ChampSelectTeam.PURPLE), BorderLayout.EAST);
-        this.centerUI.add(teamOne = getSidebarUI(ChampSelectTeam.BLUE), BorderLayout.WEST);
+        this.centerUI.add(teamTwo = getSidebarUI(this, ChampSelectTeam.PURPLE), BorderLayout.EAST);
+        this.centerUI.add(teamOne = getSidebarUI(this, ChampSelectTeam.BLUE), BorderLayout.WEST);
         this.centerUI.getNorthernChild().add(headerUI = getHeaderUI(), BorderLayout.CENTER);
         ChildUIComponent component = new ChildUIComponent(new BorderLayout());
         this.centerUI.getSouthernChild().add(component, BorderLayout.NORTH);
         component.add(new ChampSelectDebugUI(), BorderLayout.NORTH);
-        component.add(settingUI = new ChampSelectGameSettingUI(this, getAllowedSummonerSpells()), BorderLayout.CENTER);
-        this.centerUI.getSouthernChild().add(chatUI = new ChampSelectChatUI(), BorderLayout.CENTER);
+        component.add(settingUI = new ChampSelectGameSettingUI(getAllowedSummonerSpells()), BorderLayout.CENTER);
+        this.centerUI.getSouthernChild().add(chatUI = new ChampSelectChatUI(this), BorderLayout.CENTER);
         this.build();
     }
 
     protected abstract ChampSelectCenterUI getCenterUI(AbstractRenderInstance instance, ChampSelectType... supportedTypes);
 
-    protected abstract ChampSelectSidebarUI getSidebarUI(ChampSelectTeam team);
+    protected abstract ChampSelectSidebarUI getSidebarUI(AbstractRenderInstance instance, ChampSelectTeam team);
 
     protected abstract ChampSelectHeaderUI getHeaderUI();
 
@@ -67,13 +71,13 @@ public abstract class MatchmadeRenderInstance extends AbstractRenderInstance imp
     @Override
     public void push(IncomingMessage incomingMessage) {
         if (chatUI == null) return;
-        chatUI.push(incomingMessage);
+        chatUI.push(getContext(), incomingMessage);
     }
 
     @Override
     public void push(JoinMucPresence presence) {
         if (chatUI == null) return;
-        chatUI.push(presence);
+        chatUI.push(getContext(), presence);
     }
 
     private void build() {
@@ -94,6 +98,7 @@ public abstract class MatchmadeRenderInstance extends AbstractRenderInstance imp
 
     @Override
     public void onSummonerSubmission(Spell selectedSpellOne, Spell selectedSpellTwo) {
+        Logger.debug("[champ-select] invoke spell change to {}:{}", selectedSpellOne.getId(), selectedSpellTwo.getId());
         try {
             if (context == null) return;
             LeagueClient client = context.getChampSelectDataContext().getLeagueClient();
@@ -101,6 +106,7 @@ public abstract class MatchmadeRenderInstance extends AbstractRenderInstance imp
             LeagueRtmpClient rtmpClient = client.getRTMPClient();
             TeamBuilderService teamBuilderService = rtmpClient.getTeamBuilderService();
             teamBuilderService.selectSpellsBlocking(selectedSpellOne.getId(), selectedSpellTwo.getId());
+            Logger.debug("[champ-select] summoner spells have been set");
         } catch (Exception e) {
             Logger.error("Unable to submit selection");
             Logger.error(e);
@@ -187,6 +193,7 @@ public abstract class MatchmadeRenderInstance extends AbstractRenderInstance imp
 
     @Override
     public void actionPerformed(ActionEvent e) {
+        Logger.debug("[cs-ui] execute action '{}'", e.getActionCommand());
         switch (e.getActionCommand()) {
             case "Dodge" -> {
                 int result = Swiftrift.showOptionDialog(
@@ -225,8 +232,8 @@ public abstract class MatchmadeRenderInstance extends AbstractRenderInstance imp
     }
 
     @Override
-    public void init() {
-        super.init();
+    public void init(ChampSelectContext context) {
+        super.init(context);
         int targetQueueId = context.getChampSelectSettingsContext().getQueueId();
         int[] supportedQueueIds = getSupportedQueueIds();
         for (int supportedQueueId : supportedQueueIds) {
@@ -238,6 +245,24 @@ public abstract class MatchmadeRenderInstance extends AbstractRenderInstance imp
                     VirtualRiotXMPPClient xmppClient = client.getXMPPClient();
                     if (xmppClient.getIdentity() == null) return;
                     xmppClient.joinUnprotectedMuc(matchContext.getPayload().getChatRoomName(), matchContext.getPayload().getTargetRegion());
+                });
+                Swiftrift.service.execute(() -> {
+                    LCUPreferences lcuPreferences = null;
+                    Swiftrift swiftrift = context.getChampSelectInterfaceContext().getLeagueClientUI();
+                    if (swiftrift == null) {
+                        // TODO
+                        // simulate preferences
+                        //lcuPreferences =
+                    } else {
+                        lcuPreferences = swiftrift.getLeagueClient().getCachedValue(CacheElement.LCU_PREFERENCES);
+                    }
+                    if (lcuPreferences == null) return;
+                    lcuPreferences.getChampSelectPreference().ifPresent(champSelectPreference -> {
+                        JSONArray preference = champSelectPreference.getSummonerSpells(targetQueueId);
+                        Logger.error(preference);
+                        if (preference == null) return;
+                        settingUI.preselectSummonerSpells(preference);
+                    });
                 });
             }
         }

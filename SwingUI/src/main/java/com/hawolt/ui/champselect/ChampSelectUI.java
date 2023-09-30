@@ -16,6 +16,7 @@ import com.hawolt.ui.champselect.context.ChampSelectSettingsContext;
 import com.hawolt.ui.champselect.context.ChampSelectUtilityContext;
 import com.hawolt.ui.champselect.context.impl.ChampSelect;
 import com.hawolt.ui.champselect.data.ChampSelectTeamMember;
+import com.hawolt.ui.champselect.data.ChampSelectType;
 import com.hawolt.ui.champselect.impl.aram.ARAMChampSelectUI;
 import com.hawolt.ui.champselect.impl.blank.BlankChampSelectUI;
 import com.hawolt.ui.champselect.impl.blind.BlindChampSelectUI;
@@ -60,10 +61,10 @@ public class ChampSelectUI extends ChildUIComponent implements IServiceMessageLi
         } else {
             this.champSelect = new ChampSelect(this);
         }
-        this.addRenderInstance(BlankChampSelectUI.INSTANCE);
-        this.addRenderInstance(DraftChampSelectUI.INSTANCE);
-        this.addRenderInstance(BlindChampSelectUI.INSTANCE);
-        this.addRenderInstance(ARAMChampSelectUI.INSTANCE);
+        this.addRenderInstance(new BlankChampSelectUI(champSelect));
+        this.addRenderInstance(new DraftChampSelectUI(champSelect, ChampSelectType.values()));
+        this.addRenderInstance(new BlindChampSelectUI(champSelect, ChampSelectType.PICK));
+        this.addRenderInstance(new ARAMChampSelectUI(champSelect, ChampSelectType.PICK));
         this.showBlankPanel();
     }
 
@@ -85,7 +86,7 @@ public class ChampSelectUI extends ChildUIComponent implements IServiceMessageLi
 
     private void addRenderInstance(AbstractRenderInstance instance) {
         if (leagueClient != null) leagueClient.register(CacheElement.MATCH_CONTEXT, instance);
-        instance.setGlobalRunePanel(champSelect.getChampSelectInterfaceContext().getRuneSelectionPanel());
+        instance.setGlobalRunePanel(champSelect.getChampSelectInterfaceContext().getRuneSelectionPanel(instance));
         int[] queueIds = instance.getSupportedQueueIds();
         for (int id : queueIds) {
             Logger.info("[champ-select] register queueId:{} as '{}'", id, instance.getCardName());

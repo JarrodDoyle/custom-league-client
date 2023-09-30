@@ -7,6 +7,8 @@ import com.hawolt.rtmp.amf.TypedObject;
 import com.hawolt.rtmp.io.RtmpPacket;
 import com.hawolt.rtmp.service.impl.TeamBuilderService;
 import com.hawolt.rtmp.utility.PacketCallback;
+import com.hawolt.ui.champselect.AbstractRenderInstance;
+import com.hawolt.ui.champselect.context.ChampSelectContext;
 import com.hawolt.ui.champselect.generic.ChampSelectUIComponent;
 import com.hawolt.ui.champselect.generic.impl.ChampSelectBenchElement;
 import com.hawolt.ui.champselect.generic.impl.ChampSelectChoice;
@@ -30,7 +32,8 @@ import java.io.IOException;
 public class ARAMBenchUI extends ChampSelectUIComponent {
     private final ChampSelectBenchElement[] elements = new ChampSelectBenchElement[10];
 
-    public ARAMBenchUI(ChampSelectChoice callback) {
+    public ARAMBenchUI(AbstractRenderInstance instance) {
+        instance.register(this);
         ColorPalette.addThemeListener(this);
         this.setLayout(new BorderLayout());
         this.setBackground(ColorPalette.backgroundColor);
@@ -43,7 +46,7 @@ public class ARAMBenchUI extends ChampSelectUIComponent {
         );
         ChildUIComponent grid = new ChildUIComponent(new GridLayout(0, 10, 5, 0));
         for (int i = 0; i < elements.length; i++) {
-            ChampSelectBenchElement element = new ChampSelectBenchElement(callback);
+            ChampSelectBenchElement element = new ChampSelectBenchElement(instance);
             element.setChampionId(-1);
             elements[i] = element;
             grid.add(element);
@@ -52,6 +55,7 @@ public class ARAMBenchUI extends ChampSelectUIComponent {
 
         LFlatButton button = new LFlatButton("⟳", LTextAlign.CENTER, HighlightType.COMPONENT);
         button.addActionListener(listener -> Swiftrift.service.execute(() -> {
+            ChampSelectContext context = instance.getContext();
             LeagueRtmpClient client = context.getChampSelectDataContext().getLeagueClient().getRTMPClient();
             TeamBuilderService teamBuilderService = client.getTeamBuilderService();
             try {
@@ -71,14 +75,14 @@ public class ARAMBenchUI extends ChampSelectUIComponent {
     }
 
     @Override
-    public void init() {
+    public void init(ChampSelectContext context) {
         for (ChampSelectBenchElement element : elements) {
             element.setChampionId(-1);
         }
     }
 
     @Override
-    public void update() {
+    public void update(ChampSelectContext context) {
         JSONArray bench = context.getChampSelectSettingsContext().getChampionBench();
         for (int i = 0; i < bench.length(); i++) {
             elements[i].setChampionId(bench.getInt(i));

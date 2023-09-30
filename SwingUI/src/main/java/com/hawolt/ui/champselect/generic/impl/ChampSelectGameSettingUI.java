@@ -1,14 +1,9 @@
 package com.hawolt.ui.champselect.generic.impl;
 
-import com.hawolt.Swiftrift;
 import com.hawolt.async.Debouncer;
-import com.hawolt.client.cache.CacheElement;
 import com.hawolt.client.resources.communitydragon.spell.Spell;
 import com.hawolt.client.resources.communitydragon.spell.SpellIndex;
 import com.hawolt.client.resources.communitydragon.spell.SpellSource;
-import com.hawolt.client.resources.ledge.preferences.objects.lcupreferences.LCUPreferences;
-import com.hawolt.logger.Logger;
-import com.hawolt.ui.champselect.AbstractRenderInstance;
 import com.hawolt.ui.champselect.generic.ChampSelectUIComponent;
 import com.hawolt.ui.generic.component.LComboBox;
 import com.hawolt.ui.generic.component.LFlatButton;
@@ -21,13 +16,10 @@ import org.json.JSONArray;
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
-import javax.swing.event.DocumentEvent;
-import javax.swing.event.DocumentListener;
 import java.awt.*;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.concurrent.TimeUnit;
 
 /**
  * Created: 31/08/2023 17:41
@@ -35,14 +27,12 @@ import java.util.concurrent.TimeUnit;
  **/
 
 public class ChampSelectGameSettingUI extends ChampSelectUIComponent {
-    private final Debouncer debouncer = new Debouncer();
-    private final AbstractRenderInstance renderInstance;
     private final LComboBox<Spell> spellOne, spellTwo;
     private final LFlatButton submit, runes, dodge;
+    private final LHintTextField filter;
 
-    public ChampSelectGameSettingUI(AbstractRenderInstance renderInstance, Integer... allowedSpellIds) {
+    public ChampSelectGameSettingUI(Integer... allowedSpellIds) {
         this.setLayout(new BorderLayout());
-        this.renderInstance = renderInstance;
         this.setBackground(ColorPalette.backgroundColor);
         this.setBorder(BorderFactory.createMatteBorder(0, 1, 0, 1, Color.DARK_GRAY));
         //TODO find a data source for this
@@ -69,34 +59,13 @@ public class ChampSelectGameSettingUI extends ChampSelectUIComponent {
         dodge.setRounding(ColorPalette.CARD_ROUNDING);
         submit.setRounding(ColorPalette.CARD_ROUNDING);
         runes.setRounding(ColorPalette.CARD_ROUNDING);
-        LHintTextField filter = new LHintTextField("Search...");
-        filter.getDocument().addDocumentListener(new DocumentListener() {
-            private void forward(String text) {
-                debouncer.debounce(
-                        "filter",
-                        () -> context.getChampSelectInterfaceContext().filterChampion(text),
-                        200L,
-                        TimeUnit.MILLISECONDS
-                );
-            }
-
-            @Override
-            public void insertUpdate(DocumentEvent e) {
-                forward(filter.getText());
-            }
-
-            @Override
-            public void removeUpdate(DocumentEvent e) {
-                forward(filter.getText());
-            }
-
-            @Override
-            public void changedUpdate(DocumentEvent e) {
-                forward(filter.getText());
-            }
-        });
+        filter = new LHintTextField("Search...");
         buttonUI.add(filter);
         add(buttonUI, BorderLayout.WEST);
+    }
+
+    public LHintTextField getFilterField() {
+        return filter;
     }
 
     public JComboBox<Spell> getSpellOne() {
@@ -138,35 +107,6 @@ public class ChampSelectGameSettingUI extends ChampSelectUIComponent {
             if (spell.getId() == spellId) {
                 selection.setSelectedIndex(i);
                 break;
-            }
-        }
-    }
-
-    @Override
-    public void init() {
-        super.init();
-        int targetQueueId = context.getChampSelectSettingsContext().getQueueId();
-        int[] supportedQueueIds = renderInstance.getSupportedQueueIds();
-        for (int supportedQueueId : supportedQueueIds) {
-            if (supportedQueueId == targetQueueId) {
-                Swiftrift.service.execute(() -> {
-                    LCUPreferences lcuPreferences = null;
-                    Swiftrift swiftrift = context.getChampSelectInterfaceContext().getLeagueClientUI();
-                    if (swiftrift == null) {
-                        // TODO
-                        // simulate preferences
-                        //lcuPreferences =
-                    } else {
-                        lcuPreferences = swiftrift.getLeagueClient().getCachedValue(CacheElement.LCU_PREFERENCES);
-                    }
-                    if (lcuPreferences == null) return;
-                    lcuPreferences.getChampSelectPreference().ifPresent(champSelectPreference -> {
-                        JSONArray preference = champSelectPreference.getSummonerSpells(targetQueueId);
-                        Logger.error(preference);
-                        if (preference == null) return;
-                        preselectSummonerSpells(preference);
-                    });
-                });
             }
         }
     }

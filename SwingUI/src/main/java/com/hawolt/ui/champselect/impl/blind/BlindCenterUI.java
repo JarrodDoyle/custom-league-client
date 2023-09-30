@@ -1,6 +1,7 @@
 package com.hawolt.ui.champselect.impl.blind;
 
 import com.hawolt.ui.champselect.AbstractRenderInstance;
+import com.hawolt.ui.champselect.context.ChampSelectContext;
 import com.hawolt.ui.champselect.data.ChampSelectPhase;
 import com.hawolt.ui.champselect.data.ChampSelectType;
 import com.hawolt.ui.champselect.generic.impl.ChampSelectCenterUI;
@@ -17,7 +18,7 @@ public class BlindCenterUI extends ChampSelectCenterUI {
     }
 
     @Override
-    public void update() {
+    public void update(ChampSelectContext context) {
         this.current = ChampSelectPhase.PLAN;
         if (name != null && name.equals("runes")) return;
         toggleCard(current.getName());
