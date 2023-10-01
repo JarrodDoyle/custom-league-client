@@ -46,7 +46,7 @@ public class ChampSelectData extends ChampSelectContextProvider implements Champ
 
     @Override
     public void cache(String puuid, String name) {
-        Logger.info("[champ-select] resolve name in cache for {} as {}", puuid, name);
+        Logger.info("[cs-data] resolve name in cache for {} as {}", puuid, name);
         this.resolver.put(puuid, name);
     }
 

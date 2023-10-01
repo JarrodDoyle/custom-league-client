@@ -90,12 +90,12 @@ public class ChampSelectBenchElement extends ChildUIComponent implements Resourc
         public void mousePressed(MouseEvent e) {
             try {
                 if (championId == -1) return;
-                Logger.info("[champ-select] swap {}", championId);
+                Logger.info("[cs-data] swap {}", championId);
                 Dimension dimension = getSize();
                 int rectangleX = (dimension.width >> 1) - (IMAGE_TARGET_DIMENSION.width >> 1);
                 Rectangle rectangle = new Rectangle(rectangleX, 0, IMAGE_TARGET_DIMENSION.width, IMAGE_TARGET_DIMENSION.height);
                 if (!rectangle.contains(e.getPoint())) return;
-                Logger.info("[champ-select] swap to champion", championId);
+                Logger.info("[cs-data] swap to champion", championId);
                 ChampSelectBenchElement.this.repaint();
                 callback.onSwapChoice(ChampSelectBenchElement.this);
             } catch (Exception ex) {

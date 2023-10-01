@@ -113,8 +113,8 @@ public abstract class MatchmadeRenderInstance extends AbstractRenderInstance imp
     }
 
     protected void onChoice(ActionObject actionObject, int championId, boolean completed) {
-        Logger.info("[champ-select] indicate {} as {}", championId, completed);
-        Logger.info("[champ-select] {}", actionObject);
+        Logger.info("[cs-data] indicate {} as {}", championId, completed);
+        Logger.info("[cs-data] {}", actionObject);
         try {
             if (context == null) return;
             LeagueClient leagueClient = context.getChampSelectDataContext().getLeagueClient();
@@ -194,7 +194,7 @@ public abstract class MatchmadeRenderInstance extends AbstractRenderInstance imp
 
     @Override
     public void actionPerformed(ActionEvent e) {
-        Logger.debug("[champ-select] invoke UI event ''", e.getActionCommand());
+        Logger.debug("[cs-data] invoke UI event '{}'", e.getActionCommand());
         switch (e.getActionCommand()) {
             case "Dodge" -> {
                 int result = Swiftrift.showOptionDialog(

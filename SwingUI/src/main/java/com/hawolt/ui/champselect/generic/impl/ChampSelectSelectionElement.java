@@ -70,6 +70,7 @@ public class ChampSelectSelectionElement extends ChildUIComponent implements Res
         }
         if (!disabled) return;
         graphics2D.setColor(new Color(80, 80, 80, 180));
+        if (image == null) return;
         PaintHelper.roundedSquare(
                 graphics2D,
                 imageX - 1, 0,
@@ -135,13 +136,13 @@ public class ChampSelectSelectionElement extends ChildUIComponent implements Res
         public void mousePressed(MouseEvent e) {
             if (disabled) return;
             try {
-                Logger.info("[champ-select] indicate {}", championId);
+                Logger.info("[cs-data] indicate {}", championId);
                 Dimension dimension = getSize();
                 int rectangleX = (dimension.width >> 1) - (IMAGE_TARGET_DIMENSION.width >> 1);
                 Rectangle rectangle = new Rectangle(rectangleX, 0, IMAGE_TARGET_DIMENSION.width, IMAGE_TARGET_DIMENSION.height);
                 selected = rectangle.contains(e.getPoint());
                 if (!selected) return;
-                Logger.info("[champ-select] forward {} as indicator", championId);
+                Logger.info("[cs-data] forward {} as indicator", championId);
                 ChampSelectSelectionElement.this.repaint();
                 callback.onChoice(ChampSelectSelectionElement.this);
             } catch (Exception ex) {

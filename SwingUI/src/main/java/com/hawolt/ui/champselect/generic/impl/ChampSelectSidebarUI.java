@@ -87,7 +87,7 @@ public class ChampSelectSidebarUI extends ChampSelectUIComponent {
             ChampSelectMemberElement element = new ChampSelectMemberElement(swiftrift, type, team, member);
             element.setBackground(ColorPalette.backgroundColor);
             map.put(member.getCellId(), element);
-            this.display.add(element);
+            display.add(element);
         }
     }
 
@@ -96,7 +96,6 @@ public class ChampSelectSidebarUI extends ChampSelectUIComponent {
         int targetQueueId = context.getChampSelectSettingsContext().getQueueId();
         int[] supportedQueueIds = renderInstance.getSupportedQueueIds();
         for (int supportedQueueId : supportedQueueIds) {
-            Logger.error(supportedQueueId);
             if (supportedQueueId == targetQueueId) {
                 LeagueClient client = context.getChampSelectDataContext().getLeagueClient();
                 if (client != null) {

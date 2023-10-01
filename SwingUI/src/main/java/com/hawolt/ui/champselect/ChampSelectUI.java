@@ -88,7 +88,7 @@ public class ChampSelectUI extends ChildUIComponent implements IServiceMessageLi
         instance.setGlobalRunePanel(champSelect.getChampSelectInterfaceContext().getRuneSelectionPanel());
         int[] queueIds = instance.getSupportedQueueIds();
         for (int id : queueIds) {
-            Logger.info("[champ-select] register queueId:{} as '{}'", id, instance.getCardName());
+            Logger.info("[cs-data] register queueId:{} as '{}'", id, instance.getCardName());
             QUEUE_RENDERER_MAPPING.put(id, instance.getCardName());
             instances.put(id, instance);
         }
@@ -107,7 +107,7 @@ public class ChampSelectUI extends ChildUIComponent implements IServiceMessageLi
         ChampSelectSettingsContext settingsContext = context.getChampSelectSettingsContext();
         if (settingsContext.getCounter() == initialCounter) {
             String card = QUEUE_RENDERER_MAPPING.getOrDefault(settingsContext.getQueueId(), "blank");
-            Logger.info("[champ-select] switch to card {}", card);
+            Logger.info("[cs-data] switch to card {}", card);
             this.layout.show(main, card);
             if (swiftrift != null) {
                 swiftrift.getHeader().selectAndShowComponent(LayoutComponent.CHAMPSELECT);
