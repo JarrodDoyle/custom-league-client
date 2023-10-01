@@ -345,7 +345,7 @@ public class Swiftrift extends JFrame implements IClientCallback, ILoginCallback
         if (throwable instanceof RiotClientException e) {
             switch (e.getMessage()) {
                 case "ERROR_TYPE_IS_NULL" -> showFailureDialog("Login errored but the error returned is null");
-                case "CAPTCHA_NOT_SUCCESSFUL" -> showFailureDialog("Our Captcha was denied");
+                case "CAPTCHA_DENIED", "CAPTCHA_NOT_SUCCESSFUL" -> showFailureDialog("Our Captcha was denied");
                 case "UNKNOWN_RESPONSE" -> showFailureDialog("Unable to tell what is wrong");
                 case "MISSING_TYPE" -> showFailureDialog("Unable to tell login stage type");
                 case "AUTH_FAILURE" -> showFailureDialog("Invalid username or password");
