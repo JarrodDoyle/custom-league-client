@@ -28,6 +28,7 @@ public class ChatSideBarUIControl extends JComponent implements ActionListener {
 
     public ChatSideBarUIControl() {
         this.setLayout(new BorderLayout());
+        this.setPreferredSize(new Dimension(320, 16));
         this.setBackground(ColorPalette.accentColor);
         this.add(buttons, BorderLayout.EAST);
         this.setup();

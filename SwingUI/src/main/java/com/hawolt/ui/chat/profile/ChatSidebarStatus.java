@@ -7,6 +7,7 @@ import com.hawolt.ui.generic.component.LComboBox;
 import com.hawolt.ui.generic.themes.ColorPalette;
 
 import javax.swing.*;
+import javax.swing.border.EmptyBorder;
 import java.awt.*;
 
 /**
@@ -20,6 +21,7 @@ public class ChatSidebarStatus extends JComponent {
 
     public ChatSidebarStatus() {
         this.setLayout(new BorderLayout());
+        this.setBorder(new EmptyBorder(0, 0, 8, 8));
         box = new LComboBox<>(ChatStatus.values());
         box.setBackground(ColorPalette.accentColor);
         box.setSelectedItem(ChatStatus.DEFAULT);

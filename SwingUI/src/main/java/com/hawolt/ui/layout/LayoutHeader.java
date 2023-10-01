@@ -2,6 +2,8 @@ package com.hawolt.ui.layout;
 
 import com.hawolt.Swiftrift;
 import com.hawolt.async.loader.ResourceLoader;
+import com.hawolt.client.cache.CacheElement;
+import com.hawolt.client.resources.ledge.summoner.objects.Summoner;
 import com.hawolt.ui.chat.profile.ChatSidebarProfile;
 import com.hawolt.ui.chat.profile.ChatSidebarStatus;
 import com.hawolt.ui.generic.component.LFlatButton;
@@ -86,10 +88,11 @@ public class LayoutHeader extends ChildUIComponent {
         selectAndShowComponent(LayoutComponent.HOME);
 
         main.add(wallet = new HeaderWallet(swiftrift.getLeagueClient()), BorderLayout.EAST);
+        Summoner summoner = swiftrift.getLeagueClient().getCachedValue(CacheElement.SUMMONER);
         UserInformation userInformation = swiftrift.getLeagueClient().getVirtualLeagueClient()
                 .getVirtualLeagueClientInstance()
                 .getUserInformation();
-        add(profile = new ChatSidebarProfile(userInformation, new BorderLayout()), BorderLayout.EAST);
+        add(profile = new ChatSidebarProfile(userInformation, summoner), BorderLayout.EAST);
         configure(userInformation);
     }
 
@@ -127,11 +130,11 @@ public class LayoutHeader extends ChildUIComponent {
     public void configure(UserInformation userInformation) {
         if (userInformation.isLeagueAccountAssociated()) {
             String name = userInformation.getUserInformationLeagueAccount().getSummonerName();
-            getProfile().getSummoner().getChatSidebarName().setSummonerName(name);
+            getProfile().getChatSidebarName().setSummonerName(name);
             long iconId = userInformation.getUserInformationLeagueAccount().getProfileIcon();
             getProfile().getIcon().setIconId(iconId);
         } else {
-            getProfile().getSummoner().getChatSidebarName().setSummonerName("");
+            getProfile().getChatSidebarName().setSummonerName("");
             getProfile().getIcon().setIconId(29);
         }
     }
@@ -146,10 +149,10 @@ public class LayoutHeader extends ChildUIComponent {
     }
 
     public ChatSidebarStatus getChatSidebarStatus() {
-        return profile.getSummoner().getStatus();
+        return profile.getStatus();
     }
 
     public String getSelectedStatus() {
-        return profile.getSummoner().getStatus().getSelectedStatus();
+        return profile.getStatus().getSelectedStatus();
     }
 }
