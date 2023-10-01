@@ -47,7 +47,7 @@
         <dependency>
             <groupId>com.github.hawolt</groupId>
             <artifactId>league-of-legends-rms</artifactId>
-            <version>9067b9a72a</version>
+            <version>fa1401f0af</version>
         </dependency>
     </dependencies>
 </project>

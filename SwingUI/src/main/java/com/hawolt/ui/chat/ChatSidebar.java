@@ -18,16 +18,15 @@ import java.awt.*;
 
 public class ChatSidebar extends ChildUIComponent {
     private final ChatSidebarEssentials essentials;
-    private final ChatSidebarFooter footer;
     private final ChatSidebarFriendlist list;
     private final ChildUIComponent background;
+    private final ChatSidebarFooter footer;
     private final LScrollPane scrollPane;
 
     public ChatSidebar(Swiftrift swiftrift) {
         super(new BorderLayout());
         this.setPreferredSize(new Dimension(300, 0));
         this.setBackground(Color.RED);
-        ChildUIComponent component = new ChildUIComponent(new BorderLayout());
         list = new ChatSidebarFriendlist(swiftrift.getChatUI(), swiftrift);
         background = new ChildUIComponent(new BorderLayout());
         background.setBackground(ColorPalette.accentColor);
@@ -49,5 +48,9 @@ public class ChatSidebar extends ChildUIComponent {
 
     public ChatSidebarEssentials getEssentials() {
         return essentials;
+    }
+
+    public ChatSidebarFooter getFooter() {
+        return footer;
     }
 }

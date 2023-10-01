@@ -219,6 +219,7 @@ public class Swiftrift extends JFrame implements IClientCallback, ILoginCallback
         this.leagueClient.getRMSClient().getHandler().addMessageServiceListener(MessageService.GSM, presence);
         this.leagueClient.getRMSClient().getHandler().addMessageServiceListener(MessageService.PARTIES, presence);
         this.leagueClient.getRMSClient().getHandler().addMessageServiceListener(MessageService.TEAMBUILDER, presence);
+        this.leagueClient.getRMSClient().getHandler().addMessageServiceListener(MessageService.SUMMONER, headerUI.getProfile());
         this.leagueClient.getRMSClient().getHandler().addMessageServiceListener(MessageService.GSM, new GameStartListener(this));
         Swiftrift.service.execute(new ActiveGameInformation(this));
         VirtualRiotXMPPClient xmppClient = leagueClient.getXMPPClient();

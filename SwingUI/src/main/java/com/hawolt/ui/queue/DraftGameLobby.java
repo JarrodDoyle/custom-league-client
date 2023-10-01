@@ -68,8 +68,10 @@ public class DraftGameLobby extends GameLobby implements ActionListener {
     public void selectPositionPreference() {
         Swiftrift.service.execute(() -> {
             LCUPreferences lcuPreferences = swiftrift.getLeagueClient().getCachedValue(CacheElement.LCU_PREFERENCES);
-            main.setSelectedItem(PositionPreference.valueOf(lcuPreferences.getPartiesPositionPreference().get().getFirstPreference()));
-            other.setSelectedItem(PositionPreference.valueOf(lcuPreferences.getPartiesPositionPreference().get().getSecondPreference()));
+            lcuPreferences.getPartiesPositionPreference().ifPresent(preference -> {
+                main.setSelectedItem(PositionPreference.valueOf(preference.getFirstPreference()));
+                other.setSelectedItem(PositionPreference.valueOf(preference.getSecondPreference()));
+            });
         });
     }
 
