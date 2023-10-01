@@ -129,7 +129,7 @@
         <dependency>
             <groupId>com.github.hawolt</groupId>
             <artifactId>league-live-api</artifactId>
-            <version>2d9b700715</version>
+            <version>545c7d8b5a</version>
         </dependency>
         <dependency>
             <groupId>com.hawolt</groupId>

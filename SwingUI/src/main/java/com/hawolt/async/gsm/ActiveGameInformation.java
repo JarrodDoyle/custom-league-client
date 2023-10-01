@@ -2,6 +2,7 @@ package com.hawolt.async.gsm;
 
 import com.hawolt.Swiftrift;
 import com.hawolt.client.LeagueClient;
+import com.hawolt.client.cache.CacheElement;
 import com.hawolt.client.resources.ledge.gsm.GameServiceMessageLedge;
 import com.hawolt.generic.data.Platform;
 import com.hawolt.logger.Logger;
@@ -36,6 +37,7 @@ public class ActiveGameInformation implements Runnable {
             if (!game.has("gameState") || game.isNull("gameState")) return;
             if (!"IN_PROGRESS".equals(game.getString("gameState"))) return;
             JSONObject credentials = info.getJSONObject("playerCredentials");
+            swiftrift.getLeagueClient().cache(CacheElement.GAME_CREDENTIALS, credentials);
             Launcher.launch(swiftrift.getSettingService(), platform, credentials);
         } catch (IOException e) {
             Logger.error(e);

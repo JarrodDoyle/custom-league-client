@@ -40,7 +40,8 @@ public class PostGameUI extends ChildUIComponent implements ActionListener {
     }
 
     public void build(IResponse response, List<LeagueNotification> notifications) {
-        build(response.asString(), notifications);
+        this.swiftrift.getLayoutManager().getHeader().hide(LayoutComponent.RECONNECT);
+        this.build(response.asString(), notifications);
     }
 
     public void build(String response, List<LeagueNotification> notifications) {

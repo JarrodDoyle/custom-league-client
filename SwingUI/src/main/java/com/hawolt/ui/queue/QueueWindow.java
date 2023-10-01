@@ -76,13 +76,15 @@ public class QueueWindow extends ChildUIComponent implements Runnable, PacketCal
     private final CardLayout layout = new CardLayout();
     private final Swiftrift swiftrift;
     private final ChildUIComponent parent;
+    private final DraftGameLobby draftGameLobby;
+    private final TFTGameLobby tftGameLobby;
 
     public QueueWindow(Swiftrift swiftrift) {
         super(new BorderLayout());
         this.swiftrift = swiftrift;
         this.add(parent = new ChildUIComponent(layout), BorderLayout.CENTER);
-        this.relation.put("draft", new DraftGameLobby(swiftrift, parent, layout, this));
-        this.relation.put("tft", new TFTGameLobby(swiftrift, parent, layout, this));
+        this.relation.put("draft", draftGameLobby = new DraftGameLobby(swiftrift, parent, layout, this));
+        this.relation.put("tft", tftGameLobby = new TFTGameLobby(swiftrift, parent, layout, this));
         this.button.addActionListener(listener -> layout.show(parent, "lobby"));
         this.button.setPreferredSize(new Dimension(getWidth() / 5, 30));
         this.button.setHorizontalAlignment(SwingConstants.CENTER);
@@ -102,7 +104,15 @@ public class QueueWindow extends ChildUIComponent implements Runnable, PacketCal
             Logger.error(e);
         }
     }
-
+    
+    public DraftGameLobby getDraftGameLobby () {
+        return draftGameLobby;
+    }
+    
+    public TFTGameLobby getTftGameLobby () {
+        return tftGameLobby;
+    }
+    
     private Map<String, List<JSONObject>> getQueueMapping(JSONArray array) {
         Map<String, List<JSONObject>> map = new HashMap<>();
         for (int i = 0; i < array.length(); i++) {

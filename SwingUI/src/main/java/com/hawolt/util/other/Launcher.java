@@ -3,6 +3,7 @@ package com.hawolt.util.other;
 import com.hawolt.generic.data.Platform;
 import com.hawolt.logger.Logger;
 import com.hawolt.util.os.OperatingSystem;
+import com.hawolt.util.os.SystemManager;
 import com.hawolt.util.settings.SettingService;
 import org.json.JSONObject;
 
@@ -37,6 +38,13 @@ public class Launcher {
         );
         SERVICE.execute(() -> {
             try {
+                String name = switch (OperatingSystem.getOperatingSystemType()) {
+                    default -> "League of Legends";
+                };
+                if (SystemManager.getInstance().isProcessRunning(name)) {
+                    Logger.info("Prevent Game from launching whilst already running");
+                    return;
+                }
                 ProcessBuilder builder = new ProcessBuilder();
                 builder.directory(new File(String.join(File.separator, leagueDirectory, "Game")));
                 builder.redirectErrorStream(true);

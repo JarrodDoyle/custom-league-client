@@ -33,11 +33,10 @@ import java.util.Map;
 
 public class LayoutHeader extends ChildUIComponent {
     private final Map<LayoutComponent, LFlatButton> map = new HashMap<>();
-    private final Swiftrift swiftrift;
     private final ChatSidebarProfile profile;
     private final ILayoutManager manager;
     private final HeaderWallet wallet;
-
+    private final Swiftrift swiftrift;
     private Point initialClick;
 
     public LayoutHeader(ILayoutManager manager, Swiftrift swiftrift) {
@@ -99,6 +98,7 @@ public class LayoutHeader extends ChildUIComponent {
     public LFlatButton createHeaderComponent(LayoutComponent component) {
         LFlatButton button = new LFlatButton(component.name().replace("_", " "), LTextAlign.CENTER, HighlightType.TEXT);
         button.addActionListener(listener -> selectAndShowComponent(component));
+        if (button.getText().equals("RECONNECT")) button.setVisible(false);
         map.put(component, button);
         return button;
     }
@@ -154,5 +154,13 @@ public class LayoutHeader extends ChildUIComponent {
 
     public String getSelectedStatus() {
         return profile.getStatus().getSelectedStatus();
+    }
+
+    public void hide(LayoutComponent component) {
+        map.get(component).setVisible(false);
+    }
+
+    public void reveal(LayoutComponent component) {
+        map.get(component).setVisible(true);
     }
 }

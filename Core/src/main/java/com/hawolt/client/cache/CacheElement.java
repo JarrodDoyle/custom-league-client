@@ -27,7 +27,9 @@ public enum CacheElement {
     LCU_PREFERENCES(CachedDataType.VALUE),
     LCU_SOCIAL_PREFERENCES(CachedDataType.VALUE),
     STORE_CATALOG(CachedDataType.VALUE),
+    GAME_CREDENTIALS(CachedDataType.VALUE),
     PERKS_PREFERENCE(CachedDataType.VALUE);
+
     private final CachedDataType cachedDataType;
 
     CacheElement(CachedDataType cachedDataType) {

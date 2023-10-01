@@ -2,6 +2,7 @@ package com.hawolt;
 
 import com.hawolt.async.ExecutorManager;
 import com.hawolt.async.gsm.ActiveGameInformation;
+import com.hawolt.async.gsm.GameClosedHandler;
 import com.hawolt.async.gsm.GameStartHandler;
 import com.hawolt.async.presence.PresenceManager;
 import com.hawolt.async.rms.GameStartListener;
@@ -222,6 +223,12 @@ public class Swiftrift extends JFrame implements IClientCallback, ILoginCallback
         this.leagueClient.getRMSClient().getHandler().addMessageServiceListener(MessageService.SUMMONER, headerUI.getProfile());
         this.leagueClient.getRMSClient().getHandler().addMessageServiceListener(MessageService.GSM, new GameStartListener(this));
         Swiftrift.service.execute(new ActiveGameInformation(this));
+        GameClosedHandler handler = new GameClosedHandler(liveGameClient, this);
+        this.liveGameClient.register("LOCAL_PLAYER_DEAD", handler);
+        this.liveGameClient.register("ChampionDeath", handler);
+        this.liveGameClient.register("GameStart", handler);
+        this.liveGameClient.register("STARTUP", handler);
+        this.liveGameClient.start();
         VirtualRiotXMPPClient xmppClient = leagueClient.getXMPPClient();
         RMANCache.purge();
         this.chatUI.setSupplier(xmppClient);

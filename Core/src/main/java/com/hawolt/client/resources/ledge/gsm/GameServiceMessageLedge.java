@@ -48,6 +48,21 @@ public class GameServiceMessageLedge extends AbstractLedgeEndpoint {
         IResponse response = OkHttp3Client.execute(request);
         return new JSONObject(response.asString());
     }
+    
+    public int deleteGame() throws IOException {
+        String uri = String.format("%s/%s/v%s/ledge/region/%s/puuid/%s",
+                base,
+                name(),
+                version(),
+                platform.name(),
+                userInformation.getSub()
+        );
+        Request request = jsonRequest(uri)
+                .delete()
+                .build();
+        IResponse response = OkHttp3Client.execute(request);
+        return response.code();
+    }
 
     @Override
     public int version() {
