@@ -32,22 +32,22 @@
         <dependency>
             <groupId>com.github.hawolt.league-client-api</groupId>
             <artifactId>VirtualClient</artifactId>
-            <version>ed12080081</version>
+            <version>90c4159824</version>
         </dependency>
         <dependency>
             <groupId>com.github.hawolt</groupId>
             <artifactId>riot-xmpp</artifactId>
-            <version>12163a98b8</version>
+            <version>fe79ef0789</version>
         </dependency>
         <dependency>
             <groupId>com.github.hawolt</groupId>
             <artifactId>league-of-legends-rtmp</artifactId>
-            <version>eca0420773</version>
+            <version>7ba7d1f9ef</version>
         </dependency>
         <dependency>
             <groupId>com.github.hawolt</groupId>
             <artifactId>league-of-legends-rms</artifactId>
-            <version>9a9e7d1791</version>
+            <version>46f34ff853</version>
         </dependency>
     </dependencies>
 </project>
