@@ -61,7 +61,11 @@ public abstract class ClientCache implements ISimpleValueCache<CacheElement, Obj
 
     @Override
     public void cache(CacheElement element, Object value) {
-        Logger.info("Storing value for {} in cache as {}", element, value);
+        Logger.info(
+                "Storing value for {} in cache as {}",
+                element,
+                element == CacheElement.STORE_CATALOG ? "HIDDEN_VIEW_MANUALLY" : value
+        );
         if (element.getCachedDataType() != CachedDataType.JWT) {
             this.cache.put(element, value);
             this.dispatch(element);

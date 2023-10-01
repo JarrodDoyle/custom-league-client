@@ -26,7 +26,8 @@ public enum CacheElement {
     PARTY_REGISTRATION(CachedDataType.VALUE),
     LCU_PREFERENCES(CachedDataType.VALUE),
     LCU_SOCIAL_PREFERENCES(CachedDataType.VALUE),
-    STORE_CATALOG(CachedDataType.VALUE);
+    STORE_CATALOG(CachedDataType.VALUE),
+    PERKS_PREFERENCE(CachedDataType.VALUE);
     private final CachedDataType cachedDataType;
 
     CacheElement(CachedDataType cachedDataType) {

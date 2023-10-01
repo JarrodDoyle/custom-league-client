@@ -11,6 +11,7 @@ import com.hawolt.client.handler.XMPPHandler;
 import com.hawolt.client.resources.ledge.LedgeEndpoint;
 import com.hawolt.client.resources.ledge.leagues.objects.RankedStatistic;
 import com.hawolt.client.resources.ledge.preferences.objects.PreferenceType;
+import com.hawolt.client.resources.ledge.preferences.objects.lcuperkspreference.LCUPerksPreferences;
 import com.hawolt.client.resources.ledge.preferences.objects.lcupreferences.LCUPreferences;
 import com.hawolt.client.resources.ledge.preferences.objects.lcusocialpreferences.LCUSocialPreferences;
 import com.hawolt.client.resources.ledge.store.objects.StoreCatalog;
@@ -82,6 +83,7 @@ public class LeagueClient extends ClientCache implements PacketCallback {
         setElementSource(CacheElement.RANKED_STATISTIC, (ExceptionalFunction<LeagueClient, RankedStatistic>) client -> ledge.getLeague().getRankedStats(getVirtualRiotClient().getRiotClientUser().getPUUID()));
         setElementSource(CacheElement.PROFILE, (ExceptionalFunction<LeagueClient, SummonerProfile>) client -> ledge.getSummoner().resolveSummonerProfile(getVirtualRiotClient().getRiotClientUser().getPUUID()));
         setElementSource(CacheElement.LCU_PREFERENCES, (ExceptionalFunction<LeagueClient, LCUPreferences>) client -> new LCUPreferences(ledge.getPlayerPreferences().getPreferences(PreferenceType.LCU_PREFERENCES)));
+        setElementSource(CacheElement.PERKS_PREFERENCE, (ExceptionalFunction<LeagueClient, LCUPerksPreferences>) client -> new LCUPerksPreferences(ledge.getPlayerPreferences().getPreferences(PreferenceType.PERKS_PREFERENCE)));
         setElementSource(CacheElement.SUMMONER, (ExceptionalFunction<LeagueClient, Summoner>) client -> ledge.getSummoner().resolveSummonerById(getVirtualLeagueClientInstance().getUserInformation().getUserInformationLeagueAccount().getSummonerId()));
         setElementSource(CacheElement.LCU_SOCIAL_PREFERENCES, (ExceptionalFunction<LeagueClient, LCUSocialPreferences>) client -> new LCUSocialPreferences(ledge.getPlayerPreferences().getPreferences(PreferenceType.LCU_SOCIAL_PREFERENCES)), () -> "");
         ExecutorService service = Executors.newCachedThreadPool();

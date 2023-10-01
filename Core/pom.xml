@@ -37,7 +37,7 @@
         <dependency>
             <groupId>com.github.hawolt</groupId>
             <artifactId>riot-xmpp</artifactId>
-            <version>fe79ef0789</version>
+            <version>2b3ccc1cac</version>
         </dependency>
         <dependency>
             <groupId>com.github.hawolt</groupId>

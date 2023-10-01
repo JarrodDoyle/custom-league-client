@@ -114,8 +114,13 @@ public class ChampSelectUI extends ChildUIComponent implements IServiceMessageLi
             }
         }
         this.configureSwiftriftFocus(context);
-        this.instances.get(settingsContext.getQueueId()).delegate(context, initialCounter);
-        this.repaint();
+        int queueId = settingsContext.getQueueId();
+        if (instances.containsKey(queueId)) {
+            this.instances.get(queueId).delegate(context, initialCounter);
+            this.repaint();
+        } else {
+            Logger.info("No renderer available for queueId {}", queueId);
+        }
     }
 
     private void configureSwiftriftFocus(ChampSelectContext champSelectContext) {
