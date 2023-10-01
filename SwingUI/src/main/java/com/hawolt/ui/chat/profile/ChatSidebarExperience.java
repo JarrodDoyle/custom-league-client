@@ -1,5 +1,6 @@
 package com.hawolt.ui.chat.profile;
 
+import com.hawolt.client.resources.ledge.summoner.objects.Summoner;
 import com.hawolt.ui.generic.themes.ColorPalette;
 import com.hawolt.ui.generic.utility.ChildUIComponent;
 import com.hawolt.virtual.leagueclient.userinfo.UserInformation;
@@ -11,14 +12,12 @@ public class ChatSidebarExperience extends ChildUIComponent {
     private final Color GAINED = new Color(93, 156, 89);
     private int current, total;
 
-    public ChatSidebarExperience(UserInformation information, LayoutManager layout) {
+    public ChatSidebarExperience(UserInformation information, Summoner summoner) {
         this.setBackground(ColorPalette.accentColor);
         this.setPreferredSize(new Dimension(320, 8));
         if (!information.isLeagueAccountAssociated()) return;
-
-        // Placeholder XP amounts
-        this.current = 419;
-        this.total = 2193;
+        this.total = summoner.getExpToNextLevel();
+        this.current = summoner.getExpPoints();
     }
 
     @Override
@@ -33,5 +32,11 @@ public class ChatSidebarExperience extends ChildUIComponent {
         g.fillRect(0, 0, gainedWidth, dimension.height);
         g.setColor(UNOBTAINED);
         g.fillRect(gainedWidth, 0, dimension.width - gainedWidth, dimension.height);
+    }
+
+    public void set(int finalXp, int finalLevelBoundary) {
+        this.total = finalLevelBoundary;
+        this.current = finalXp;
+        this.repaint();
     }
 }

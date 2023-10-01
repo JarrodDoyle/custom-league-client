@@ -10,14 +10,18 @@ import java.awt.*;
 
 public class ChatSidebarLevel extends ChildUIComponent {
     private final Font font = new Font("Arial", Font.BOLD, 16);
-    private int level = 0;
+    private int level;
 
-    public ChatSidebarLevel(UserInformation information, LayoutManager layout) {
+    public ChatSidebarLevel(UserInformation information) {
         this.setBackground(ColorPalette.accentColor);
-        if (information.isLeagueAccountAssociated()) {
-            this.level = (int) information.getUserInformationLeagueAccount().getSummonerLevel();
-        }
-        this.setPreferredSize(new Dimension(16 + String.valueOf(this.level).length() * font.getSize(), 8 + font.getSize()));
+        if (!information.isLeagueAccountAssociated()) return;
+        this.setLevel((int) information.getUserInformationLeagueAccount().getSummonerLevel());
+    }
+
+    public void setLevel(int level) {
+        this.setPreferredSize(new Dimension(16 + String.valueOf(level).length() * font.getSize(), 8 + font.getSize()));
+        this.level = level;
+        this.repaint();
     }
 
     @Override
@@ -28,6 +32,6 @@ public class ChatSidebarLevel extends ChildUIComponent {
         int y = dimensions.height - (font.getSize() + 8);
         g.setColor(ColorPalette.backgroundColor);
         PaintHelper.roundedSquare((Graphics2D) g, 0, y, dimensions.width, dimensions.height - y, ColorPalette.CARD_ROUNDING, false, true, false, false);
-        PaintHelper.drawShadowText(g, font, String.valueOf(this.level), new Rectangle(0, y, dimensions.width, dimensions.height - y), LTextAlign.CENTER, Color.WHITE);
+        PaintHelper.drawShadowText(g, font, String.valueOf(this.level), new Rectangle(3, y + 1, dimensions.width, dimensions.height - y), LTextAlign.CENTER, Color.WHITE);
     }
 }

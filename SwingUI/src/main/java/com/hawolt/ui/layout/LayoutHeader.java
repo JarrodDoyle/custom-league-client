@@ -2,6 +2,8 @@ package com.hawolt.ui.layout;
 
 import com.hawolt.Swiftrift;
 import com.hawolt.async.loader.ResourceLoader;
+import com.hawolt.client.cache.CacheElement;
+import com.hawolt.client.resources.ledge.summoner.objects.Summoner;
 import com.hawolt.ui.chat.profile.ChatSidebarProfile;
 import com.hawolt.ui.chat.profile.ChatSidebarStatus;
 import com.hawolt.ui.generic.component.LFlatButton;
@@ -86,10 +88,11 @@ public class LayoutHeader extends ChildUIComponent {
         selectAndShowComponent(LayoutComponent.HOME);
 
         main.add(wallet = new HeaderWallet(swiftrift.getLeagueClient()), BorderLayout.EAST);
+        Summoner summoner = swiftrift.getLeagueClient().getCachedValue(CacheElement.SUMMONER);
         UserInformation userInformation = swiftrift.getLeagueClient().getVirtualLeagueClient()
                 .getVirtualLeagueClientInstance()
                 .getUserInformation();
-        add(profile = new ChatSidebarProfile(userInformation, new BorderLayout()), BorderLayout.EAST);
+        add(profile = new ChatSidebarProfile(userInformation, summoner), BorderLayout.EAST);
         configure(userInformation);
     }
 
