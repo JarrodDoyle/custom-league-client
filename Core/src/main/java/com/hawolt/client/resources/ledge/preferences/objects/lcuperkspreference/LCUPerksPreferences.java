@@ -17,7 +17,7 @@ public class LCUPerksPreferences extends DynamicObject {
 
     public Optional<PageSettingPreference> getPerksPageSettings() {
         if (pageSettingPreference != null) return Optional.of(pageSettingPreference);
-        if (has("champ-select")) {
+        if (has("page-settings")) {
             this.pageSettingPreference = new PageSettingPreference(getByKey("page-settings"));
         } else {
             JSONObject page = new JSONObject().put("data", new JSONObject()).put("schemaVersion", 5);
