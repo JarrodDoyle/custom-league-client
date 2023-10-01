@@ -4,6 +4,7 @@ import com.hawolt.async.ExecutorManager;
 import com.hawolt.async.gsm.ActiveGameInformation;
 import com.hawolt.async.gsm.GameClosedHandler;
 import com.hawolt.async.gsm.GameStartHandler;
+import com.hawolt.async.loader.ResourceLoader;
 import com.hawolt.async.presence.PresenceManager;
 import com.hawolt.async.rms.GameStartListener;
 import com.hawolt.async.shutdown.ShutdownManager;
@@ -76,6 +77,7 @@ public class Swiftrift extends JFrame implements IClientCallback, ILoginCallback
         // DISABLE LOGGING USER CREDENTIALS
         StringTokenSupplier.debug = false;
         AMFDecoder.debug = false;
+        ResourceLoader.invoke();
         try {
             logo = ImageIO.read(RunLevel.get("logo.png"));
         } catch (IOException e) {
@@ -405,10 +407,10 @@ public class Swiftrift extends JFrame implements IClientCallback, ILoginCallback
         this.setExtendedState(JFrame.NORMAL);
         this.lastFocusRequest = System.currentTimeMillis();
     }
-    
-    
+
+
     @Override
-    public void onEvent (BaseObject baseObject) {
+    public void onEvent(BaseObject baseObject) {
         this.buildSidebarUI(leagueClient.getXMPPClient());
         this.presence = new PresenceManager(this);
         this.leagueClient.getRTMPClient().addDefaultCallback(presence);

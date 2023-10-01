@@ -6,6 +6,7 @@ import com.hawolt.async.ExecutorManager;
 import com.hawolt.async.loader.ResourceLoader;
 import com.hawolt.async.loader.ResourceManager;
 import com.hawolt.client.LeagueClient;
+import com.hawolt.client.cache.CacheElement;
 import com.hawolt.client.resources.communitydragon.DataTypeConverter;
 import com.hawolt.client.resources.communitydragon.champion.ChampionIndex;
 import com.hawolt.client.resources.communitydragon.champion.ChampionSource;
@@ -17,10 +18,10 @@ import com.hawolt.client.resources.ledge.summoner.SummonerLedge;
 import com.hawolt.client.resources.ledge.teambuilder.TeamBuilderLedge;
 import com.hawolt.logger.Logger;
 import com.hawolt.rtmp.service.impl.TeamBuilderService;
-import com.hawolt.ui.champselect.context.ChampSelectContext;
+import com.hawolt.ui.champselect.context.*;
 import com.hawolt.ui.champselect.data.*;
-import com.hawolt.ui.champselect.generic.ChampSelectUIComponent;
 import com.hawolt.ui.generic.themes.ColorPalette;
+import com.hawolt.ui.generic.utility.ChildUIComponent;
 import com.hawolt.util.paint.custom.GraphicalDrawableManager;
 import org.imgscalr.Scalr;
 
@@ -33,6 +34,8 @@ import java.awt.image.BufferedImage;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.util.Map;
+import java.util.Optional;
+import java.util.concurrent.ExecutorService;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
@@ -42,41 +45,42 @@ import java.util.concurrent.TimeUnit;
  * Author: Twitter @hawolt
  **/
 
-public class ChampSelectMemberElement extends ChampSelectUIComponent implements Runnable, DataTypeConverter<byte[], BufferedImage> {
+public class ChampSelectMemberElement extends ChildUIComponent implements DataTypeConverter<byte[], BufferedImage> {
     private static final String SPRITE_PATH = "https://raw.communitydragon.org/pbe/plugins/rcp-be-lol-game-data/global/default/v1/champion-splashes/%s/%s.jpg";
-    private static final Dimension SUMMONER_SPELL_DIMENSION = new Dimension(28, 28);
-    private static final Color HIGHLIGHT_NOT_LOCKED = new Color(0xFF, 0xFF, 0xFF, 0x4F);
-    private static final Color HIGHLIGHT_PICKING = new Color(155, 224, 155, 179);
-    private final ResourceManager<BufferedImage> manager = new ResourceManager<>(this);
-    private final ChampSelectTeamType teamType;
-    private final ChampSelectTeam team;
     private final ScheduledExecutorService service = ExecutorManager.getScheduledService("trade-blocker");
-    private int championId, indicatorId, skinId, spell1Id, spell2Id;
-    private BufferedImage sprite, spellOne, spellTwo, clearChampion;
-    private ChampSelectMember member;
-    private String hero, puuid, name;
-    private GraphicalDrawableManager drawables;
-    private ScheduledFuture<?> future;
+    private static final Color HIGHLIGHT_NOT_LOCKED = new Color(0xFF, 0xFF, 0xFF, 0x4F);
+    private static final Dimension SUMMONER_SPELL_DIMENSION = new Dimension(28, 28);
+    private final ResourceManager<BufferedImage> manager = new ResourceManager<>(this);
+    private static final Color HIGHLIGHT_PICKING = new Color(155, 224, 155, 179);
+    private final ChampSelectTeamType teamType;
+    private final Swiftrift swiftrift;
+    private final ChampSelectTeam team;
 
-    public ChampSelectMemberElement(ChampSelectTeamType teamType, ChampSelectTeam team, ChampSelectMember member) {
+    private int championId, indicatorId, skinId, spell1Id, spell2Id, currentActionSetIndex;
+    private BufferedImage sprite, spellOne, spellTwo, clearChampion;
+    private boolean picking, locked, self, teamMember;
+    private Optional<PickOrderStatus> pickOrderStatus;
+    private GraphicalDrawableManager drawables;
+    private Optional<TradeStatus> tradeStatus;
+    private ScheduledFuture<?> future;
+    private String hero, puuid, name;
+    private ChampSelectMember member;
+    private DraftMode draftMode;
+
+
+    public ChampSelectMemberElement(Swiftrift swiftrift, ChampSelectTeamType teamType, ChampSelectTeam team, ChampSelectMember member) {
         ColorPalette.addThemeListener(this);
         this.addComponentListener(new ChampSelectSelectMemberResizeAdapter());
         this.setBackground(ColorPalette.backgroundColor);
+        this.swiftrift = swiftrift;
         this.teamType = teamType;
         this.member = member;
         this.team = team;
         this.drawables();
     }
 
-    @Override
-    public void run() {
-        if (!(member instanceof ChampSelectTeamMember teamMember)) return;
-        GraphicalIndicatorButton swapOrder = drawables.getGraphicalComponent("order");
-        swapOrder.setVisible(true);
-        configure(teamMember);
-    }
-
-    private void configure(ChampSelectTeamMember teamMember) {
+    private void configure(ChampSelectContext context, ChampSelectTeamMember teamMember) {
+        ChampSelectDataContext dataContext = context.getChampSelectDataContext();
         LeagueClient client = dataContext.getLeagueClient();
         if (client == null) {
             Logger.warn("unable to fetch name for {}, client is null", puuid == null ? "N/A" : puuid);
@@ -116,8 +120,8 @@ public class ChampSelectMemberElement extends ChampSelectUIComponent implements 
         ResourceLoader.loadLocalResource("assets/cs_swap_order.png", swapOrder);
         swapOrder.addExecutionListener(event -> Swiftrift.service.execute(() -> {
             if (event.getInitiator() instanceof MouseEvent mouseEvent) {
-                TeamBuilderLedge ledge = dataContext.getLeagueClient().getLedge().getTeamBuilder();
-                interactionContext.getPickSwap(member.getCellId()).ifPresent(trade -> {
+                TeamBuilderLedge ledge = swiftrift.getLeagueClient().getLedge().getTeamBuilder();
+                pickOrderStatus.ifPresent(trade -> {
                     try {
                         switch (mouseEvent.getButton()) {
                             case 1 -> ledge.acceptPickOrderSwap(trade.getId());
@@ -133,8 +137,8 @@ public class ChampSelectMemberElement extends ChampSelectUIComponent implements 
         ResourceLoader.loadLocalResource("assets/cs_swap_champion.png", swapChampion);
         swapChampion.addExecutionListener(event -> Swiftrift.service.execute(() -> {
             if (event.getInitiator() instanceof MouseEvent mouseEvent) {
-                TeamBuilderService service = dataContext.getLeagueClient().getRTMPClient().getTeamBuilderService();
-                interactionContext.getTrade(member.getCellId()).ifPresent(trade -> {
+                TeamBuilderService service = swiftrift.getLeagueClient().getRTMPClient().getTeamBuilderService();
+                tradeStatus.ifPresent(trade -> {
                     try {
                         switch (mouseEvent.getButton()) {
                             case 1 -> service.acceptTradeV1Blocking(trade.getId());
@@ -181,7 +185,7 @@ public class ChampSelectMemberElement extends ChampSelectUIComponent implements 
         if (indicatorId != 0) {
             this.setClearChampion(indicatorId);
             this.updateSprite(indicatorId, indicatorId * 1000);
-        } else if (member.getChampionId() == 0 && !utilityContext.isPicking(member)) {
+        } else if (member.getChampionId() == 0 && !picking) {
             this.clearChampion = null;
             this.sprite = null;
         }
@@ -250,9 +254,22 @@ public class ChampSelectMemberElement extends ChampSelectUIComponent implements 
         }
     }
 
-    public void update(ChampSelectMember member) {
-        this.member = member;
-        this.updateChamp(member);
+
+    public void init(ChampSelectContext context) {
+        ExecutorService loader = ExecutorManager.getService("name-loader");
+        loader.execute(() -> {
+            if (!(member instanceof ChampSelectTeamMember teamMember)) return;
+            GraphicalIndicatorButton swapOrder = drawables.getGraphicalComponent("order");
+            swapOrder.setVisible(true);
+            configure(context, teamMember);
+        });
+    }
+
+    private void update(ChampSelectContext context, ChampSelectMember member) {
+        ChampSelectInteractionContext interactionContext = context.getChampSelectInteractionContext();
+        ChampSelectSettingsContext settingsContext = context.getChampSelectSettingsContext();
+        ChampSelectUtilityContext utilityContext = context.getChampSelectUtilityContext();
+        this.updateChamp(this.member = member);
         GraphicalIndicatorButton swapOrder = drawables.getGraphicalComponent("order");
         long remaining = settingsContext.getCurrentTimeRemainingMillis() - (System.currentTimeMillis() - settingsContext.getLastUpdate()) - 5000L;
         if (remaining > 0) {
@@ -262,22 +279,32 @@ public class ChampSelectMemberElement extends ChampSelectUIComponent implements 
                 ChampSelectMemberElement.this.repaint();
             }, remaining, TimeUnit.MILLISECONDS);
         }
+
+        this.pickOrderStatus = interactionContext.getPickSwap(member.getCellId());
+        this.currentActionSetIndex = settingsContext.getCurrentActionSetIndex();
+        this.tradeStatus = interactionContext.getTrade(member.getCellId());
+        this.teamMember = utilityContext.isTeamMember(member);
+        this.picking = utilityContext.isPicking(member);
+        this.locked = utilityContext.isLockedIn(member);
+        this.draftMode = settingsContext.getDraftMode();
+        this.self = utilityContext.isSelf(member);
+
         if (teamType == ChampSelectTeamType.ALLIED) {
-            ChampSelectTeamMember teamMember = (ChampSelectTeamMember) member;
+            ChampSelectTeamMember teamMember = (ChampSelectTeamMember) this.member;
             this.updateChampIndicator(teamMember);
+            this.configure(context, teamMember);
             this.updateSpellOne(teamMember);
             this.updateSpellTwo(teamMember);
             this.updateSkin(teamMember);
-            this.configure(teamMember);
 
             interactionContext.getPickSwap().ifPresentOrElse(trade -> {
-                if (trade.getCellId() != member.getCellId()) return;
+                if (trade.getCellId() != this.member.getCellId()) return;
                 swapOrder.setHighlight(true);
             }, () -> swapOrder.setHighlight(false));
 
             GraphicalIndicatorButton swapChampion = drawables.getGraphicalComponent("champion");
             interactionContext.getActiveTrade().ifPresentOrElse(trade -> {
-                if (trade.getCellId() != member.getCellId()) return;
+                if (trade.getCellId() != this.member.getCellId()) return;
                 swapChampion.setHighlight(true);
             }, () -> swapChampion.setHighlight(false));
 
@@ -285,21 +312,21 @@ public class ChampSelectMemberElement extends ChampSelectUIComponent implements 
             swapOrder.update(new Rectangle(baseX, 38, 28, 28));
             if (remaining > 5000L) {
                 utilityContext.getOwnPickPhase().ifPresent(phase -> {
-                    swapOrder.setVisible(!phase.isCompleted() && !utilityContext.isLockedIn(member));
+                    swapOrder.setVisible(!phase.isCompleted() && !utilityContext.isLockedIn(this.member));
                     repaint();
                 });
             }
             TradeStatus[] tradeStatuses = interactionContext.getTrades();
             swapChampion.update(new Rectangle(baseX, 71, 28, 28));
             for (TradeStatus status : tradeStatuses) {
-                if (status.getCellId() != member.getCellId()) continue;
+                if (status.getCellId() != this.member.getCellId()) continue;
                 swapChampion.setVisible(!"INVALID".equals(status.getState()));
             }
 
-            if (context != null && utilityContext.isPicking(member)) {
+            if (utilityContext.isPicking(this.member)) {
                 utilityContext.getCurrent()
                         .stream()
-                        .filter(actionObject -> actionObject.getActorCellId() == member.getCellId())
+                        .filter(actionObject -> actionObject.getActorCellId() == this.member.getCellId())
                         .findAny()
                         .ifPresent(actionObject -> {
                             if (settingsContext.getCurrentActionSetIndex() > 0 || settingsContext.getActionSetMapping().size() == 1) {
@@ -311,10 +338,25 @@ public class ChampSelectMemberElement extends ChampSelectUIComponent implements 
         this.repaint();
     }
 
+    public void handle(ChampSelectContext context, ChampSelectMember member) {
+        int initialCounter;
+        LeagueClient leagueClient = context.getChampSelectDataContext().getLeagueClient();
+        if (leagueClient != null) {
+            int counter = leagueClient.getCachedValue(CacheElement.CHAMP_SELECT_COUNTER);
+            initialCounter = counter + 1;
+        } else {
+            // LOCAL: adjust this depending on local test data
+            initialCounter = 5;
+        }
+        if (context.getChampSelectSettingsContext().getCounter() == initialCounter) {
+            init(context);
+        }
+        update(context, member);
+    }
+
     @Override
     protected void paintComponent(Graphics g) {
         super.paintComponent(g);
-        if (context == null) return;
         Dimension dimension = getSize();
 
         //DRAW CHAMPION/SKIN IMAGE
@@ -324,9 +366,9 @@ public class ChampSelectMemberElement extends ChampSelectUIComponent implements 
             g.drawImage(clearChampion, imageX, imageY, null);
         }
         //INDICATE PICKING OR STATUS NOT LOCKED IN
-        DraftMode mode = settingsContext.getDraftMode();
-        if (member != null && mode != DraftMode.ARAM) {
-            if (!utilityContext.isLockedIn(member) || (mode == DraftMode.DRAFT && settingsContext.getCurrentActionSetIndex() <= 0)) {
+
+        if (member != null && draftMode != DraftMode.ARAM) {
+            if (!locked || (draftMode == DraftMode.DRAFT && currentActionSetIndex <= 0)) {
                 g.setColor(HIGHLIGHT_NOT_LOCKED);
                 g.fillRect(0, 0, dimension.width, dimension.height);
             }
@@ -395,7 +437,7 @@ public class ChampSelectMemberElement extends ChampSelectUIComponent implements 
         }
 
         //BORDER
-        if (member != null && (!utilityContext.isLockedIn(member) && utilityContext.isPicking(member))) {
+        if (member != null && (!locked && picking)) {
             g.setColor(HIGHLIGHT_PICKING);
             g.drawRect(0, 0, dimension.width - 1, dimension.height - 1);
         } else {
@@ -405,10 +447,10 @@ public class ChampSelectMemberElement extends ChampSelectUIComponent implements 
 
         if (member == null) return;
 
-        if (utilityContext.isSelf(member)) {
+        if (self) {
             g.setColor(new Color(217, 160, 74, 255));
             g.drawRect(1, 1, dimension.width - 3, dimension.height - 3);
-        } else if (utilityContext.isTeamMember(member)) {
+        } else if (teamMember) {
             drawables.draw(graphics2D);
         }
     }
@@ -453,10 +495,6 @@ public class ChampSelectMemberElement extends ChampSelectUIComponent implements 
                 g.drawRect(baseX + SUMMONER_SPELL_DIMENSION.width + 5, 5, SUMMONER_SPELL_DIMENSION.width, SUMMONER_SPELL_DIMENSION.height);
             }
         }
-    }
-
-    public void setIndex(ChampSelectContext context) {
-        this.configure(context);
     }
 
     @Override

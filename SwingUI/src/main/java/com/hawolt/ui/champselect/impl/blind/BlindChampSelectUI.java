@@ -6,6 +6,7 @@ import com.hawolt.ui.champselect.data.ChampSelectType;
 import com.hawolt.ui.champselect.generic.impl.ChampSelectCenterUI;
 import com.hawolt.ui.champselect.generic.impl.ChampSelectSidebarUI;
 import com.hawolt.ui.champselect.impl.MatchmadeRenderInstance;
+import com.hawolt.ui.champselect.impl.shared.SelfTeamSelectSidebarUI;
 
 /**
  * Created: 03/09/2023 14:16
@@ -26,7 +27,7 @@ public class BlindChampSelectUI extends MatchmadeRenderInstance {
 
     @Override
     protected ChampSelectSidebarUI getSidebarUI(ChampSelectTeam team) {
-        return new BlindSelectSidebarUI(team);
+        return new SelfTeamSelectSidebarUI(this, team);
     }
 
     @Override

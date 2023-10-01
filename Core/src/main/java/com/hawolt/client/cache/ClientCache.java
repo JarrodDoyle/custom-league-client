@@ -92,6 +92,14 @@ public abstract class ClientCache implements ISimpleValueCache<CacheElement, Obj
         }
     }
 
+    public <T> T getCachedValueOrElse(CacheElement element, T t) {
+        try {
+            return getCachedValue(element);
+        } catch (Exception e) {
+            return t;
+        }
+    }
+
     public <T> T getCachedValue(CacheElement element) {
         if (!cache.containsKey(element) && sources.containsKey(element)) {
             Logger.info("Fetch cache value for {}", element);

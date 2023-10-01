@@ -1,5 +1,6 @@
 package com.hawolt.ui.champselect.impl.draft;
 
+import com.hawolt.ui.champselect.AbstractRenderInstance;
 import com.hawolt.ui.champselect.data.ActionObject;
 import com.hawolt.ui.champselect.data.ChampSelectTeam;
 import com.hawolt.ui.champselect.generic.impl.ChampSelectBanElement;
@@ -19,8 +20,8 @@ public class DraftSelectSidebarUI extends ChampSelectSidebarUI {
 
     private final ChampSelectBanElement[] elements = new ChampSelectBanElement[5];
 
-    public DraftSelectSidebarUI(ChampSelectTeam team) {
-        super(team);
+    public DraftSelectSidebarUI(AbstractRenderInstance renderInstance, ChampSelectTeam team) {
+        super(renderInstance, team);
         ChildUIComponent bans = new ChildUIComponent(new GridLayout(0, 5, 5, 0));
         bans.setBorder(new MatteBorder(0, 0, 1, 0, Color.DARK_GRAY));
         bans.setPreferredSize(new Dimension(0, 60));

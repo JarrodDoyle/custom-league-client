@@ -3,6 +3,7 @@ package com.hawolt.ui.queue;
 import com.hawolt.Swiftrift;
 import com.hawolt.async.Debouncer;
 import com.hawolt.client.cache.CacheElement;
+import com.hawolt.client.cache.CacheException;
 import com.hawolt.client.resources.ledge.parties.objects.data.PositionPreference;
 import com.hawolt.client.resources.ledge.preferences.PlayerPreferencesLedge;
 import com.hawolt.client.resources.ledge.preferences.objects.PreferenceType;
@@ -67,11 +68,15 @@ public class DraftGameLobby extends GameLobby implements ActionListener {
 
     public void selectPositionPreference() {
         Swiftrift.service.execute(() -> {
-            LCUPreferences lcuPreferences = swiftrift.getLeagueClient().getCachedValue(CacheElement.LCU_PREFERENCES);
-            lcuPreferences.getPartiesPositionPreference().ifPresent(preference -> {
-                main.setSelectedItem(PositionPreference.valueOf(preference.getFirstPreference()));
-                other.setSelectedItem(PositionPreference.valueOf(preference.getSecondPreference()));
-            });
+            try {
+                LCUPreferences lcuPreferences = swiftrift.getLeagueClient().getCachedValue(CacheElement.LCU_PREFERENCES);
+                lcuPreferences.getPartiesPositionPreference().ifPresent(preference -> {
+                    main.setSelectedItem(PositionPreference.valueOf(preference.getFirstPreference()));
+                    other.setSelectedItem(PositionPreference.valueOf(preference.getSecondPreference()));
+                });
+            } catch (CacheException e) {
+                Logger.warn(e.getMessage());
+            }
         });
     }
 

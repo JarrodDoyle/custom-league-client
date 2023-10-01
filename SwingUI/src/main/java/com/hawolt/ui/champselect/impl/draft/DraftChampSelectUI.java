@@ -30,7 +30,7 @@ public class DraftChampSelectUI extends MatchmadeRenderInstance implements Actio
 
     @Override
     protected ChampSelectSidebarUI getSidebarUI(ChampSelectTeam team) {
-        return new DraftSelectSidebarUI(team);
+        return new DraftSelectSidebarUI(this, team);
     }
 
     @Override

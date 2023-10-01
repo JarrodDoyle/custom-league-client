@@ -7,6 +7,7 @@ import com.hawolt.ui.champselect.AbstractRenderInstance;
 import com.hawolt.ui.champselect.data.ChampSelectType;
 import com.hawolt.ui.champselect.generic.ChampSelectRuneComponent;
 import com.hawolt.ui.champselect.generic.impl.ChampSelectBenchElement;
+import com.hawolt.ui.champselect.generic.impl.ChampSelectGameSettingUI;
 import com.hawolt.xmpp.event.objects.conversation.history.impl.IncomingMessage;
 import com.hawolt.xmpp.event.objects.presence.impl.JoinMucPresence;
 
@@ -39,6 +40,11 @@ public class CustomChampSelectUI extends AbstractRenderInstance {
     @Override
     public void setGlobalRunePanel(ChampSelectRuneComponent selection) {
 
+    }
+
+    @Override
+    public ChampSelectGameSettingUI getGameSettingUI() {
+        return null;
     }
 
     @Override

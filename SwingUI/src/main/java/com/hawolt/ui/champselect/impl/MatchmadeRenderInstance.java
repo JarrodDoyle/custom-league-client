@@ -56,6 +56,11 @@ public abstract class MatchmadeRenderInstance extends AbstractRenderInstance imp
         this.build();
     }
 
+    @Override
+    public ChampSelectGameSettingUI getGameSettingUI() {
+        return settingUI;
+    }
+
     protected abstract ChampSelectCenterUI getCenterUI(AbstractRenderInstance instance, ChampSelectType... supportedTypes);
 
     protected abstract ChampSelectSidebarUI getSidebarUI(ChampSelectTeam team);
@@ -112,7 +117,9 @@ public abstract class MatchmadeRenderInstance extends AbstractRenderInstance imp
         Logger.info("[champ-select] {}", actionObject);
         try {
             if (context == null) return;
-            LeagueRtmpClient rtmpClient = context.getChampSelectDataContext().getLeagueClient().getRTMPClient();
+            LeagueClient leagueClient = context.getChampSelectDataContext().getLeagueClient();
+            if (leagueClient == null) return;
+            LeagueRtmpClient rtmpClient = leagueClient.getRTMPClient();
             TeamBuilderService teamBuilderService = rtmpClient.getTeamBuilderService();
             teamBuilderService.updateActionV1Asynchronous(new PacketCallback() {
                 @Override

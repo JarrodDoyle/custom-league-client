@@ -42,6 +42,10 @@ public class ResourceLoader {
     private static final Set<String> hashes = new HashSet<>();
     private static final Object lock = new Object();
 
+    public static void invoke() {
+        Logger.info("{}:invoked", ResourceLoader.class.getCanonicalName());
+    }
+
     static {
         try (InputStream configStream = RunLevel.get("sql/config.json")) {
             Server h2Server = Server.createTcpServer("-ifNotExists").start();

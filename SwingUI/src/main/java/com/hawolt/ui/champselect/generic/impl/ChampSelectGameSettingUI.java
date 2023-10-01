@@ -54,16 +54,8 @@ public class ChampSelectGameSettingUI extends ChampSelectUIComponent {
         this.setLayout(new BorderLayout());
         this.setBackground(ColorPalette.backgroundColor);
         ChildUIComponent spellUI = new ChildUIComponent(new GridLayout(0, 2, 5, 0));
-        spellUI.add(spellOne = new LComboBox<>(allowed) {
-            protected void fireActionEvent() {
-                if (this.hasFocus()) super.fireActionEvent();
-            }
-        });
-        spellUI.add(spellTwo = new LComboBox<>(allowed) {
-            protected void fireActionEvent() {
-                if (this.hasFocus()) super.fireActionEvent();
-            }
-        });
+        spellUI.add(spellOne = new LComboBox<>(allowed));
+        spellUI.add(spellTwo = new LComboBox<>(allowed));
         spellUI.setBorder(new EmptyBorder(5, 5, 5, 5));
         add(spellUI, BorderLayout.EAST);
         ChildUIComponent buttonUI = new ChildUIComponent(new GridLayout(0, 4, 5, 0));
@@ -142,17 +134,6 @@ public class ChampSelectGameSettingUI extends ChampSelectUIComponent {
             if (spell.getId() == spellId) {
                 selection.setSelectedIndex(i);
                 break;
-            }
-        }
-    }
-
-    @Override
-    public void init() {
-        int targetQueueId = context.getChampSelectSettingsContext().getQueueId();
-        int[] supportedQueueIds = renderInstance.getSupportedQueueIds();
-        for (int supportedQueueId : supportedQueueIds) {
-            if (supportedQueueId == targetQueueId) {
-                this.preselectSummonerSpells(context.getChampSelectSettingsContext().getInitialSpellIds());
             }
         }
     }

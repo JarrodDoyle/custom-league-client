@@ -13,6 +13,7 @@ import com.hawolt.ui.champselect.data.GameType;
 import com.hawolt.ui.champselect.generic.ChampSelectRuneComponent;
 import com.hawolt.ui.champselect.generic.ChampSelectUIComponent;
 import com.hawolt.ui.champselect.generic.impl.ChampSelectChoice;
+import com.hawolt.ui.champselect.generic.impl.ChampSelectGameSettingUI;
 import com.hawolt.ui.champselect.generic.impl.ChampSelectSelectionElement;
 import com.hawolt.ui.generic.utility.ChildUIComponent;
 import com.hawolt.xmpp.event.objects.conversation.history.impl.IncomingMessage;
@@ -48,6 +49,8 @@ public abstract class AbstractRenderInstance extends ChampSelectUIComponent impl
     public abstract void invokeChampionFilter(String champion);
 
     public abstract void setGlobalRunePanel(ChampSelectRuneComponent selection);
+
+    public abstract ChampSelectGameSettingUI getGameSettingUI();
 
     @Override
     public void init() {

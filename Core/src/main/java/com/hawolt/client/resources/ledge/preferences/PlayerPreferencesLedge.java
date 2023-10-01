@@ -72,13 +72,13 @@ public class PlayerPreferencesLedge extends AbstractLedgeEndpoint {
         return code;
     }
 
-    private JSONObject convertYamlToJson(String yamlString) {
+    public static JSONObject convertYamlToJson(String yamlString) {
         Yaml yaml = new Yaml();
         Map<String, Object> map = yaml.load(yamlString);
         return new JSONObject(map);
     }
 
-    private String convertJsonToYaml(JSONObject jsonObject) {
+    public static String convertJsonToYaml(JSONObject jsonObject) {
         Yaml yaml = new Yaml();
         String JSONString = jsonObject.toString(4);
         Map<String, Object> map = yaml.load(JSONString);

@@ -7,6 +7,7 @@ import com.hawolt.ui.champselect.generic.impl.ChampSelectCenterUI;
 import com.hawolt.ui.champselect.generic.impl.ChampSelectHeaderUI;
 import com.hawolt.ui.champselect.generic.impl.ChampSelectSidebarUI;
 import com.hawolt.ui.champselect.impl.MatchmadeRenderInstance;
+import com.hawolt.ui.champselect.impl.shared.SelfTeamSelectSidebarUI;
 
 import java.awt.*;
 
@@ -30,7 +31,7 @@ public class ARAMChampSelectUI extends MatchmadeRenderInstance {
 
     @Override
     protected ChampSelectSidebarUI getSidebarUI(ChampSelectTeam team) {
-        return new ARAMSelectSidebarUI(team);
+        return new SelfTeamSelectSidebarUI(this, team);
     }
 
     @Override

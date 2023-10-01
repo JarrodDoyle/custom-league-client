@@ -5,8 +5,6 @@ import com.hawolt.ui.champselect.context.ChampSelectSettingsContext;
 import com.hawolt.ui.champselect.data.ChampSelectPhase;
 import com.hawolt.ui.champselect.generic.ChampSelectUIComponent;
 import com.hawolt.ui.generic.themes.ColorPalette;
-import com.hawolt.util.audio.AudioEngine;
-import com.hawolt.util.audio.Sound;
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
@@ -74,11 +72,7 @@ public abstract class ChampSelectHeaderUI extends ChampSelectUIComponent {
         this.currentTimeRemainingMillis = settingsContext.getCurrentTimeRemainingMillis();
         this.currentTotalTimeMillis = settingsContext.getCurrentTotalTimeMillis();
         this.timestamp = System.currentTimeMillis();
-        ChampSelectPhase previous = this.phase;
         this.phase = getChampSelectPhase();
-        if (phase == ChampSelectPhase.PICK && previous != ChampSelectPhase.PICK) {
-            AudioEngine.play(Sound.PICK);
-        }
     }
 
     protected abstract String getPhaseDescription(ChampSelectPhase phase);
