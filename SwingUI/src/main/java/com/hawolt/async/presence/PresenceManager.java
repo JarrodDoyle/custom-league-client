@@ -1,8 +1,10 @@
 package com.hawolt.async.presence;
 
 import com.hawolt.Swiftrift;
+import com.hawolt.async.Debouncer;
 import com.hawolt.client.LeagueClient;
 import com.hawolt.client.cache.CacheElement;
+import com.hawolt.client.cache.CacheListener;
 import com.hawolt.client.misc.MapQueueId;
 import com.hawolt.client.resources.ledge.gsm.GameServiceMessageLedge;
 import com.hawolt.client.resources.ledge.parties.PartiesLedge;
@@ -24,13 +26,15 @@ import org.json.JSONArray;
 import org.json.JSONObject;
 
 import java.util.HashMap;
+import java.util.concurrent.TimeUnit;
 
 /**
  * Created: 11/09/2023 17:08
  * Author: Twitter @hawolt
  **/
 
-public class PresenceManager implements PacketCallback, IServiceMessageListener<RiotMessageServiceMessage> {
+public class PresenceManager implements PacketCallback, IServiceMessageListener<RiotMessageServiceMessage>, CacheListener<JSONObject> {
+    private final Debouncer debouncer = new Debouncer();
     private final Swiftrift swiftrift;
     private final LeagueClient leagueClient;
     private String currentDefaultStatus;
@@ -38,6 +42,8 @@ public class PresenceManager implements PacketCallback, IServiceMessageListener<
     public PresenceManager(Swiftrift swiftrift) {
         this.swiftrift = swiftrift;
         this.leagueClient = swiftrift.getLeagueClient();
+        this.swiftrift.getLeagueClient().register(CacheElement.GAME_CREDENTIALS, this);
+        this.setIdlePresence();
     }
 
     private int getPresenceTierId(String tier) {
@@ -153,9 +159,8 @@ public class PresenceManager implements PacketCallback, IServiceMessageListener<
                     .setQueueId(String.valueOf(queueId))
                     .setGameStatus("championSelect")
                     .setMapId(MapQueueId.getMapId(queueId));
-            if (status.equals("default")) status = "dnd";
             currentDefaultStatus = "dnd";
-            set(status, builder.merge(base));
+            debouncer.debounce("presence", () -> set("default".equals(status) ? "dnd" : status, builder.merge(base)), 5, TimeUnit.SECONDS);
         });
     }
 
@@ -209,7 +214,7 @@ public class PresenceManager implements PacketCallback, IServiceMessageListener<
         }
     }
 
-    public void setIdlePresence() {
+    private void setIdlePresence() {
         leagueClient.getCachedValueOrElse(CacheElement.PRESENCE, this::configure, Logger::error).ifPresent(base -> {
             Presence.Builder builder = new Presence.Builder().setGameStatus("outOfGame");
             builder.setPTY("");
@@ -232,7 +237,7 @@ public class PresenceManager implements PacketCallback, IServiceMessageListener<
                     .setGameStatus("inQueue")
                     .setQueueId(String.valueOf(queueId));
             currentDefaultStatus = "dnd";
-            set("default".equals(status) ? "dnd" : status, builder.merge(base));
+            debouncer.debounce("presence", () -> set("default".equals(status) ? "dnd" : status, builder.merge(base)), 5, TimeUnit.SECONDS);
         });
     }
 
@@ -272,7 +277,7 @@ public class PresenceManager implements PacketCallback, IServiceMessageListener<
                         builder.setQueueId(String.valueOf(mode.getQueueId()));
                         String status = swiftrift.getHeader().getSelectedStatus();
                         currentDefaultStatus = "chat";
-                        set("default".equals(status) ? "chat" : status, builder.merge(base));
+                        debouncer.debounce("presence", () -> set("default".equals(status) ? "chat" : status, builder.merge(base)), 5, TimeUnit.SECONDS);
                     });
         });
     }
@@ -306,7 +311,7 @@ public class PresenceManager implements PacketCallback, IServiceMessageListener<
                         builder.setMapId(String.valueOf(data.getInt("mapId")));
                         String status = swiftrift.getHeader().getSelectedStatus();
                         currentDefaultStatus = "dnd";
-                        set("default".equals(status) ? "dnd" : status, builder.merge(base));
+                        debouncer.debounce("presence", () -> set("default".equals(status) ? "dnd" : status, builder.merge(base)), 5, TimeUnit.SECONDS);
                     });
         });
     }
@@ -336,11 +341,21 @@ public class PresenceManager implements PacketCallback, IServiceMessageListener<
         return summoner;
     }
 
+    
     public void changeStatus() {
         if (currentDefaultStatus == null) currentDefaultStatus = "chat";
         String status = swiftrift.getHeader().getSelectedStatus();
         leagueClient.getCachedValueOrElse(CacheElement.PRESENCE, this::configure, Logger::error).ifPresent(base -> {
-            set("default".equals(status) ? "dnd" : status, base);
+            set("default".equals(status) ? currentDefaultStatus : status, base);
         });
+    }
+    
+    @Override
+    public void onCacheUpdate (CacheElement element, JSONObject o) {
+        try{
+            setInGamePresence(o);
+        } catch (Exception e) {
+            Logger.error(e);
+        }
     }
 }

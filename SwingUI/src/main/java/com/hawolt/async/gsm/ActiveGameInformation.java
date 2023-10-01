@@ -1,6 +1,7 @@
 package com.hawolt.async.gsm;
 
 import com.hawolt.Swiftrift;
+import com.hawolt.async.presence.PresenceManager;
 import com.hawolt.client.LeagueClient;
 import com.hawolt.client.cache.CacheElement;
 import com.hawolt.client.resources.ledge.gsm.GameServiceMessageLedge;
@@ -9,7 +10,6 @@ import com.hawolt.logger.Logger;
 import com.hawolt.util.other.Launcher;
 import org.json.JSONObject;
 
-import java.io.IOException;
 
 /**
  * Created: 22/08/2023 16:53
@@ -39,7 +39,7 @@ public class ActiveGameInformation implements Runnable {
             JSONObject credentials = info.getJSONObject("playerCredentials");
             swiftrift.getLeagueClient().cache(CacheElement.GAME_CREDENTIALS, credentials);
             Launcher.launch(swiftrift.getSettingService(), platform, credentials);
-        } catch (IOException e) {
+        } catch (Exception e) {
             Logger.error(e);
         }
     }

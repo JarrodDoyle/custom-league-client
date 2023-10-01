@@ -48,9 +48,9 @@ import com.hawolt.virtual.client.RiotClientException;
 import com.hawolt.virtual.leagueclient.exception.LeagueException;
 import com.hawolt.virtual.riotclient.instance.MultiFactorSupplier;
 import com.hawolt.xmpp.core.VirtualRiotXMPPClient;
+import com.hawolt.xmpp.event.BaseObject;
 import com.hawolt.xmpp.event.EventListener;
 import com.hawolt.xmpp.event.EventType;
-import com.hawolt.xmpp.event.objects.other.PlainData;
 
 import javax.imageio.ImageIO;
 import javax.swing.*;
@@ -68,7 +68,7 @@ import java.util.concurrent.TimeUnit;
  * Author: Twitter @hawolt
  **/
 
-public class Swiftrift extends JFrame implements IClientCallback, ILoginCallback, WindowStateListener {
+public class Swiftrift extends JFrame implements IClientCallback, ILoginCallback, WindowStateListener, EventListener<BaseObject> {
     public static final ExecutorService service = ExecutorManager.registerService("pool", Executors.newCachedThreadPool());
     private static BufferedImage logo;
 
@@ -203,7 +203,6 @@ public class Swiftrift extends JFrame implements IClientCallback, ILoginCallback
     private void bootstrap(LeagueClient client) {
         this.leagueClient = client;
         this.shutdownManager = new ShutdownManager(client);
-        this.presence = new PresenceManager(this);
         this.configure(loginUI == null || loginUI.getRememberMe().isSelected());
         this.liveGameClient.register("GameStart", new GameStartHandler(this));
         this.dispose();
@@ -215,14 +214,8 @@ public class Swiftrift extends JFrame implements IClientCallback, ILoginCallback
 
     private void wrap() {
         this.layout.show(deck, "main");
-        this.leagueClient.getRTMPClient().addDefaultCallback(presence);
-        this.headerUI.getChatSidebarStatus().setPresenceManager(presence);
-        this.leagueClient.getRMSClient().getHandler().addMessageServiceListener(MessageService.GSM, presence);
-        this.leagueClient.getRMSClient().getHandler().addMessageServiceListener(MessageService.PARTIES, presence);
-        this.leagueClient.getRMSClient().getHandler().addMessageServiceListener(MessageService.TEAMBUILDER, presence);
         this.leagueClient.getRMSClient().getHandler().addMessageServiceListener(MessageService.SUMMONER, headerUI.getProfile());
         this.leagueClient.getRMSClient().getHandler().addMessageServiceListener(MessageService.GSM, new GameStartListener(this));
-        Swiftrift.service.execute(new ActiveGameInformation(this));
         GameClosedHandler handler = new GameClosedHandler(liveGameClient, this);
         this.liveGameClient.register("LOCAL_PLAYER_DEAD", handler);
         this.liveGameClient.register("ChampionDeath", handler);
@@ -232,12 +225,8 @@ public class Swiftrift extends JFrame implements IClientCallback, ILoginCallback
         VirtualRiotXMPPClient xmppClient = leagueClient.getXMPPClient();
         RMANCache.purge();
         this.chatUI.setSupplier(xmppClient);
-        xmppClient.addHandler(
-                EventType.ON_READY,
-                (EventListener<PlainData>) event -> buildSidebarUI(xmppClient)
-        );
         ChatSidebarFriendlist friendlist = chatSidebar.getChatSidebarFriendlist();
-        xmppClient.addHandler(EventType.ON_READY, o -> presence.setIdlePresence());
+        xmppClient.addHandler(EventType.ON_READY, this);
         xmppClient.addMessageListener(getLayoutManager().getChampSelectUI().getChampSelect().getChampSelectDataContext().getMessageListener());
         xmppClient.addPresenceListener(friendlist);
         xmppClient.addFriendListener(friendlist);
@@ -415,5 +404,18 @@ public class Swiftrift extends JFrame implements IClientCallback, ILoginCallback
         this.setExtendedState(JFrame.ICONIFIED);
         this.setExtendedState(JFrame.NORMAL);
         this.lastFocusRequest = System.currentTimeMillis();
+    }
+    
+    
+    @Override
+    public void onEvent (BaseObject baseObject) {
+        this.buildSidebarUI(leagueClient.getXMPPClient());
+        this.presence = new PresenceManager(this);
+        this.leagueClient.getRTMPClient().addDefaultCallback(presence);
+        this.headerUI.getChatSidebarStatus().setPresenceManager(presence);
+        this.leagueClient.getRMSClient().getHandler().addMessageServiceListener(MessageService.GSM, presence);
+        this.leagueClient.getRMSClient().getHandler().addMessageServiceListener(MessageService.PARTIES, presence);
+        this.leagueClient.getRMSClient().getHandler().addMessageServiceListener(MessageService.TEAMBUILDER, presence);
+        Swiftrift.service.execute(new ActiveGameInformation(this));
     }
 }
