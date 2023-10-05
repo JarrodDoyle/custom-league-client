@@ -18,6 +18,7 @@ import com.hawolt.rtmp.utility.PacketCallback;
 import com.hawolt.ui.chat.friendlist.ChatSidebarEssentials;
 import com.hawolt.ui.generic.component.LFlatButton;
 import com.hawolt.ui.generic.component.LLabel;
+import com.hawolt.ui.generic.component.LScrollPane;
 import com.hawolt.ui.generic.component.LTextAlign;
 import com.hawolt.ui.generic.themes.ColorPalette;
 import com.hawolt.ui.generic.utility.ChildUIComponent;
@@ -25,6 +26,7 @@ import com.hawolt.ui.generic.utility.HighlightType;
 import com.hawolt.ui.queue.pop.QueueDialog;
 import com.hawolt.util.audio.AudioEngine;
 import com.hawolt.util.audio.Sound;
+import com.hawolt.util.paint.PaintHelper;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
@@ -82,6 +84,7 @@ public class QueueWindow extends ChildUIComponent implements Runnable, PacketCal
 
     public QueueWindow(Swiftrift swiftrift) {
         super(new BorderLayout());
+        this.setBorder(new EmptyBorder(8, 8, 8, 8));
         this.swiftrift = swiftrift;
         this.add(parent = new ChildUIComponent(layout), BorderLayout.CENTER);
         this.relation.put("draft", draftGameLobby = new DraftGameLobby(swiftrift, parent, layout, this));
@@ -142,26 +145,20 @@ public class QueueWindow extends ChildUIComponent implements Runnable, PacketCal
         JSONArray array = new JSONArray(body);
         Map<String, List<JSONObject>> map = getQueueMapping(array);
         //int count = (int) map.keySet().stream().filter(o -> !o.contains("TUTORIAL")).count();
-        ChildUIComponent modes = new ChildUIComponent(new GridLayout(0, 3, 5, 0));
-        modes.setBorder(new EmptyBorder(5, 5, 5, 5));
+
+        ChildUIComponent modes = new ChildUIComponent(new GridBagLayout());
+        modes.setBackground(ColorPalette.cardColor);
+        GridBagConstraints constraints = new GridBagConstraints();
+        constraints.fill = GridBagConstraints.HORIZONTAL;
+        constraints.gridy = 0;
+        constraints.weightx = 1.0;
+
         main.setBackground(ColorPalette.backgroundColor);
-        modes.setBackground(ColorPalette.backgroundColor);
         for (String key : map.keySet()) {
             LLabel label = new LLabel(key, LTextAlign.CENTER, true);
-            ChildUIComponent parent = new ChildUIComponent(new BorderLayout());
-            ChildUIComponent grid = new ChildUIComponent(new GridLayout(0, 1, 0, 5)) {
-                @Override
-                protected void paintComponent(Graphics g) {
-                    Graphics2D g2d = (Graphics2D) g.create();
-                    g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-                    g2d.setColor(ColorPalette.backgroundColor);
-                    g2d.fillRect(getX(), getY(), getWidth(), getHeight());
-                    g2d.setColor(ColorPalette.cardColor);
-                    g2d.fillRoundRect(getX(), getY(), getWidth(), getHeight(), ColorPalette.CARD_ROUNDING, ColorPalette.CARD_ROUNDING);
-                    g2d.dispose();
-                }
-            };
-            parent.setBackground(ColorPalette.backgroundColor);
+            ChildUIComponent grid = new ChildUIComponent(new GridLayout(0, 1, 0, 4));
+            grid.setBackground(ColorPalette.cardColor);
+            parent.setBackground(ColorPalette.cardColor);
             grid.add(label);
 
             for (JSONObject object : map.get(key)) {
@@ -169,16 +166,36 @@ public class QueueWindow extends ChildUIComponent implements Runnable, PacketCal
                 if (name.contains("CLASH") || name.contains("TFT-TUTORIAL")) continue;
                 String modeName = mapping.getOrDefault(object.getInt("id"), "UNKNOWN");
                 LFlatButton button = new LFlatButton(modeName.isEmpty() ? name : modeName, LTextAlign.CENTER, HighlightType.COMPONENT);
-                button.setPreferredSize(new Dimension(grid.getWidth() / 4, 30));
+                button.setRounding(ColorPalette.BUTTON_SMALL_ROUNDING);
                 button.setActionCommand(object.toString());
                 button.addActionListener(e -> createMatchMadeLobby(e, key));
                 grid.add(button);
             }
-            parent.add(grid, BorderLayout.NORTH);
-            parent.setPreferredSize(new Dimension(modes.getWidth() / 4, 0));
-            modes.add(parent);
+            modes.add(grid, constraints);
+            constraints.insets = new Insets(16, 0, 0, 0);
+            constraints.gridy += 1;
         }
-        main.add(modes, BorderLayout.CENTER);
+
+        ChildUIComponent scrollContainer = new ChildUIComponent(new BorderLayout());
+        scrollContainer.setBackground(ColorPalette.cardColor);
+        scrollContainer.add(modes, BorderLayout.NORTH);
+
+        LScrollPane modesPanel = new LScrollPane(scrollContainer) {
+            @Override
+            protected void paintComponent(Graphics g) {
+                super.paintComponent(g);
+                Dimension dimensions = getSize();
+
+                // TODO: Set anti-aliasing
+                g.setColor(ColorPalette.cardColor);
+                PaintHelper.roundedSquare((Graphics2D) g, 0, 0, dimensions.width, dimensions.height, ColorPalette.CARD_ROUNDING, true, true, true, true);
+            }
+        };
+        modesPanel.setBorder(new EmptyBorder(8, 8, 8, 8));
+        modesPanel.setBackground(ColorPalette.backgroundColor);
+        modesPanel.getVerticalScrollBar().setUnitIncrement(15);
+
+        main.add(modesPanel, BorderLayout.CENTER);
         this.parent.add("modes", main);
         layout.show(parent, "modes");
         revalidate();
