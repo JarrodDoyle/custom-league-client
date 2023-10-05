@@ -16,6 +16,8 @@ import com.hawolt.cli.ParserException;
 import com.hawolt.client.IClientCallback;
 import com.hawolt.client.LeagueClient;
 import com.hawolt.client.RiotClient;
+import com.hawolt.client.cache.CacheElement;
+import com.hawolt.client.cache.JWT;
 import com.hawolt.client.misc.ClientConfiguration;
 import com.hawolt.generic.token.impl.StringTokenSupplier;
 import com.hawolt.http.integrity.Diffuser;
@@ -32,6 +34,7 @@ import com.hawolt.ui.chat.window.ChatUI;
 import com.hawolt.ui.generic.dialog.SwiftDialog;
 import com.hawolt.ui.generic.utility.ChildUIComponent;
 import com.hawolt.ui.generic.utility.WindowCloseHandler;
+import com.hawolt.ui.layout.LayoutComponent;
 import com.hawolt.ui.layout.LayoutHeader;
 import com.hawolt.ui.layout.LayoutManager;
 import com.hawolt.ui.login.ILoginCallback;
@@ -52,6 +55,7 @@ import com.hawolt.xmpp.core.VirtualRiotXMPPClient;
 import com.hawolt.xmpp.event.BaseObject;
 import com.hawolt.xmpp.event.EventListener;
 import com.hawolt.xmpp.event.EventType;
+import org.json.JSONObject;
 
 import javax.imageio.ImageIO;
 import javax.swing.*;
@@ -60,6 +64,7 @@ import java.awt.event.WindowEvent;
 import java.awt.event.WindowStateListener;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
+import java.util.Base64;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
@@ -240,7 +245,8 @@ public class Swiftrift extends JFrame implements IClientCallback, ILoginCallback
     public void onClient(LeagueClient client) {
         this.bootstrap(client);
         try {
-            this.buildUI(leagueClient);
+            this.buildUI();
+            this.buildConditionalUI(leagueClient);
             this.wrap();
         } catch (Exception e) {
             Logger.error("Failed whilst creating UI");
@@ -258,7 +264,7 @@ public class Swiftrift extends JFrame implements IClientCallback, ILoginCallback
         this.animationVisualizer.start();
     }
 
-    private void buildUI(LeagueClient client) {
+    private void buildUI() {
         main = new ChildUIComponent(new BorderLayout());
         deck.add("main", main);
         chatUI = new ChatUI();
@@ -274,6 +280,18 @@ public class Swiftrift extends JFrame implements IClientCallback, ILoginCallback
         main.add(headerUI = new LayoutHeader(manager, this), BorderLayout.NORTH);
         manager.setHeader(headerUI);
         mainUI.revalidate();
+    }
+
+    private void buildConditionalUI(LeagueClient leagueClient) throws IOException {
+        JSONObject config = leagueClient.getVirtualLeagueClientInstance().getPlayerClientConfig().load();
+        if (config.has("lol.client_settings.yourshop")) {
+            JSONObject yourShop = config.getJSONObject("lol.client_settings.yourshop");
+            if (config.has("lol.client_settings.yourshop")) {
+                if (!yourShop.has("Active") || !yourShop.getBoolean("Active")) return;
+                headerUI.reveal(LayoutComponent.YOUR_SHOP);
+                manager.getYourShop().build(leagueClient.getCachedValue(CacheElement.PERSONALIZED_OFFERS));
+            }
+        }
     }
 
     private void buildSidebarUI(VirtualRiotXMPPClient xmppClient) {

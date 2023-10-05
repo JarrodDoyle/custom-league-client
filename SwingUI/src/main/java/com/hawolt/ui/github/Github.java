@@ -18,9 +18,9 @@ import java.util.Date;
 
 public class Github {
 
-    private static final String BASE_URL = "https://api.github.com/repos/hawolt/custom-league-client";
+    private static final String BASE_URL = "https://api.github.com/repos/hawolt/SwiftRift";
 
-    private static final String BUG_URL = "https://github.com/hawolt/custom-league-client/issues/new?assignees=&labels=bug&projects=&template=bug_report.md&title=%5BBUG%5D";
+    private static final String BUG_URL = "https://github.com/hawolt/SwiftRift/issues/new?assignees=&labels=bug&projects=&template=bug_report.md&title=%5BBUG%5D";
 
     private static JSONObject latestRelease;
     private static JSONArray releases;

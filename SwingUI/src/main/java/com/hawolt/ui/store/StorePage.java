@@ -13,7 +13,6 @@ import com.hawolt.ui.generic.component.LScrollPane;
 import com.hawolt.ui.generic.themes.ColorPalette;
 import com.hawolt.ui.generic.utility.ChildUIComponent;
 import org.jetbrains.annotations.NotNull;
-import org.json.JSONObject;
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
@@ -35,9 +34,10 @@ import java.util.concurrent.TimeUnit;
 public class StorePage extends ChildUIComponent implements IStorePage {
 
     private final StoreElementComparator alphabeticalComparator = new StoreElementComparator(StoreSortProperty.NAME, SortOrder.ASCENDING);
+    private boolean chromaFilter, tftFilter, ownedFilter, saleFilter = false;
+    private final Map<Long, StoreElement> storeElementMap = new HashMap<>();
     private final String[] tft_options = {"TACTICIANS", "ARENA SKINS"};
     private final String[] skins_options = {"SKINS", "CHROMAS"};
-    private final Map<Long, StoreElement> map = new HashMap<>();
     private final Debouncer debouncer = new Debouncer();
     private final StoreElementComparator comparator;
     private final ChildUIComponent inputPanel;
@@ -45,9 +45,8 @@ public class StorePage extends ChildUIComponent implements IStorePage {
     private final ChildUIComponent grid;
     private final LeagueClient client;
     private final List<Long> owned;
-    private final String name;
-    private boolean chromaFilter, tftFilter, ownedFilter, saleFilter = false;
     private String filter = "";
+    private final String name;
 
     public StorePage(LeagueClient client, String name, List<Long> owned, StoreSortProperty... properties) {
         super(new BorderLayout(0, 5));
@@ -109,7 +108,7 @@ public class StorePage extends ChildUIComponent implements IStorePage {
             LComboBox<String> options = new LComboBox<>(this.skins_options);
             options.addItemListener(listener -> {
                 chromaFilter = Objects.equals(options.getSelectedItem(), this.skins_options[1]);
-                debouncer.debounce("chromaFilter", this::updateElements, 150, TimeUnit.MILLISECONDS);
+                debouncer.debounce("chromaFilter", this::updateStoreElements, 150, TimeUnit.MILLISECONDS);
             });
             inputPanel.add(options);
         }
@@ -117,7 +116,7 @@ public class StorePage extends ChildUIComponent implements IStorePage {
             LComboBox<String> options = new LComboBox<>(this.tft_options);
             options.addItemListener(listener -> {
                 tftFilter = Objects.equals(options.getSelectedItem(), this.tft_options[1]);
-                debouncer.debounce("tftFilter", this::updateElements, 150, TimeUnit.MILLISECONDS);
+                debouncer.debounce("tftFilter", this::updateStoreElements, 150, TimeUnit.MILLISECONDS);
             });
             inputPanel.add(options);
         }
@@ -127,7 +126,7 @@ public class StorePage extends ChildUIComponent implements IStorePage {
             @Override
             public void keyReleased(KeyEvent e) {
                 filter = search.getText().toLowerCase();
-                debouncer.debounce("searchField", () -> updateElements(), 200, TimeUnit.MILLISECONDS);
+                debouncer.debounce("searchField", () -> updateStoreElements(), 200, TimeUnit.MILLISECONDS);
             }
         });
         inputPanel.add(search);
@@ -135,7 +134,7 @@ public class StorePage extends ChildUIComponent implements IStorePage {
         LCheckBox ownedCheck = new LCheckBox("Show Owned");
         ownedCheck.addActionListener(listener -> {
             ownedFilter = !ownedFilter;
-            debouncer.debounce("ownedFilter", this::updateElements, 200, TimeUnit.MILLISECONDS);
+            debouncer.debounce("ownedFilter", this::updateStoreElements, 200, TimeUnit.MILLISECONDS);
         });
         inputPanel.add(ownedCheck);
 
@@ -144,7 +143,7 @@ public class StorePage extends ChildUIComponent implements IStorePage {
         LCheckBox saleCheck = new LCheckBox("On Sale");
         saleCheck.addActionListener(listener -> {
             saleFilter = !saleFilter;
-            debouncer.debounce("saleFilter", this::updateElements, 200, TimeUnit.MILLISECONDS);
+            debouncer.debounce("saleFilter", this::updateStoreElements, 200, TimeUnit.MILLISECONDS);
         });
         inputPanel.add(saleCheck);
 
@@ -162,7 +161,7 @@ public class StorePage extends ChildUIComponent implements IStorePage {
             StoreSortOption option = sortBox.getItemAt(sortBox.getSelectedIndex());
             comparator.setProperty(option.property());
             comparator.setOrder(option.order());
-            updateElements();
+            updateStoreElements();
         });
         return sortBox;
     }
@@ -185,28 +184,27 @@ public class StorePage extends ChildUIComponent implements IStorePage {
                 if (item.getCorrectRiotPointCost() == 0 && !item.isBlueEssencePurchaseAvailable()) continue;
                 if (item.hasVariantId())
                     if (owned.contains(item.getVariantId())) item.setVariantOwned(true);
-                JSONObject object = item.asJSON();
-                long itemId = object.getLong("itemId");
+                long itemId = item.getItemId();
                 StoreElement element = new StoreElement(client, this, item, isOwned(item));
-                map.put(itemId, element);
+                storeElementMap.put(itemId, element);
                 grid.add(element);
             }
         } catch (Exception e) {
             Logger.error(e);
         }
-        updateElements();
+        updateStoreElements();
     }
 
     @Override
     public void removeStoreElement(StoreElement component) {
         grid.remove(component);
-        map.remove(component.getItem().getItemId());
-        updateElements();
+        storeElementMap.remove(component.getItem().getItemId());
+        updateStoreElements();
     }
 
-    public void updateElements() {
+    public void updateStoreElements() {
         grid.removeAll();
-        map.values()
+        storeElementMap.values()
                 .stream()
                 .sorted(this.alphabeticalComparator)
                 .sorted(this.comparator)

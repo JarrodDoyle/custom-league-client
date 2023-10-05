@@ -106,6 +106,7 @@ public class ResourceLoader {
                     pending.put(hash, new ArrayList<>());
                     List<ResourceConsumer<?, byte[]>> list = pending.get(hash);
                     if (list != null) {
+                        list.add(consumer);
                         service.execute(runnable);
                     } else {
                         load(path, consumer, runnable);

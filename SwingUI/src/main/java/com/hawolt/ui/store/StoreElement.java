@@ -66,6 +66,7 @@ public class StoreElement extends ChildUIComponent implements IStoreElement {
         GridBagConstraints gbc = new GridBagConstraints();
         ChildUIComponent nameComponent = new ChildUIComponent(new GridLayout(1, 0, 0, 0));
         LTextPane name = new LTextPane(this.item.getName());
+        name.setBackground(ColorPalette.cardColor);
         nameComponent.add(name);
         gbc.insets = new Insets(0, 0, 0, 0);
         gbc.anchor = GridBagConstraints.PAGE_START;

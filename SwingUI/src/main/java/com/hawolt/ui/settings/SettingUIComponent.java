@@ -265,9 +265,7 @@ public class SettingUIComponent extends ChildUIComponent {
         int pos = 0;
         for (int i = 0; i < c; i++) {
             StringBuilder builder = new StringBuilder();
-            for (int j = 0; j < contributorsList.length() / c; j++) {
-                //TODO handle this properly
-                if (pos >= contributorsList.length()) break;
+            for (int j = 0; j < 5 && pos < contributorsList.length(); j++) {
                 JSONObject contributor = contributorsList.getJSONObject(pos);
                 pos++;
                 builder.append(contributor.getString("login")).append("\n");

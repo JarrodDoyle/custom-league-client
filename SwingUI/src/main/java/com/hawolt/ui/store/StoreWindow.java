@@ -3,6 +3,8 @@ package com.hawolt.ui.store;
 import com.hawolt.Swiftrift;
 import com.hawolt.client.LeagueClient;
 import com.hawolt.client.cache.CacheElement;
+import com.hawolt.client.resources.ledge.personalizedoffers.objects.PersonalOfferCatalog;
+import com.hawolt.client.resources.ledge.personalizedoffers.objects.PersonalizedOfferItem;
 import com.hawolt.client.resources.ledge.store.objects.InventoryType;
 import com.hawolt.client.resources.ledge.store.objects.StoreCatalog;
 import com.hawolt.client.resources.ledge.store.objects.StoreItem;

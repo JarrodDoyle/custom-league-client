@@ -19,14 +19,15 @@ import java.util.List;
 public class StoreItem {
     private final List<Price> prices = new ArrayList<>();
     private int discountCostBE, discountCostRP, bundleDiscountMinCost;
-    private String offerId, name, description, tags;
     private long itemId, variantId, variantBundleId;
+    private String offerId, name, description;
     private SubInventoryType subInventoryType;
     private float discountBE, discountRP;
     private boolean active, variantOwned;
     private InventoryType inventoryType;
     private JSONObject object;
     private Date releaseDate;
+    private JSONArray tags;
 
     public StoreItem(JSONArray array) {
         JSONObject item = array.getJSONObject(0);
@@ -84,11 +85,11 @@ public class StoreItem {
         return object;
     }
 
-    public String getTags() {
+    public JSONArray getTags() {
         return tags;
     }
 
-    public void setTags(String tags) {
+    public void setTags(JSONArray tags) {
         this.tags = tags;
     }
 

@@ -17,6 +17,8 @@ public class ColorPalette {
     public static Color textColor = new Color(255, 255, 255);
     public static Color secondaryTextColor = new Color(255, 255, 255);
     public static Color cardColor = new Color(38, 44, 52);
+    public static Color discountColor = new Color(179, 140, 69);
+    public static Color oldPriceColor = new Color(110, 110, 128);
     public static Color dropdownColor = new Color(38, 44, 52);
     public static Color friendDND = new Color(194, 54, 22);
     public static Color friendOffline = new Color(113, 128, 147);

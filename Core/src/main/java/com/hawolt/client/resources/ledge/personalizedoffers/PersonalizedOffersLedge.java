@@ -1,6 +1,7 @@
 package com.hawolt.client.resources.ledge.personalizedoffers;
 
 import com.hawolt.client.LeagueClient;
+import com.hawolt.client.cache.CacheElement;
 import com.hawolt.client.resources.ledge.AbstractLedgeEndpoint;
 import com.hawolt.generic.Constant;
 import com.hawolt.http.OkHttp3Client;
@@ -70,6 +71,7 @@ public class PersonalizedOffersLedge extends AbstractLedgeEndpoint {
     }
 
     public JSONObject offers() throws IOException {
+        if (client.isCached(CacheElement.PERSONALIZED_OFFERS)) return client.getCachedValue(CacheElement.PERSONALIZED_OFFERS);
         HttpUrl url = new HttpUrl.Builder()
                 .scheme("https")
                 .host(base.substring(base.lastIndexOf('/') + 1))

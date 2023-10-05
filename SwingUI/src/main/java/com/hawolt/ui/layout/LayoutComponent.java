@@ -6,7 +6,26 @@ package com.hawolt.ui.layout;
  **/
 
 public enum LayoutComponent {
-    HOME, STORE, PLAY, PROFILE, CHAMPSELECT, RECONNECT;
+    HOME(true),
+    STORE(true),
+    PLAY(true),
+    PROFILE(true),
+    CHAMPSELECT(true),
+    YOUR_SHOP(false),
+    RECONNECT(false);
+    private final boolean defaultComponent;
+
+    LayoutComponent(boolean defaultComponent) {
+        this.defaultComponent = defaultComponent;
+    }
+
+    public boolean isDefaultComponent() {
+        return defaultComponent;
+    }
+
+    public String getPrettyName() {
+        return name().replace("_", " ");
+    }
 
     @Override
     public String toString() {

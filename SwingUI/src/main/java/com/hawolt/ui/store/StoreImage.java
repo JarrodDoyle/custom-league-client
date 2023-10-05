@@ -131,7 +131,7 @@ public class StoreImage extends JComponent implements IStoreImage, ResourceConsu
             g2.setColor(Color.BLACK);
             g2.drawOval(2, 2, 44, 44);
             g2.drawOval(6, 6, 36, 36);
-            g2.setColor(new Color(179, 140, 69));
+            g2.setColor(ColorPalette.discountColor);
             g2.setStroke(new BasicStroke(3));
             g2.drawOval(4, 4, 40, 40);
             g2.setColor(Color.WHITE);

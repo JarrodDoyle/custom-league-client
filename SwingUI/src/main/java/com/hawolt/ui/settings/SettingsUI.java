@@ -168,7 +168,7 @@ public class SettingsUI extends ChildUIComponent {
     private SettingsPage newClientAboutPage() {
         SettingsPage result = new SettingsPage();
         result.add(SettingUIComponent.createTagComponent("About"));
-        result.add(SettingUIComponent.createAboutComponent("Swift-Rift-Crew"));
+        result.add(SettingUIComponent.createAboutComponent("SwiftRift-Crew"));
         return result;
     }
 

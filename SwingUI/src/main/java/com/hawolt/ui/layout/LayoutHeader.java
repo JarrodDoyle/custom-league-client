@@ -96,9 +96,9 @@ public class LayoutHeader extends ChildUIComponent {
     }
 
     public LFlatButton createHeaderComponent(LayoutComponent component) {
-        LFlatButton button = new LFlatButton(component.name().replace("_", " "), LTextAlign.CENTER, HighlightType.TEXT);
+        LFlatButton button = new LFlatButton(component.getPrettyName(), LTextAlign.CENTER, HighlightType.TEXT);
         button.addActionListener(listener -> selectAndShowComponent(component));
-        if (button.getText().equals("RECONNECT")) button.setVisible(false);
+        if (!component.isDefaultComponent()) button.setVisible(false);
         map.put(component, button);
         return button;
     }

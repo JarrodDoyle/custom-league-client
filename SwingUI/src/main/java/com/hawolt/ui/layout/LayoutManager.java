@@ -9,6 +9,7 @@ import com.hawolt.ui.profile.ProfileWindow;
 import com.hawolt.ui.queue.QueueWindow;
 import com.hawolt.ui.reconnect.ReconnectWindow;
 import com.hawolt.ui.store.StoreWindow;
+import com.hawolt.ui.yourshop.YourShopWindow;
 
 import java.awt.*;
 
@@ -24,6 +25,7 @@ public class LayoutManager extends ChildUIComponent implements ILayoutManager {
     private final QueueWindow queue;
     private final StoreWindow store;
     private final ProfileWindow profile;
+    private final YourShopWindow yourShop;
     private final ChampSelectUI champSelect;
     private LayoutHeader header;
 
@@ -39,6 +41,7 @@ public class LayoutManager extends ChildUIComponent implements ILayoutManager {
         this.center.add("play", queue = new QueueWindow(swiftrift));
         this.center.add("reconnect", new ReconnectWindow(swiftrift));
         this.center.add("profile", profile = new ProfileWindow(swiftrift));
+        this.center.add("your_shop", yourShop = new YourShopWindow(client));
         this.center.add("champselect", champSelect = new ChampSelectUI(swiftrift));
         layout.show(center, "github");
     }
@@ -70,6 +73,11 @@ public class LayoutManager extends ChildUIComponent implements ILayoutManager {
 
     public StoreWindow getStore() {
         return store;
+    }
+
+
+    public YourShopWindow getYourShop() {
+        return yourShop;
     }
 
     @Override

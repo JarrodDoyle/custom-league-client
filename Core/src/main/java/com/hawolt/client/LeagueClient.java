@@ -31,6 +31,7 @@ import com.hawolt.virtual.leagueclient.instance.IVirtualLeagueClientInstance;
 import com.hawolt.virtual.riotclient.client.IVirtualRiotClient;
 import com.hawolt.virtual.riotclient.instance.IVirtualRiotClientInstance;
 import com.hawolt.xmpp.core.VirtualRiotXMPPClient;
+import org.json.JSONObject;
 
 import javax.imageio.ImageIO;
 import java.util.LinkedList;
@@ -79,6 +80,7 @@ public class LeagueClient extends ClientCache implements PacketCallback {
         cache(CacheElement.ACCOUNT_ID, getVirtualLeagueClientInstance().getUserInformation().getUserInformationLeague().getCUID());
         cache(CacheElement.SUMMONER_ID, getVirtualLeagueClientInstance().getUserInformation().getUserInformationLeagueAccount().getSummonerId());
         setElementSource(CacheElement.STORE_CATALOG, (ExceptionalFunction<LeagueClient, StoreCatalog>) client -> ledge.getStore().catalogV1());
+        setElementSource(CacheElement.PERSONALIZED_OFFERS, (ExceptionalFunction<LeagueClient, JSONObject>) client -> ledge.getPersonalizedOffers().offers());
         setElementSource(CacheElement.INVENTORY_TOKEN, (ExceptionalFunction<LeagueClient, String>) client -> ledge.getInventoryService().getInventoryToken());
         setElementSource(CacheElement.RANKED_STATISTIC, (ExceptionalFunction<LeagueClient, RankedStatistic>) client -> ledge.getLeague().getRankedStats(getVirtualRiotClient().getRiotClientUser().getPUUID()));
         setElementSource(CacheElement.PROFILE, (ExceptionalFunction<LeagueClient, SummonerProfile>) client -> ledge.getSummoner().resolveSummonerProfile(getVirtualRiotClient().getRiotClientUser().getPUUID()));

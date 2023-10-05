@@ -1,5 +1,6 @@
 package com.hawolt.client.resources.ledge.store.objects;
 
+import org.json.JSONArray;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
@@ -18,14 +19,27 @@ public class StoreCatalog extends HashMap<InventoryType, HashMap<Long, StoreItem
         for (StoreItem storeItem : list) {
             JSONObject item = storeItem.asJSON();
             if (item.has("tags")) {
-                storeItem.setTags(item.getJSONArray("tags").toString());
-                String tags = storeItem.getTags();
-                if (tags.contains("skin_variant")) {
-                    long variantId = Long.parseLong(tags.substring(45, 60).replaceAll("[^0-9]", ""));
-                    storeItem.setVariantId(variantId);
-                    long variantBundleId = Long.parseLong(tags.substring(75, 90).replaceAll("[^0-9]", ""));
-                    storeItem.setVariantBundleId(variantBundleId);
-                    JSONObject variantBundle = get(InventoryType.BUNDLES).get(variantBundleId).asJSON();
+                storeItem.setTags(item.getJSONArray("tags"));
+                JSONArray tags = storeItem.getTags();
+                for (int i = 0; i < tags.length(); i++) {
+                    Object o = tags.get(i);
+                    if (!(o instanceof String tag)) continue;
+                    if (tag.contains("skin_variant_skin")) {
+                        String tmp = tag.replaceAll("[^0-9]", "");
+                        if (!tmp.isEmpty()) {
+                            long variantId = Long.parseLong(tmp);
+                            storeItem.setVariantId(variantId);
+                        }
+                    } else if (tag.contains("skin_variant_bundle")) {
+                        String tmp = tag.replaceAll("[^0-9]", "");
+                        if (!tmp.isEmpty()) {
+                            long variantBundleId = Long.parseLong(tag.replaceAll("[^0-9]", ""));
+                            storeItem.setVariantBundleId(variantBundleId);
+                        }
+                    }
+                }
+                if (storeItem.getVariantBundleId() != 0L) {
+                    JSONObject variantBundle = get(InventoryType.BUNDLES).get(storeItem.getVariantBundleId()).asJSON();
                     int bundleDiscountMinCost = variantBundle.getInt("bundleDiscountMinCost");
                     storeItem.setBundleDiscountMinCost(bundleDiscountMinCost);
                 }
