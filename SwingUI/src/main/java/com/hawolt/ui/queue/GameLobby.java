@@ -54,7 +54,6 @@ public abstract class GameLobby extends ChildUIComponent implements IServiceMess
     public GameLobby(Swiftrift swiftrift, Container parent, CardLayout layout, QueueWindow queueWindow) {
         super(new BorderLayout());
 
-        createGrid(component);
         ChildUIComponent newButton = new ChildUIComponent(new BorderLayout());
         this.swiftrift = swiftrift;
         this.swiftrift.getLeagueClient().getRMSClient().getHandler().addMessageServiceListener(MessageService.PARTIES, this);
@@ -164,9 +163,13 @@ public abstract class GameLobby extends ChildUIComponent implements IServiceMess
             PartiesRegistration registration = new PartiesRegistration(payload.getJSONObject("player"));
             puuid = registration.getPUUID();
             party = registration.getCurrentParty();
-            List<PartyParticipant> partyParticipants = party.getPlayers();
             if (party == null) return;
+            PartyGameMode mode = party.getPartyGameMode();
+            if (mode == null) return;
+            queueId = mode.getQueueId();
+            createGrid(component);
             PartyRestriction restriction = party.getPartyRestriction();
+            List<PartyParticipant> partyParticipants = party.getPlayers();
             if (restriction != null) handleGatekeeperRestriction(restriction.getRestrictionList());
             partyParticipants.stream().filter(participant -> participant.getPUUID().equals(puuid)).findFirst().ifPresent(self -> {
                 SummonerLedge summonerLedge = swiftrift.getLeagueClient().getLedge().getSummoner();

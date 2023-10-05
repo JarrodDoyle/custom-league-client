@@ -1,5 +1,6 @@
 package com.hawolt;
 
+import com.hawolt.async.Debouncer;
 import com.hawolt.async.ExecutorManager;
 import com.hawolt.async.gsm.ActiveGameInformation;
 import com.hawolt.async.gsm.GameClosedHandler;
@@ -43,7 +44,6 @@ import com.hawolt.ui.settings.SettingsUI;
 import com.hawolt.util.audio.AudioEngine;
 import com.hawolt.util.discord.RichPresence;
 import com.hawolt.util.os.OperatingSystem;
-import com.hawolt.util.os.SystemManager;
 import com.hawolt.util.other.StaticConstant;
 import com.hawolt.util.paint.animation.AnimationVisualizer;
 import com.hawolt.util.paint.animation.impl.impl.SpinningAnimation;
@@ -64,6 +64,7 @@ import java.awt.event.WindowEvent;
 import java.awt.event.WindowStateListener;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
+import java.util.Optional;
 import java.util.Base64;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -76,6 +77,7 @@ import java.util.concurrent.TimeUnit;
 
 public class Swiftrift extends JFrame implements IClientCallback, ILoginCallback, WindowStateListener, EventListener<BaseObject> {
     public static final ExecutorService service = ExecutorManager.registerService("pool", Executors.newCachedThreadPool());
+    public static final Debouncer debouncer = new Debouncer();
     private static BufferedImage logo;
 
     static {
@@ -90,10 +92,11 @@ public class Swiftrift extends JFrame implements IClientCallback, ILoginCallback
         }
     }
 
-    private final LiveGameClient liveGameClient = new LiveGameClient(1000);
-    private SettingService settingService;
+    private final LiveGameClient liveGameClient = new LiveGameClient(100);
     private ShutdownManager shutdownManager;
+    private SettingService settingService;
     private ChildUIComponent deck, main;
+    private RichPresence richPresence;
     private LeagueClient leagueClient;
     private PresenceManager presence;
     private ChatSidebar chatSidebar;
@@ -114,6 +117,10 @@ public class Swiftrift extends JFrame implements IClientCallback, ILoginCallback
         this.addWindowStateListener(this);
         this.addWindowListener(new WindowCloseHandler(this));
         this.setDefaultCloseOperation(WindowConstants.DO_NOTHING_ON_CLOSE);
+    }
+
+    private void setRichPresenceInstance(RichPresence richPresence) {
+        this.richPresence = richPresence;
     }
 
     private static void printLaunchDetail(String[] args) {
@@ -148,21 +155,8 @@ public class Swiftrift extends JFrame implements IClientCallback, ILoginCallback
         handleCommandLine(args);
         RMANCache.preload();
         AudioEngine.install();
-        Swiftrift.service.execute(() -> {
-            String processName = switch (OperatingSystem.getOperatingSystemType()) {
-                case MAC -> "Discord.app";
-                case LINUX -> "Discord";
-                case WINDOWS -> "Discord.exe";
-                default -> null;
-            };
-            try {
-                if (processName == null || !SystemManager.getInstance().isProcessRunning(processName)) return;
-                RichPresence.show();
-            } catch (IOException e) {
-                Logger.error(e);
-            }
-        });
         Swiftrift swiftrift = new Swiftrift(StaticConstant.PROJECT);
+        RichPresence.create().ifPresent(swiftrift::setRichPresenceInstance);
         swiftrift.setIconImage(logo);
         swiftrift.settingService = new SettingManager();
         swiftrift.loginUI = LoginUI.create(swiftrift);
@@ -348,6 +342,14 @@ public class Swiftrift extends JFrame implements IClientCallback, ILoginCallback
 
     public ShutdownManager getShutdownManager() {
         return shutdownManager;
+    }
+
+    public PresenceManager getPresence() {
+        return presence;
+    }
+
+    public Optional<RichPresence> getRichPresence() {
+        return Optional.ofNullable(richPresence);
     }
 
     private void showFailureDialog(String message) {

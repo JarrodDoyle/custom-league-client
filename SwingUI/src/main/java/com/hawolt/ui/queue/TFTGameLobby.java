@@ -24,16 +24,20 @@ public class TFTGameLobby extends GameLobby {
 
     @Override
     public SummonerComponent getSummonerComponentAt(int id) {
-        int index;
-        if (id == 0) index = 1;
-        else if (id == 1) index = 2;
-        else if (id == 2) index = 0;
-        else if (id == 3) index = 3;
-        else if (id == 4) index = 5;
-        else if (id == 5) index = 6;
-        else if (id == 6) index = 4;
-        else index = 7;
-        return (SummonerComponent) grid.getComponent(index);
+        if (queueId == 1160) {
+            return (SummonerComponent) grid.getComponent(id);
+        } else {
+            int index;
+            if (id == 0) index = 1;
+            else if (id == 1) index = 2;
+            else if (id == 2) index = 0;
+            else if (id == 3) index = 3;
+            else if (id == 4) index = 5;
+            else if (id == 5) index = 6;
+            else if (id == 6) index = 4;
+            else index = 7;
+            return (SummonerComponent) grid.getComponent(index);
+        }
     }
 
     @Override
@@ -100,9 +104,12 @@ public class TFTGameLobby extends GameLobby {
 
     @Override
     protected void createGrid(ChildUIComponent component) {
-        grid = new ChildUIComponent(new GridLayout(2, 4));
-        for (int i = 0; i < 8; i++) grid.add(new SummonerComponent());
-        grid.setBackground(Color.YELLOW);
+        int girdIndicator = queueId == 1160 ? 1 : 2;
+        int supportedPlayerAmount = queueId == 1160 ? 2 : 8;
+        grid = new ChildUIComponent(new GridLayout(girdIndicator, 2 * girdIndicator));
+        for (int i = 0; i < supportedPlayerAmount; i++) {
+            grid.add(new SummonerComponent());
+        }
         component.add(grid, BorderLayout.CENTER);
     }
 }

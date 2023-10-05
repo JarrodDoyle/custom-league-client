@@ -74,10 +74,11 @@ public class QueueWindow extends ChildUIComponent implements Runnable, PacketCal
     private final ChildUIComponent main = new ChildUIComponent(new BorderLayout());
     private final Map<String, GameLobby> relation = new HashMap<>();
     private final CardLayout layout = new CardLayout();
-    private final Swiftrift swiftrift;
-    private final ChildUIComponent parent;
     private final DraftGameLobby draftGameLobby;
     private final TFTGameLobby tftGameLobby;
+    private final ChildUIComponent parent;
+    private final Swiftrift swiftrift;
+    private String currentMode;
 
     public QueueWindow(Swiftrift swiftrift) {
         super(new BorderLayout());
@@ -85,7 +86,7 @@ public class QueueWindow extends ChildUIComponent implements Runnable, PacketCal
         this.add(parent = new ChildUIComponent(layout), BorderLayout.CENTER);
         this.relation.put("draft", draftGameLobby = new DraftGameLobby(swiftrift, parent, layout, this));
         this.relation.put("tft", tftGameLobby = new TFTGameLobby(swiftrift, parent, layout, this));
-        this.button.addActionListener(listener -> layout.show(parent, "lobby"));
+        this.button.addActionListener(listener -> layout.show(parent, currentMode));
         this.button.setPreferredSize(new Dimension(getWidth() / 5, 30));
         this.button.setHorizontalAlignment(SwingConstants.CENTER);
         this.button.setVerticalAlignment(SwingConstants.CENTER);
@@ -104,15 +105,15 @@ public class QueueWindow extends ChildUIComponent implements Runnable, PacketCal
             Logger.error(e);
         }
     }
-    
-    public DraftGameLobby getDraftGameLobby () {
+
+    public DraftGameLobby getDraftGameLobby() {
         return draftGameLobby;
     }
-    
-    public TFTGameLobby getTftGameLobby () {
+
+    public TFTGameLobby getTftGameLobby() {
         return tftGameLobby;
     }
-    
+
     private Map<String, List<JSONObject>> getQueueMapping(JSONArray array) {
         Map<String, List<JSONObject>> map = new HashMap<>();
         for (int i = 0; i < array.length(); i++) {
@@ -256,7 +257,8 @@ public class QueueWindow extends ChildUIComponent implements Runnable, PacketCal
     }
 
     public void showMatchMadeLobby(String mode) {
-        if (mode.equals("TFT")) {
+        this.currentMode = mode;
+        if (mode.equals("tft")) {
             this.layout.show(parent, "tft");
         } else {
             DraftGameLobby draftGameLobby = (DraftGameLobby) relation.get("draft");

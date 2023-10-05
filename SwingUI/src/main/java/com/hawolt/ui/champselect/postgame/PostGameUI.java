@@ -17,6 +17,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.IOException;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 /**
  * Created: 11/09/2023 20:58
@@ -40,7 +41,7 @@ public class PostGameUI extends ChildUIComponent implements ActionListener {
     }
 
     public void build(IResponse response, List<LeagueNotification> notifications) {
-        this.swiftrift.getLayoutManager().getHeader().hide(LayoutComponent.RECONNECT);
+        Swiftrift.debouncer.debounce("Reconnect", () -> this.swiftrift.getLayoutManager().getHeader().hide(LayoutComponent.RECONNECT), 0, TimeUnit.MILLISECONDS);
         this.build(response.asString(), notifications);
     }
 
