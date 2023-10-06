@@ -16,9 +16,12 @@ import com.hawolt.rms.data.subject.service.MessageService;
 import com.hawolt.rms.data.subject.service.RiotMessageServiceMessage;
 import com.hawolt.ui.generic.component.LFlatButton;
 import com.hawolt.ui.generic.component.LTextAlign;
+import com.hawolt.ui.generic.component.LTextPane;
 import com.hawolt.ui.generic.themes.ColorPalette;
 import com.hawolt.ui.generic.utility.ChildUIComponent;
 import com.hawolt.ui.generic.utility.HighlightType;
+import com.hawolt.util.paint.PaintHelper;
+
 import org.json.JSONObject;
 
 import javax.swing.border.EmptyBorder;
@@ -113,17 +116,39 @@ public abstract class GameLobby extends ChildUIComponent implements IServiceMess
         });
 
         ChildUIComponent top = new ChildUIComponent(new GridLayout(0, 1, 0, 0));
-        top.add(leavePartyButton);
-        top.add(inviteButton);
         component.add(top, BorderLayout.NORTH);
         Swiftrift.service.execute(() -> createSpecificComponents(component));
         add(component, BorderLayout.CENTER);
 
-        ChildUIComponent bottom = new ChildUIComponent(new GridLayout(0, 2, 5, 0));
-        bottom.setBorder(new EmptyBorder(5, 5, 5, 5));
-        bottom.add(queueStopButton);
-        bottom.add(queueStartButton);
-        add(bottom, BorderLayout.SOUTH);
+        ChildUIComponent lobbyChat = new ChildUIComponent(new BorderLayout()){
+            @Override
+            protected void paintComponent(Graphics g) {
+                super.paintComponent(g);
+                Dimension dimensions = getSize();
+
+                // Enable anti-aliasing
+                Graphics2D g2d = (Graphics2D) g;
+                g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+
+                g.setColor(ColorPalette.cardColor);
+                PaintHelper.roundedSquare((Graphics2D) g, 0, 0, dimensions.width, dimensions.height, ColorPalette.CARD_ROUNDING, true, true, true, true);
+            }
+        };
+        lobbyChat.setPreferredSize(new Dimension(576, 224));
+        lobbyChat.setBorder(new EmptyBorder(8, 8, 8, 8));
+        lobbyChat.add(new LTextPane("Chat goes here :)"));
+
+        ChildUIComponent lobbyControls = new ChildUIComponent(new GridLayout(0, 1, 8, 8));
+        lobbyControls.add(leavePartyButton);
+        lobbyControls.add(inviteButton);
+        lobbyControls.add(this.queueStopButton);
+        lobbyControls.add(this.queueStartButton);
+
+        ChildUIComponent bottom = new ChildUIComponent(new BorderLayout(8, 0));
+        bottom.add(lobbyChat, BorderLayout.WEST);
+        bottom.add(lobbyControls, BorderLayout.CENTER);
+
+        this.add(bottom, BorderLayout.SOUTH);
     }
 
     public LFlatButton getQueueStopButton() {
