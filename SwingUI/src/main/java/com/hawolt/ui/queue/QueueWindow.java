@@ -72,7 +72,6 @@ public class QueueWindow extends ChildUIComponent implements Runnable, PacketCal
     }};
 
     private final List<String> supportedModes = Arrays.asList("TUTORIAL", "ARAM", "BOTS", "BLIND", "DRAFT", "RANKED-FLEX", "RANKED-SOLO", "TFT");
-    private final LFlatButton button = new LFlatButton("Show Lobby", LTextAlign.CENTER, HighlightType.COMPONENT);
     private final ChildUIComponent main = new ChildUIComponent(new BorderLayout());
     private final Map<String, GameLobby> relation = new HashMap<>();
     private final CardLayout layout = new CardLayout();
@@ -89,10 +88,6 @@ public class QueueWindow extends ChildUIComponent implements Runnable, PacketCal
         this.add(parent = new ChildUIComponent(layout), BorderLayout.CENTER);
         this.relation.put("draft", draftGameLobby = new DraftGameLobby(swiftrift, parent, layout, this));
         this.relation.put("tft", tftGameLobby = new TFTGameLobby(swiftrift, parent, layout, this));
-        this.button.addActionListener(listener -> layout.show(parent, currentMode));
-        this.button.setPreferredSize(new Dimension(getWidth() / 5, 30));
-        this.button.setHorizontalAlignment(SwingConstants.CENTER);
-        this.button.setVerticalAlignment(SwingConstants.CENTER);
         this.parent.add("draft", relation.get("draft"));
         this.parent.add("tft", relation.get("tft"));
         Swiftrift.service.execute(this);
@@ -285,7 +280,6 @@ public class QueueWindow extends ChildUIComponent implements Runnable, PacketCal
     public void createMatchMadeLobby(ActionEvent e, String mode) {
         JSONObject json = new JSONObject(e.getActionCommand());
         long queueId = json.getLong("id");
-        this.main.add(button, BorderLayout.SOUTH);
         long maximumParticipantListSize = json.getLong("maximumParticipantListSize");
         PartiesLedge partiesLedge = swiftrift.getLeagueClient().getLedge().getParties();
         try {
@@ -304,6 +298,6 @@ public class QueueWindow extends ChildUIComponent implements Runnable, PacketCal
     }
 
     public void rebase() {
-        main.remove(button);
+        // TODO: Show blank lobby section?
     }
 }
