@@ -59,8 +59,6 @@ public abstract class GameLobby extends ChildUIComponent implements IServiceMess
         this.swiftrift.getLeagueClient().getRMSClient().getHandler().addMessageServiceListener(MessageService.LOL_PLATFORM, this);
 
         ChildUIComponent top = new ChildUIComponent(new GridLayout(0, 1, 0, 0));
-        LFlatButton close = new LFlatButton("Choose mode", LTextAlign.CENTER, HighlightType.COMPONENT);
-        close.addActionListener(listener -> layout.show(parent, "modes"));
 
         LFlatButton invite = new LFlatButton("Invite another Summoner", LTextAlign.CENTER, HighlightType.COMPONENT);
         LFlatButton leave = new LFlatButton("Leave Party", LTextAlign.CENTER, HighlightType.COMPONENT);
@@ -76,9 +74,6 @@ public abstract class GameLobby extends ChildUIComponent implements IServiceMess
                 throw new RuntimeException(e);
             }
         });
-        close.addActionListener(listener -> {
-            layout.show(parent, "modes");
-        });
         invite.addActionListener(listener -> {
             String name = Swiftrift.showInputDialog("Who do you want to Invite?");
             if (name == null) return;
@@ -93,7 +88,6 @@ public abstract class GameLobby extends ChildUIComponent implements IServiceMess
             }
         });
         top.add(leave);
-        top.add(close);
         top.add(invite);
         component.add(top, BorderLayout.NORTH);
         Swiftrift.service.execute(() -> createSpecificComponents(component));
