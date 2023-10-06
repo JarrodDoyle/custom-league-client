@@ -47,7 +47,7 @@ public abstract class GameLobby extends ChildUIComponent implements IServiceMess
 
     public ChildUIComponent component = new ChildUIComponent(new BorderLayout());
     public ChildUIComponent grid;
-    private LFlatButton stop, start;
+    private LFlatButton queueStopButton, queueStartButton;
     private CurrentParty party;
     private String puuid;
 
@@ -75,8 +75,8 @@ public abstract class GameLobby extends ChildUIComponent implements IServiceMess
 
         LFlatButton leavePartyButton = new LFlatButton("Leave Party", LTextAlign.CENTER, HighlightType.COMPONENT);
         leavePartyButton.addActionListener(listener -> {
-            this.stop.setEnabled(false);
-            this.start.setEnabled(true);
+            this.queueStopButton.setEnabled(false);
+            this.queueStartButton.setEnabled(true);
             layout.show(parent, "modes");
             try {
                 swiftrift.getLeagueClient().getLedge().getParties().role(PartyRole.DECLINED);
@@ -87,18 +87,18 @@ public abstract class GameLobby extends ChildUIComponent implements IServiceMess
             }
         });
 
-        this.start = new LFlatButton("Start", LTextAlign.CENTER, HighlightType.COMPONENT);
-        this.start.setRounding(ColorPalette.BUTTON_SMALL_ROUNDING);
-        this.start.setBackground(ColorPalette.buttonSelectionColor);
-        this.start.setHighlightColor(ColorPalette.buttonSelectionAltColor);
-        this.start.addActionListener(listener -> startQueue());
+        this.queueStartButton = new LFlatButton("Start", LTextAlign.CENTER, HighlightType.COMPONENT);
+        this.queueStartButton.setRounding(ColorPalette.BUTTON_SMALL_ROUNDING);
+        this.queueStartButton.setBackground(ColorPalette.buttonSelectionColor);
+        this.queueStartButton.setHighlightColor(ColorPalette.buttonSelectionAltColor);
+        this.queueStartButton.addActionListener(listener -> startQueue());
 
-        this.stop = new LFlatButton("×", LTextAlign.CENTER, HighlightType.COMPONENT);
-        this.stop.setEnabled(false);
-        this.stop.setRounding(ColorPalette.BUTTON_SMALL_ROUNDING);
-        this.stop.setBackground(ColorPalette.buttonSelectionColor);
-        this.stop.setHighlightColor(ColorPalette.buttonSelectionAltColor);
-        this.stop.addActionListener(listener -> {
+        this.queueStopButton = new LFlatButton("×", LTextAlign.CENTER, HighlightType.COMPONENT);
+        this.queueStopButton.setEnabled(false);
+        this.queueStopButton.setRounding(ColorPalette.BUTTON_SMALL_ROUNDING);
+        this.queueStopButton.setBackground(ColorPalette.buttonSelectionColor);
+        this.queueStopButton.setHighlightColor(ColorPalette.buttonSelectionAltColor);
+        this.queueStopButton.addActionListener(listener -> {
             if (future != null) future.cancel(true);
             PartiesLedge partiesLedge = swiftrift.getLeagueClient().getLedge().getParties();
             PartiesRegistration registration = partiesLedge.getCurrentRegistration();
@@ -118,29 +118,29 @@ public abstract class GameLobby extends ChildUIComponent implements IServiceMess
         component.add(top, BorderLayout.NORTH);
         Swiftrift.service.execute(() -> createSpecificComponents(component));
         add(component, BorderLayout.CENTER);
-        
+
         ChildUIComponent bottom = new ChildUIComponent(new GridLayout(0, 2, 5, 0));
         bottom.setBorder(new EmptyBorder(5, 5, 5, 5));
-        bottom.add(stop);
-        bottom.add(start);
+        bottom.add(queueStopButton);
+        bottom.add(queueStartButton);
         add(bottom, BorderLayout.SOUTH);
     }
 
-    public LFlatButton getStopButton() {
-        return stop;
+    public LFlatButton getQueueStopButton() {
+        return queueStopButton;
     }
 
-    public LFlatButton getStartButton() {
-        return start;
+    public LFlatButton getQueueStartButton() {
+        return queueStartButton;
     }
 
     public void toggleButtonState(boolean stop, boolean start) {
-        this.start.setEnabled(start);
-        this.stop.setEnabled(stop);
+        this.queueStartButton.setEnabled(start);
+        this.queueStopButton.setEnabled(stop);
     }
 
     public void flipButtonState() {
-        this.toggleButtonState(!stop.isEnabled(), !start.isEnabled());
+        this.toggleButtonState(!queueStopButton.isEnabled(), !queueStartButton.isEnabled());
     }
 
     protected abstract void createSpecificComponents(ChildUIComponent component);
