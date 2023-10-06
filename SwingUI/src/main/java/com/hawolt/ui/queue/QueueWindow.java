@@ -158,7 +158,6 @@ public class QueueWindow extends ChildUIComponent implements Runnable, PacketCal
             LLabel label = new LLabel(key, LTextAlign.CENTER, true);
             ChildUIComponent grid = new ChildUIComponent(new GridLayout(0, 1, 0, 4));
             grid.setBackground(ColorPalette.cardColor);
-            parent.setBackground(ColorPalette.cardColor);
             grid.add(label);
 
             for (JSONObject object : map.get(key)) {
@@ -194,10 +193,9 @@ public class QueueWindow extends ChildUIComponent implements Runnable, PacketCal
         modesPanel.setBorder(new EmptyBorder(8, 8, 8, 8));
         modesPanel.setBackground(ColorPalette.backgroundColor);
         modesPanel.getVerticalScrollBar().setUnitIncrement(15);
+        modesPanel.setPreferredSize(new Dimension(300, 0));
 
-        main.add(modesPanel, BorderLayout.CENTER);
-        this.parent.add("modes", main);
-        layout.show(parent, "modes");
+        this.add(modesPanel, BorderLayout.WEST);
         revalidate();
     }
 
