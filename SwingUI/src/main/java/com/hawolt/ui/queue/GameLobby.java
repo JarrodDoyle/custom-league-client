@@ -91,12 +91,14 @@ public abstract class GameLobby extends ChildUIComponent implements IServiceMess
         });
 
         this.queueStartButton = new LFlatButton("Start", LTextAlign.CENTER, HighlightType.COMPONENT);
+        this.queueStartButton.setPreferredSize(new Dimension(192, 0));
         this.queueStartButton.setRounding(ColorPalette.BUTTON_SMALL_ROUNDING);
         this.queueStartButton.setBackground(ColorPalette.buttonSelectionColor);
         this.queueStartButton.setHighlightColor(ColorPalette.buttonSelectionAltColor);
         this.queueStartButton.addActionListener(listener -> startQueue());
 
         this.queueStopButton = new LFlatButton("×", LTextAlign.CENTER, HighlightType.COMPONENT);
+        this.queueStopButton.setPreferredSize(new Dimension(192, 0));
         this.queueStopButton.setEnabled(false);
         this.queueStopButton.setRounding(ColorPalette.BUTTON_SMALL_ROUNDING);
         this.queueStopButton.setBackground(ColorPalette.buttonSelectionColor);
@@ -138,11 +140,14 @@ public abstract class GameLobby extends ChildUIComponent implements IServiceMess
         lobbyChat.setBorder(new EmptyBorder(8, 8, 8, 8));
         lobbyChat.add(new LTextPane("Chat goes here :)"));
 
+        ChildUIComponent queueButtons = new ChildUIComponent(new BorderLayout(8, 8));
+        queueButtons.add(this.queueStopButton, BorderLayout.CENTER);
+        queueButtons.add(this.queueStartButton, BorderLayout.EAST);
+
         ChildUIComponent lobbyControls = new ChildUIComponent(new GridLayout(0, 1, 8, 8));
         lobbyControls.add(leavePartyButton);
         lobbyControls.add(inviteButton);
-        lobbyControls.add(this.queueStopButton);
-        lobbyControls.add(this.queueStartButton);
+        lobbyControls.add(queueButtons);
 
         ChildUIComponent bottom = new ChildUIComponent(new BorderLayout(8, 0));
         bottom.add(lobbyChat, BorderLayout.WEST);
