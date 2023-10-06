@@ -30,7 +30,6 @@ import com.hawolt.util.paint.PaintHelper;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
-import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 import java.awt.*;
 import java.awt.event.ActionEvent;
@@ -44,32 +43,34 @@ import java.util.*;
  **/
 
 public class QueueWindow extends ChildUIComponent implements Runnable, PacketCallback, IServiceMessageListener<RiotMessageServiceMessage> {
-    private final Map<Integer, String> mapping = new HashMap<>() {{
-        //TFT
-        put(1090, "NORMAL");
-        put(1100, "RANKED");
-        put(1130, "HYPER ROLL");
-        put(1160, "DOUBLE UP");
+    private final Map<Integer, String> mapping = new HashMap<>() {
+        {
+            //TFT
+            put(1090, "NORMAL");
+            put(1100, "RANKED");
+            put(1130, "HYPER ROLL");
+            put(1160, "DOUBLE UP");
 
-        //TUTORIAL
-        put(2000, "TUTORIAL 1");
-        put(2010, "TUTORIAL 2");
-        put(2020, "TUTORIAL 3");
+            // TUTORIAL
+            put(2000, "TUTORIAL 1");
+            put(2010, "TUTORIAL 2");
+            put(2020, "TUTORIAL 3");
 
-        //ARAM
-        put(450, "ARAM");
+            // ARAM
+            put(450, "ARAM");
 
-        //BOT
-        put(830, "INTRO");
-        put(840, "EASY");
-        put(850, "INTERMEDIATE");
+            // BOT
+            put(830, "INTRO");
+            put(840, "EASY");
+            put(850, "INTERMEDIATE");
 
-        //NORMAL
-        put(430, "BLIND PICK");
-        put(420, "RANKED SOLO/DUO");
-        put(400, "DRAFT PICK");
-        put(440, "RANKED FLEX");
-    }};
+            // NORMAL
+            put(430, "BLIND PICK");
+            put(420, "RANKED SOLO/DUO");
+            put(400, "DRAFT PICK");
+            put(440, "RANKED FLEX");
+        }
+    };
 
     private final List<String> supportedModes = Arrays.asList("TUTORIAL", "ARAM", "BOTS", "BLIND", "DRAFT", "RANKED-FLEX", "RANKED-SOLO", "TFT");
     private final Map<String, GameLobby> relation = new HashMap<>();
@@ -256,9 +257,7 @@ public class QueueWindow extends ChildUIComponent implements Runnable, PacketCal
          * 1.   AFK_CHECK_FAILED
          */
         switch (info.getString("backwardsTransitionReason")) {
-            case "PLAYER_TIMED_OUT_ON_REQUIRED_ACTION",
-                    "PLAYER_LEFT_CHAMPION_SELECT",
-                    "PLAYER_LEFT_MATCHMAKING" -> {
+            case "PLAYER_TIMED_OUT_ON_REQUIRED_ACTION", "PLAYER_LEFT_CHAMPION_SELECT", "PLAYER_LEFT_MATCHMAKING" -> {
                 swiftrift.getLayoutManager().getChampSelectUI().showBlankPanel();
             }
         }
@@ -282,12 +281,7 @@ public class QueueWindow extends ChildUIComponent implements Runnable, PacketCal
         PartiesLedge partiesLedge = swiftrift.getLeagueClient().getLedge().getParties();
         try {
             partiesLedge.role(PartyRole.DECLINED);
-            partiesLedge.gamemode(
-                    partiesLedge.getCurrentPartyId(),
-                    maximumParticipantListSize,
-                    0,
-                    queueId
-            );
+            partiesLedge.gamemode(partiesLedge.getCurrentPartyId(), maximumParticipantListSize, 0, queueId);
             partiesLedge.partytype(PartyType.OPEN);
             showMatchMadeLobby(mode);
         } catch (IOException ex) {
