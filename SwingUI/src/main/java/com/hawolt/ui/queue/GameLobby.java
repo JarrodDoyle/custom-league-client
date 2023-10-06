@@ -58,23 +58,8 @@ public abstract class GameLobby extends ChildUIComponent implements IServiceMess
         this.swiftrift.getLeagueClient().getRMSClient().getHandler().addMessageServiceListener(MessageService.PARTIES, this);
         this.swiftrift.getLeagueClient().getRMSClient().getHandler().addMessageServiceListener(MessageService.LOL_PLATFORM, this);
 
-        ChildUIComponent top = new ChildUIComponent(new GridLayout(0, 1, 0, 0));
-
-        LFlatButton invite = new LFlatButton("Invite another Summoner", LTextAlign.CENTER, HighlightType.COMPONENT);
-        LFlatButton leave = new LFlatButton("Leave Party", LTextAlign.CENTER, HighlightType.COMPONENT);
-        leave.addActionListener(listener -> {
-            this.stop.setEnabled(false);
-            this.start.setEnabled(true);
-            layout.show(parent, "modes");
-            try {
-                swiftrift.getLeagueClient().getLedge().getParties().role(PartyRole.DECLINED);
-                queueId = 0;
-                queueWindow.rebase();
-            } catch (IOException e) {
-                throw new RuntimeException(e);
-            }
-        });
-        invite.addActionListener(listener -> {
+        LFlatButton inviteButton = new LFlatButton("Invite another Summoner", LTextAlign.CENTER, HighlightType.COMPONENT);
+        inviteButton.addActionListener(listener -> {
             String name = Swiftrift.showInputDialog("Who do you want to Invite?");
             if (name == null) return;
             LedgeEndpoint ledges = swiftrift.getLeagueClient().getLedge();
@@ -87,25 +72,33 @@ public abstract class GameLobby extends ChildUIComponent implements IServiceMess
                 Logger.error(e);
             }
         });
-        top.add(leave);
-        top.add(invite);
-        component.add(top, BorderLayout.NORTH);
-        Swiftrift.service.execute(() -> createSpecificComponents(component));
 
-        add(component, BorderLayout.CENTER);
-        ChildUIComponent bottom = new ChildUIComponent(new GridLayout(0, 2, 5, 0));
-        bottom.setBorder(new EmptyBorder(5, 5, 5, 5));
+        LFlatButton leavePartyButton = new LFlatButton("Leave Party", LTextAlign.CENTER, HighlightType.COMPONENT);
+        leavePartyButton.addActionListener(listener -> {
+            this.stop.setEnabled(false);
+            this.start.setEnabled(true);
+            layout.show(parent, "modes");
+            try {
+                swiftrift.getLeagueClient().getLedge().getParties().role(PartyRole.DECLINED);
+                queueId = 0;
+                queueWindow.rebase();
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+        });
+
         this.start = new LFlatButton("Start", LTextAlign.CENTER, HighlightType.COMPONENT);
-        start.setRounding(ColorPalette.BUTTON_SMALL_ROUNDING);
-        start.setBackground(ColorPalette.buttonSelectionColor);
-        start.setHighlightColor(ColorPalette.buttonSelectionAltColor);
-        start.addActionListener(listener -> startQueue());
+        this.start.setRounding(ColorPalette.BUTTON_SMALL_ROUNDING);
+        this.start.setBackground(ColorPalette.buttonSelectionColor);
+        this.start.setHighlightColor(ColorPalette.buttonSelectionAltColor);
+        this.start.addActionListener(listener -> startQueue());
+
         this.stop = new LFlatButton("×", LTextAlign.CENTER, HighlightType.COMPONENT);
-        stop.setEnabled(false);
-        stop.setRounding(ColorPalette.BUTTON_SMALL_ROUNDING);
-        stop.setBackground(ColorPalette.buttonSelectionColor);
-        stop.setHighlightColor(ColorPalette.buttonSelectionAltColor);
-        stop.addActionListener(listener -> {
+        this.stop.setEnabled(false);
+        this.stop.setRounding(ColorPalette.BUTTON_SMALL_ROUNDING);
+        this.stop.setBackground(ColorPalette.buttonSelectionColor);
+        this.stop.setHighlightColor(ColorPalette.buttonSelectionAltColor);
+        this.stop.addActionListener(listener -> {
             if (future != null) future.cancel(true);
             PartiesLedge partiesLedge = swiftrift.getLeagueClient().getLedge().getParties();
             PartiesRegistration registration = partiesLedge.getCurrentRegistration();
@@ -118,6 +111,16 @@ public abstract class GameLobby extends ChildUIComponent implements IServiceMess
                 Logger.error(e);
             }
         });
+
+        ChildUIComponent top = new ChildUIComponent(new GridLayout(0, 1, 0, 0));
+        top.add(leavePartyButton);
+        top.add(inviteButton);
+        component.add(top, BorderLayout.NORTH);
+        Swiftrift.service.execute(() -> createSpecificComponents(component));
+        add(component, BorderLayout.CENTER);
+        
+        ChildUIComponent bottom = new ChildUIComponent(new GridLayout(0, 2, 5, 0));
+        bottom.setBorder(new EmptyBorder(5, 5, 5, 5));
         bottom.add(stop);
         bottom.add(start);
         add(bottom, BorderLayout.SOUTH);
