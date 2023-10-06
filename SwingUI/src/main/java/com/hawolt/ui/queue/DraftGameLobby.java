@@ -12,7 +12,6 @@ import com.hawolt.logger.Logger;
 import com.hawolt.ui.generic.component.LComboBox;
 import com.hawolt.ui.generic.utility.ChildUIComponent;
 
-import javax.swing.border.EmptyBorder;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -34,8 +33,7 @@ public class DraftGameLobby extends GameLobby implements ActionListener {
 
     @Override
     protected void createSpecificComponents(ChildUIComponent component) {
-        ChildUIComponent roles = new ChildUIComponent(new GridLayout(0, 2, 5, 0));
-        roles.setBorder(new EmptyBorder(5, 5, 5, 5));
+        ChildUIComponent roles = new ChildUIComponent(new GridLayout(0, 2, 8, 0));
         main = new LComboBox<>(PositionPreference.values());
         main.addActionListener(this);
         roles.add(main);
@@ -48,9 +46,8 @@ public class DraftGameLobby extends GameLobby implements ActionListener {
 
     @Override
     protected void createGrid(ChildUIComponent component) {
-        grid = new ChildUIComponent(new GridLayout(1, 5));
+        grid = new ChildUIComponent(new GridLayout(1, 5, 4, 0));
         for (int i = 0; i < 5; i++) grid.add(new DraftSummonerComponent());
-        grid.setBackground(Color.YELLOW);
         component.add(grid, BorderLayout.CENTER);
     }
 
