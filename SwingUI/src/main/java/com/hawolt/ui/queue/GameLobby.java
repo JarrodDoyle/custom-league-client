@@ -62,6 +62,7 @@ public abstract class GameLobby extends ChildUIComponent implements IServiceMess
         this.swiftrift.getLeagueClient().getRMSClient().getHandler().addMessageServiceListener(MessageService.LOL_PLATFORM, this);
 
         LFlatButton inviteButton = new LFlatButton("Invite another Summoner", LTextAlign.CENTER, HighlightType.COMPONENT);
+        inviteButton.setRounding(ColorPalette.BUTTON_SMALL_ROUNDING);
         inviteButton.addActionListener(listener -> {
             String name = Swiftrift.showInputDialog("Who do you want to Invite?");
             if (name == null) return;
@@ -77,6 +78,7 @@ public abstract class GameLobby extends ChildUIComponent implements IServiceMess
         });
 
         LFlatButton leavePartyButton = new LFlatButton("Leave Party", LTextAlign.CENTER, HighlightType.COMPONENT);
+        leavePartyButton.setRounding(ColorPalette.BUTTON_SMALL_ROUNDING);
         leavePartyButton.addActionListener(listener -> {
             this.queueStopButton.setEnabled(false);
             this.queueStartButton.setEnabled(true);
@@ -136,7 +138,7 @@ public abstract class GameLobby extends ChildUIComponent implements IServiceMess
                 PaintHelper.roundedSquare((Graphics2D) g, 0, 0, dimensions.width, dimensions.height, ColorPalette.CARD_ROUNDING, true, true, true, true);
             }
         };
-        lobbyChat.setPreferredSize(new Dimension(576, 224));
+        lobbyChat.setPreferredSize(new Dimension(576, 192));
         lobbyChat.setBorder(new EmptyBorder(8, 8, 8, 8));
         lobbyChat.add(new LTextPane("Chat goes here :)"));
 
