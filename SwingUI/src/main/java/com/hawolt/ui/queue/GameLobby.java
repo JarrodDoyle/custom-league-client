@@ -138,7 +138,7 @@ public abstract class GameLobby extends ChildUIComponent implements IServiceMess
                 g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
 
                 g.setColor(ColorPalette.cardColor);
-                PaintHelper.roundedSquare((Graphics2D) g, 0, 0, dimensions.width, dimensions.height, ColorPalette.CARD_ROUNDING, true, true, true, true);
+                PaintHelper.roundedSquare(g2d, 0, 0, dimensions.width, dimensions.height, ColorPalette.CARD_ROUNDING, true, true, true, true);
             }
         };
         lobbyChat.setPreferredSize(new Dimension(576, 192));
