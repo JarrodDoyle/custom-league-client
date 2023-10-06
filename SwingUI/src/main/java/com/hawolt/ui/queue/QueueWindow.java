@@ -179,7 +179,10 @@ public class QueueWindow extends ChildUIComponent implements Runnable, PacketCal
                 super.paintComponent(g);
                 Dimension dimensions = getSize();
 
-                // TODO: Set anti-aliasing
+                // Enable anti-aliasing
+                Graphics2D g2d = (Graphics2D) g;
+                g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+
                 g.setColor(ColorPalette.cardColor);
                 PaintHelper.roundedSquare((Graphics2D) g, 0, 0, dimensions.width, dimensions.height, ColorPalette.CARD_ROUNDING, true, true, true, true);
             }
