@@ -54,7 +54,6 @@ public abstract class GameLobby extends ChildUIComponent implements IServiceMess
     public GameLobby(Swiftrift swiftrift, Container parent, CardLayout layout, QueueWindow queueWindow) {
         super(new BorderLayout());
 
-        ChildUIComponent newButton = new ChildUIComponent(new BorderLayout());
         this.swiftrift = swiftrift;
         this.swiftrift.getLeagueClient().getRMSClient().getHandler().addMessageServiceListener(MessageService.PARTIES, this);
         this.swiftrift.getLeagueClient().getRMSClient().getHandler().addMessageServiceListener(MessageService.LOL_PLATFORM, this);
@@ -77,12 +76,9 @@ public abstract class GameLobby extends ChildUIComponent implements IServiceMess
                 throw new RuntimeException(e);
             }
         });
-        newButton.add(leave, BorderLayout.NORTH);
         close.addActionListener(listener -> {
             layout.show(parent, "modes");
         });
-        newButton.add(close, BorderLayout.CENTER);
-        add(newButton, BorderLayout.NORTH);
         invite.addActionListener(listener -> {
             String name = Swiftrift.showInputDialog("Who do you want to Invite?");
             if (name == null) return;
@@ -96,6 +92,7 @@ public abstract class GameLobby extends ChildUIComponent implements IServiceMess
                 Logger.error(e);
             }
         });
+        top.add(leave);
         top.add(close);
         top.add(invite);
         component.add(top, BorderLayout.NORTH);
