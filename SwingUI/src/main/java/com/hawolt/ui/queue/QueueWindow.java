@@ -72,7 +72,6 @@ public class QueueWindow extends ChildUIComponent implements Runnable, PacketCal
     }};
 
     private final List<String> supportedModes = Arrays.asList("TUTORIAL", "ARAM", "BOTS", "BLIND", "DRAFT", "RANKED-FLEX", "RANKED-SOLO", "TFT");
-    private final ChildUIComponent main = new ChildUIComponent(new BorderLayout());
     private final Map<String, GameLobby> relation = new HashMap<>();
     private final CardLayout layout = new CardLayout();
     private final DraftGameLobby draftGameLobby;
@@ -148,7 +147,6 @@ public class QueueWindow extends ChildUIComponent implements Runnable, PacketCal
         constraints.gridy = 0;
         constraints.weightx = 1.0;
 
-        main.setBackground(ColorPalette.backgroundColor);
         for (String key : map.keySet()) {
             LLabel label = new LLabel(key, LTextAlign.CENTER, true);
             ChildUIComponent grid = new ChildUIComponent(new GridLayout(0, 1, 0, 4));
