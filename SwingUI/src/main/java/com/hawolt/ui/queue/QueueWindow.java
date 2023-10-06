@@ -82,7 +82,7 @@ public class QueueWindow extends ChildUIComponent implements Runnable, PacketCal
     private String currentMode;
 
     public QueueWindow(Swiftrift swiftrift) {
-        super(new BorderLayout());
+        super(new BorderLayout(8, 8));
         this.setBorder(new EmptyBorder(8, 8, 8, 8));
         this.swiftrift = swiftrift;
         this.add(parent = new ChildUIComponent(layout), BorderLayout.CENTER);
