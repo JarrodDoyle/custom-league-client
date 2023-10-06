@@ -55,7 +55,7 @@ public abstract class GameLobby extends ChildUIComponent implements IServiceMess
     private String puuid;
 
     public GameLobby(Swiftrift swiftrift, Container parent, CardLayout layout, QueueWindow queueWindow) {
-        super(new BorderLayout());
+        super(new BorderLayout(8, 8));
 
         this.swiftrift = swiftrift;
         this.swiftrift.getLeagueClient().getRMSClient().getHandler().addMessageServiceListener(MessageService.PARTIES, this);
@@ -119,8 +119,11 @@ public abstract class GameLobby extends ChildUIComponent implements IServiceMess
             }
         });
 
-        ChildUIComponent top = new ChildUIComponent(new GridLayout(0, 1, 0, 0));
-        component.add(top, BorderLayout.NORTH);
+        LTextPane lobbyHeader = new LTextPane("Lobby Game Mode Here");
+        lobbyHeader.setFontSize(24);
+        lobbyHeader.setBackground(ColorPalette.backgroundColor);
+        this.add(lobbyHeader, BorderLayout.NORTH);
+
         Swiftrift.service.execute(() -> createSpecificComponents(component));
         add(component, BorderLayout.CENTER);
 
