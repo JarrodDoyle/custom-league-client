@@ -51,35 +51,42 @@ public class SummonerComponent extends ChildUIComponent implements ResourceConsu
     @Override
     protected void paintComponent(Graphics g) {
         super.paintComponent(g);
+        Dimension dimensions = getSize();
+        Graphics2D g2d = (Graphics2D) g;
+
+        // We don't want to draw anything if there's nobody actually here
         if (summoner == null || participant == null) return;
         String role = participant.getRole();
         if (!role.equals("MEMBER") && !role.equals("LEADER")) return;
-        Dimension dimension = getSize();
-        Graphics2D graphics2D = (Graphics2D) g;
-        graphics2D.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-        graphics2D.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
-        graphics2D.setColor(Color.BLACK);
-        PaintHelper.roundedSquare(graphics2D, 2, 2, dimension.width - 5, dimension.height - 5, 25, true, true, true, true);
-        graphics2D.setColor(accent);
-        PaintHelper.roundedSquare(graphics2D, 3, 3, dimension.width - 7, dimension.height - 7, 25, true, true, true, true);
-        int centeredX = dimension.width >> 1;
-        int centeredY = dimension.height >> 1;
+
+        // Enable antialisaing
+        g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+        g2d.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
+
+        // Draw main card
+        g.setColor(ColorPalette.cardColor);
+        PaintHelper.roundedSquare(g2d, 0, 0, dimensions.width, dimensions.height, ColorPalette.CARD_ROUNDING, true, true, true, true);
+        
+        // Draw icon
+        int centeredX = dimensions.width >> 1;
+        int centeredY = dimensions.height >> 1;
         if (image != null) {
-            int imageX = centeredX - (image.getWidth() >> 1);
-            int imageY = (dimension.height >> 1) - (image.getHeight() >> 1);
-            g.setColor(Color.BLACK);
-            int imageSpacing = 3;
-            g.fillRect(
-                    imageX - imageSpacing,
-                    imageY - imageSpacing,
-                    image.getWidth() + (imageSpacing << 1),
-                    image.getHeight() + (imageSpacing << 1)
-            );
-            g.drawImage(image, imageX, imageY, null);
+            int imageW = image.getWidth();
+            int imageH = image.getHeight();
+            int imageX = centeredX - (imageW >> 1);
+            int imageY = (dimensions.height >> 1) - (imageH >> 1);
+
+            // Placeholder background in case something funky is happening with the image
+            g.setColor(ColorPalette.backgroundColor);
+            PaintHelper.roundedSquare(g2d, imageX, imageY, imageW, imageH, ColorPalette.CARD_ROUNDING, true, true, true, true);
+
+            // Main icon
+            g.drawImage(PaintHelper.circleize(image, ColorPalette.CARD_ROUNDING), imageX, imageY, null);
         }
-        FontMetrics metrics;
-        graphics2D.setFont(NAME_FONT);
-        metrics = graphics2D.getFontMetrics();
+
+        g2d.setFont(NAME_FONT);
+        g2d.setColor(Color.WHITE);
+        FontMetrics metrics = g2d.getFontMetrics();
         String name = summoner.getName().trim();
         int width = metrics.stringWidth(name);
         int nameX = centeredX - (width >> 1);
