@@ -268,7 +268,7 @@ public class QueueWindow extends ChildUIComponent implements Runnable, PacketCal
 
     public void showMatchMadeLobby(String mode) {
         this.currentMode = mode;
-        if (mode.equals("tft")) {
+        if (mode.toLowerCase().equals("tft")) {
             this.layout.show(parent, "tft");
         } else {
             DraftGameLobby draftGameLobby = (DraftGameLobby) relation.get("draft");
