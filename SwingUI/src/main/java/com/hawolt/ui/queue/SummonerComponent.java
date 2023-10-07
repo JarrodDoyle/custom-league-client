@@ -66,8 +66,8 @@ public class SummonerComponent extends ChildUIComponent implements ResourceConsu
         // Draw main card
         g.setColor(ColorPalette.cardColor);
         PaintHelper.roundedSquare(g2d, 0, 0, dimensions.width, dimensions.height, ColorPalette.CARD_ROUNDING, true, true, true, true);
-        
-        // Draw icon
+
+        // Draw summoner icon
         int centeredX = dimensions.width >> 1;
         int centeredY = dimensions.height >> 1;
         if (image != null) {
@@ -84,6 +84,7 @@ public class SummonerComponent extends ChildUIComponent implements ResourceConsu
             g.drawImage(PaintHelper.circleize(image, ColorPalette.CARD_ROUNDING), imageX, imageY, null);
         }
 
+        // Summoner name
         g2d.setFont(NAME_FONT);
         g2d.setColor(Color.WHITE);
         FontMetrics metrics = g2d.getFontMetrics();
@@ -92,6 +93,11 @@ public class SummonerComponent extends ChildUIComponent implements ResourceConsu
         int nameX = centeredX - (width >> 1);
         g.drawString(name, nameX, centeredY - (IMAGE_DIMENSION.height >> 1) - 20);
 
+        // Draw leader indicator
+        if (role.equals("LEADER")){
+            g2d.setColor(Color.ORANGE);
+            g.drawString("P", 8, 8 + metrics.getAscent());
+        }
     }
 
 
