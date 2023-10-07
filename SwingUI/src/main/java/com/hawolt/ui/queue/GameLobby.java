@@ -48,7 +48,7 @@ public abstract class GameLobby extends ChildUIComponent implements IServiceMess
     public ScheduledFuture<?> future;
     public int queueId;
 
-    public ChildUIComponent component = new ChildUIComponent(new BorderLayout());
+    public ChildUIComponent component = new ChildUIComponent(new BorderLayout(8, 8));
     public ChildUIComponent grid;
     private LFlatButton queueStopButton, queueStartButton;
     private CurrentParty party;
